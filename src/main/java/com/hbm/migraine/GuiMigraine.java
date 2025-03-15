@@ -22,6 +22,8 @@ public class GuiMigraine extends GuiScreen {
 	protected static int guiMouseX, guiMouseY;
 	private int ticks = 0;
 
+	private boolean isPaused = false;
+
 	private final MigraineInstructions instructions;
 
 	public GuiMigraine(MigraineInstructions instruct){
@@ -38,10 +40,17 @@ public class GuiMigraine extends GuiScreen {
 
 		FAKE_PLAYER.setWorld(worldRenderer.world);
 		worldRenderer.world.unloadEntities(Collections.singletonList(FAKE_PLAYER));
+
+		instructions.zoom = 1f;
+		instructions.yaw = 20f;
+		instructions.pitch = 50f;
+		instructions.center = null;
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float f){
+		if (isPaused) return;
+
 		this.drawDefaultBackground();
 
 		instructions.update(worldRenderer, ticks);
@@ -53,21 +62,22 @@ public class GuiMigraine extends GuiScreen {
 		ticks++;
 	}
 
+
+
 	private void updateCamera(){
 		Vector3f size = worldRenderer.world.getSize();
 		Vector3f minPos = worldRenderer.world.getMinPos();
-		Vector3f center = new Vector3f(minPos.x + size.x / 2, minPos.y + size.y / 2, minPos.z + size.z / 2);
+		Vector3f center = instructions.center == null ? new Vector3f(minPos.x + size.x / 2, minPos.y + size.y / 2, minPos.z + size.z / 2) : instructions.center;
 
 		worldRenderer.renderedBlocks.clear();
 		worldRenderer.addRenderedBlocks(new HashSet<>(worldRenderer.world.blockMap.keySet()));
 
 		float max = Math.max(Math.max(size.x, size.y), size.z);
-		float baseZoom = (float) (3.5f * Math.sqrt(max));
+		float baseZoom = (float) (3.5f * Math.sqrt(max)) / instructions.zoom;
 		float sizeFactor = (float) (1.0f + Math.log(max) / Math.log(10));
 
 		float zoom = baseZoom * sizeFactor / 1.5f;
-		float rotationYaw = 20f;
-		float rotationPitch = 50f;
-		worldRenderer.setCameraLookAt(center, zoom, Math.toRadians(rotationPitch), Math.toRadians(rotationYaw));
+		// ignore how yaw and pitch are reversed
+		worldRenderer.setCameraLookAt(center, zoom, Math.toRadians(instructions.yaw), Math.toRadians(instructions.pitch));
 	}
 }

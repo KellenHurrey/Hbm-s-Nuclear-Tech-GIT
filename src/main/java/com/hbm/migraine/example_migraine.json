@@ -1,0 +1,37 @@
+{
+	"comment0": "The owner tag tells the migraine what block or item this migraine belongs to",
+	"owner": {
+		"comment0": "The modid tag specifies which mod the block or item is from. Usually will be hbm, but minecraft (or anything else) works too",
+		"modid": "hbm",
+
+		"comment1": "The name tag specifies what block or item to attach this migraine to. If it is a block, and a tile entity, it most likely will require the tile.block_name format",
+		"name": "tile.machine_press"
+	},
+
+	"comment1": "The update array is an array of actions that the scene will take",
+	"update": [
+		{
+			"comment0": "The tick tag tell the migraine which tick to perform this action on, starting at zero when the gui opens, and increasing every tick. If it is set to 0 it will happen before the first render.",
+			"tick": 0,
+
+			"comment1": "This is the actual action to take on the tick listed above",
+			"action": {
+				"comment0": "The type tag is the most important. It tells the migraine what action to take",
+				"type": "setBlock",
+
+				"comment1": "The setBlock type requires 3 (possibly 4) things: a position, a modid, a name, and optionally, meta for that block",
+
+				"comment2": "Positions are formatted like this",
+				"position": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				},
+
+				"comment3": "The modid and name tags are the same as in the owner tag",
+				"modid": "hbm",
+				"name": "tile.machine_press"
+			}
+		}
+	]
+}
