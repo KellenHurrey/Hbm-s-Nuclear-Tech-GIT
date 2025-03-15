@@ -1,0 +1,53 @@
+{
+	"ownerData": {
+		"type": "block",
+		"modid": "hbm",
+		"name": "tile.machine_press"
+	},
+	"update": [
+		{
+			"tick": 0,
+			"action": {
+				"type": "fillBlocks",
+				"positionMin": {
+					"x": 0,
+					"y": 0,
+					"z": 0
+				},
+				"positionMax": {
+					"x": 2,
+					"y": 0,
+					"z": 2
+				},
+				"modid": "minecraft",
+				"name": "brick_block"
+			}
+		},
+		{
+			"tick": 0,
+			"action": {
+				"type": "setBlock",
+				"position": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				},
+				"modid": "hbm",
+				"name": "tile.machine_press"
+			}
+		},
+		{
+			"tick": 20,
+			"action": {
+				"type": "setBlock",
+				"position": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				},
+				"modid": "hbm",
+				"name": "tile.machine_epress"
+			}
+		}
+	]
+}

@@ -36,6 +36,9 @@ import com.hbm.items.weapon.sedna.GunConfig;
 import com.hbm.items.weapon.sedna.ItemGunBaseNT;
 import com.hbm.lib.Library;
 import com.hbm.lib.RefStrings;
+import com.hbm.migraine.GuiMigraine;
+import com.hbm.migraine.MigraineInstructions;
+import com.hbm.migraine.MigraineLoader;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.packet.toserver.AuxButtonPacket;
 import com.hbm.packet.toserver.GunButtonPacket;
@@ -809,15 +812,25 @@ public class ModEventHandlerClient {
 		}
 
 		try {
-			CanneryBase cannery = Jars.canneries.get(comp);
-			if(cannery != null) {
+			if (MigraineLoader.instructions.get(comp) != null){
 				list.add(EnumChatFormatting.GREEN + I18nUtil.resolveKey("cannery.f1"));
 				lastCannery = comp;
 				canneryTimestamp = System.currentTimeMillis();
 			}
-		} catch(Exception ex) {
-			list.add(EnumChatFormatting.RED + "Error loading cannery: " + ex.getLocalizedMessage());
+		} catch (Exception ex){
+			list.add(EnumChatFormatting.RED + "Error loading migraine: " + ex.getLocalizedMessage());
 		}
+
+//		try {
+//			CanneryBase cannery = Jars.canneries.get(comp);
+//			if(cannery != null) {
+//				list.add(EnumChatFormatting.GREEN + I18nUtil.resolveKey("cannery.f1"));
+//				lastCannery = comp;
+//				canneryTimestamp = System.currentTimeMillis();
+//			}
+//		} catch(Exception ex) {
+//			list.add(EnumChatFormatting.RED + "Error loading cannery: " + ex.getLocalizedMessage());
+//		}
 
 		/*ItemStack copy = stack.copy();
 		List<MaterialStack> materials = Mats.getMaterialsFromItem(copy);
@@ -955,9 +968,11 @@ public class ModEventHandlerClient {
 			}
 
 			if(comp != null) {
-				CanneryBase cannery = Jars.canneries.get(comp);
-				if(cannery != null) {
-					FMLCommonHandler.instance().showGuiScreen(new GuiWorldInAJar(cannery.createScript(), cannery.getName(), cannery.getIcon(), cannery.seeAlso()));
+//				CanneryBase cannery = Jars.canneries.get(comp);
+				MigraineInstructions instructions = MigraineLoader.instructions.get(comp);
+				if(instructions != null) {
+					FMLCommonHandler.instance().showGuiScreen(new GuiMigraine(instructions));
+//					FMLCommonHandler.instance().showGuiScreen(new GuiWorldInAJar(cannery.createScript(), cannery.getName(), cannery.getIcon(), cannery.seeAlso()));
 				}
 			}
 		}
