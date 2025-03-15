@@ -3,19 +3,23 @@ package com.hbm.migraine.world;
 import com.hbm.util.CoordinatePacker;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import it.unimi.dsi.fastutil.longs.*;
+//import it.unimi.dsi.fastutil.longs.*;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
-import org.joml.Vector3f;
+import org.lwjgl.util.vector.Vector3f;
+
+import java.util.HashMap;
+import java.util.HashSet;
+//import org.joml.Vector3f;
 
 public class TrackedDummyWorld extends DummyWorld {
-	public final Long2ObjectMap<Block> blockMap = new Long2ObjectOpenHashMap<>();
-	public final Long2ObjectMap<TileEntity> tileMap = new Long2ObjectOpenHashMap<>();
-	public final Long2IntMap blockMetaMap = new Long2IntOpenHashMap();
+	public final HashMap<Long, Block> blockMap = new HashMap<>();
+	public final HashMap<Long, TileEntity> tileMap = new HashMap<>();
+	public final HashMap<Long, Integer> blockMetaMap = new HashMap<>();
 
 	private final Vector3f minPos = new Vector3f(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	private final Vector3f maxPos = new Vector3f(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
@@ -119,7 +123,8 @@ public class TrackedDummyWorld extends DummyWorld {
 	}
 
 	public Vector3f getSize() {
-		return size.set(maxPos.x - minPos.x + 1, maxPos.y - minPos.y + 1, maxPos.z - minPos.z + 1);
+		size.set(maxPos.x - minPos.x + 1, maxPos.y - minPos.y + 1, maxPos.z - minPos.z + 1);
+		return size;
 	}
 
 	public Vector3f getMinPos() {
@@ -130,11 +135,11 @@ public class TrackedDummyWorld extends DummyWorld {
 		return maxPos;
 	}
 
-	public MovingObjectPosition rayTraceBlocksWithTargetMap(Vec3 start, Vec3 end, LongSet targetedBlocks) {
+	public MovingObjectPosition rayTraceBlocksWithTargetMap(Vec3 start, Vec3 end, HashSet<Long> targetedBlocks) {
 		return rayTraceBlocksWithTargetMap(start, end, targetedBlocks, false, false, false);
 	}
 
-	public MovingObjectPosition rayTraceBlocksWithTargetMap(Vec3 start, Vec3 end, LongSet targetedBlocks,
+	public MovingObjectPosition rayTraceBlocksWithTargetMap(Vec3 start, Vec3 end, HashSet<Long> targetedBlocks,
 															boolean stopOnLiquid, boolean ignoreBlockWithoutBoundingBox, boolean returnLastUncollidableBlock) {
 		if (!Double.isNaN(start.xCoord) && !Double.isNaN(start.yCoord) && !Double.isNaN(start.zCoord)) {
 			if (!Double.isNaN(end.xCoord) && !Double.isNaN(end.yCoord) && !Double.isNaN(end.zCoord)) {
@@ -303,7 +308,7 @@ public class TrackedDummyWorld extends DummyWorld {
 		}
 	}
 
-	private boolean isBlockTargeted(MovingObjectPosition result, LongSet targetedBlocks) {
+	private boolean isBlockTargeted(MovingObjectPosition result, HashSet<Long> targetedBlocks) {
 		return targetedBlocks.contains(CoordinatePacker.pack(result.blockX, result.blockY, result.blockZ));
 	}
 

@@ -2,8 +2,7 @@ package com.hbm.migraine.client;
 
 import com.hbm.migraine.world.TrackedDummyWorld;
 import com.hbm.util.CoordinatePacker;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
+import com.hbm.util.Vector4i;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -16,12 +15,13 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.ForgeHooksClient;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4i;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.glu.GLU;
+import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 
+import java.util.HashSet;
 import java.util.function.Consumer;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -32,8 +32,8 @@ public abstract class WorldSceneRenderer {
 	// you have to place blocks in the world before use
 	public final TrackedDummyWorld world;
 	// the Blocks which this renderer needs to render
-	public final LongSet renderedBlocks = new LongOpenHashSet();
-	public final LongSet renderOpaqueBlocks = new LongOpenHashSet();
+	public final HashSet<Long> renderedBlocks = new HashSet<>();
+	public final HashSet<Long> renderOpaqueBlocks = new HashSet<>();
 	private Consumer<WorldSceneRenderer> beforeRender;
 	private Consumer<WorldSceneRenderer> onRender;
 	private Consumer<MovingObjectPosition> onLookingAt;
@@ -65,7 +65,7 @@ public abstract class WorldSceneRenderer {
 		return this;
 	}
 
-	public WorldSceneRenderer addRenderedBlocks(LongSet blocks) {
+	public WorldSceneRenderer addRenderedBlocks(HashSet<Long> blocks) {
 		if (blocks != null) {
 			this.renderedBlocks.addAll(blocks);
 		}
@@ -137,9 +137,11 @@ public abstract class WorldSceneRenderer {
 
 	public void setCameraLookAt(Vector3f lookAt, double radius, double rotationPitch, double rotationYaw) {
 		this.lookAt.set(lookAt);
-		eyePos.set((float) Math.cos(rotationPitch), 0, (float) Math.sin(rotationPitch))
-			.add(0, (float) (Math.tan(rotationYaw) * eyePos.length()), 0).normalize().mul((float) radius)
-			.add(lookAt);
+		eyePos.set((float) Math.cos(rotationPitch), 0, (float) Math.sin(rotationPitch));
+		Vector3f.add(eyePos, new Vector3f(0, (float) (Math.tan(rotationYaw) * eyePos.length()), 0), eyePos);
+		eyePos.normalise(eyePos);
+		eyePos.scale((float) radius);
+		Vector3f.add(eyePos, lookAt, eyePos);
 	}
 
 	public void setupCamera() {
@@ -258,7 +260,7 @@ public abstract class WorldSceneRenderer {
 		glDepthMask(true);
 	}
 
-	public void renderBlocks(Tessellator tessellator, LongSet blocksToRender, boolean transparent) {
+	public void renderBlocks(Tessellator tessellator, HashSet<Long> blocksToRender, boolean transparent) {
 		if (blocksToRender.isEmpty()) return;
 		Minecraft mc = Minecraft.getMinecraft();
 		final int savedAo = mc.gameSettings.ambientOcclusion;
@@ -308,17 +310,17 @@ public abstract class WorldSceneRenderer {
 	}
 
 	public boolean isInsideRect(int x, int y) {
-		return x > rect.x() && x < rect.x() + rect.z() && y > rect.y() && y < rect.y() + rect.w();
+		return x > rect.x && x < rect.x + rect.z && y > rect.y && y < rect.y + rect.w;
 	}
 
 	public MovingObjectPosition rayTrace(Vector3f lookVec) {
 		Vec3 startPos = Vec3.createVectorHelper(this.eyePos.x, this.eyePos.y, this.eyePos.z);
-		lookVec.mul(100); // range: 100 Blocks
+		lookVec.scale(100); // range: 100 Blocks
 		Vec3 endPos = Vec3.createVectorHelper(
 			(lookVec.x + startPos.xCoord),
 			(lookVec.y + startPos.yCoord),
 			(lookVec.z + startPos.zCoord));
-		return this.world.rayTraceBlocksWithTargetMap(startPos, endPos, world.blockMap.keySet());
+		return this.world.rayTraceBlocksWithTargetMap(startPos, endPos, new HashSet<>(world.blockMap.keySet()));
 	}
 
 
@@ -326,40 +328,104 @@ public abstract class WorldSceneRenderer {
 	private static final Vector3f MUT_3F = new Vector3f();
 	private static final Vector3f RESULT = new Vector3f();
 
-	public static Vector3f unProject(Vector4i rect, Vector3f eyePos, Vector3f lookat, int mouseX, int mouseY) {
-		int width = rect.z();
-		int height = rect.w();
+//	public static Vector3f unProject(Vector4i rect, Vector3f eyePos, Vector3f lookat, int mouseX, int mouseY) {
+//		int width = rect.z();
+//		int height = rect.w();
+//
+//		double aspectRatio = ((double) width / (double) height);
+//		double fov = Math.toRadians(30);
+//
+//		double a = -((double) (mouseX - rect.x()) / (double) width - 0.5) * 2;
+//		double b = -((double) (height - (mouseY - rect.y())) / (double) height - 0.5) * 2;
+//		double tanf = Math.tan(fov);
+//
+//		eyePos.sub(lookat, MUT_3F);
+//		float yawn = (float) Math.atan2(MUT_3F.x, -MUT_3F.z);
+//		float pitch = (float) Math.atan2(MUT_3F.y, Math.sqrt(MUT_3F.x * MUT_3F.x + MUT_3F.z * MUT_3F.z));
+//
+//		ROT.identity().rotate(yawn, 0, -1, 0).rotate(pitch, 1, 0, 0);
+//		RESULT.set(ROT.transformPosition(MUT_3F.set(0, 0, 1)));
+//		ROT.transformPosition(MUT_3F.set(1, 0, 0));
+//		RESULT.add(
+//			(float) (MUT_3F.x * tanf * aspectRatio * a),
+//			(float) (MUT_3F.y * tanf * aspectRatio * a),
+//			(float) (MUT_3F.z * tanf * aspectRatio * a));
+//		ROT.transformPosition(MUT_3F.set(0, 1, 0));
+//		RESULT.add((float) (MUT_3F.x * tanf * b), (float) (MUT_3F.y * tanf * b), (float) (MUT_3F.z * tanf * b));
+//		return normalize(RESULT);
+//	}
+//
+//	public static Vector3f normalize(Vector3f vec) {
+//		float length = (float) Math.sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+//
+//		vec.x /= length;
+//		vec.y /= length;
+//		vec.z /= length;
+//
+//		return vec;
+//	}
 
-		double aspectRatio = ((double) width / (double) height);
+
+	// CHATGPT TRANSLATE THIS CODE FROM JOML TO LWJGL
+	public static Vector3f unProject(Vector4i rect, Vector3f eyePos, Vector3f lookAt, int mouseX, int mouseY) {
+		int width = rect.z;
+		int height = rect.w;
+
+		double aspectRatio = (double) width / (double) height;
 		double fov = Math.toRadians(30);
 
-		double a = -((double) (mouseX - rect.x()) / (double) width - 0.5) * 2;
-		double b = -((double) (height - (mouseY - rect.y())) / (double) height - 0.5) * 2;
+		double a = -((double) (mouseX - rect.x) / width - 0.5) * 2;
+		double b = -((double) (height - (mouseY - rect.y)) / height - 0.5) * 2;
 		double tanf = Math.tan(fov);
 
-		eyePos.sub(lookat, MUT_3F);
+		Vector3f.sub(eyePos, lookAt, MUT_3F);
 		float yawn = (float) Math.atan2(MUT_3F.x, -MUT_3F.z);
 		float pitch = (float) Math.atan2(MUT_3F.y, Math.sqrt(MUT_3F.x * MUT_3F.x + MUT_3F.z * MUT_3F.z));
 
-		ROT.identity().rotate(yawn, 0, -1, 0).rotate(pitch, 1, 0, 0);
-		RESULT.set(ROT.transformPosition(MUT_3F.set(0, 0, 1)));
-		ROT.transformPosition(MUT_3F.set(1, 0, 0));
-		RESULT.add(
-			(float) (MUT_3F.x * tanf * aspectRatio * a),
-			(float) (MUT_3F.y * tanf * aspectRatio * a),
-			(float) (MUT_3F.z * tanf * aspectRatio * a));
-		ROT.transformPosition(MUT_3F.set(0, 1, 0));
-		RESULT.add((float) (MUT_3F.x * tanf * b), (float) (MUT_3F.y * tanf * b), (float) (MUT_3F.z * tanf * b));
+		ROT.setIdentity();
+		rotateY(ROT, yawn);
+		rotateX(ROT, pitch);
+
+		MUT_3F.set(0, 0, 1);
+		transformPosition(ROT, MUT_3F, RESULT);
+		MUT_3F.set(1, 0, 0);
+		transformPosition(ROT, MUT_3F, MUT_3F);
+
+		RESULT.x += MUT_3F.x * tanf * aspectRatio * a;
+		RESULT.y += MUT_3F.y * tanf * aspectRatio * a;
+		RESULT.z += MUT_3F.z * tanf * aspectRatio * a;
+
+		MUT_3F.set(0, 1, 0);
+		transformPosition(ROT, MUT_3F, MUT_3F);
+
+		RESULT.x += MUT_3F.x * tanf * b;
+		RESULT.y += MUT_3F.y * tanf * b;
+		RESULT.z += MUT_3F.z * tanf * b;
+
 		return normalize(RESULT);
+	}
+
+	private static void rotateX(Matrix4f mat, float angle) {
+		Matrix4f.rotate(angle, new Vector3f(1, 0, 0), mat, mat);
+	}
+
+	private static void rotateY(Matrix4f mat, float angle) {
+		Matrix4f.rotate(angle, new Vector3f(0, -1, 0), mat, mat);
+	}
+
+	private static void transformPosition(Matrix4f mat, Vector3f vec, Vector3f dest) {
+		Vector4f temp = new Vector4f(vec.x, vec.y, vec.z, 1.0f); // Homogeneous coordinate w = 1
+		Matrix4f.transform(mat, temp, temp);
+		dest.set(temp.x, temp.y, temp.z); // Extract only x, y, z
 	}
 
 	public static Vector3f normalize(Vector3f vec) {
 		float length = (float) Math.sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-
-		vec.x /= length;
-		vec.y /= length;
-		vec.z /= length;
-
+		if (length != 0) {
+			vec.x /= length;
+			vec.y /= length;
+			vec.z /= length;
+		}
 		return vec;
 	}
 }

@@ -1,21 +1,16 @@
 package com.hbm.migraine;
 
-import codechicken.lib.gui.GuiDraw;
-import com.hbm.blocks.ModBlocks;
 import com.hbm.migraine.client.ClientFakePlayer;
 import com.hbm.migraine.client.ImmediateWorldSceneRenderer;
-import com.hbm.migraine.client.WorldSceneRenderer;
 import com.hbm.migraine.world.DummyWorld;
 import com.hbm.migraine.world.TrackedDummyWorld;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.init.Blocks;
-import org.joml.Vector3f;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector3f;
 
-import java.awt.*;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.UUID;
 
 public class GuiMigraine extends GuiScreen {
@@ -64,7 +59,7 @@ public class GuiMigraine extends GuiScreen {
 		Vector3f center = new Vector3f(minPos.x + size.x / 2, minPos.y + size.y / 2, minPos.z + size.z / 2);
 
 		worldRenderer.renderedBlocks.clear();
-		worldRenderer.addRenderedBlocks(worldRenderer.world.blockMap.keySet());
+		worldRenderer.addRenderedBlocks(new HashSet<>(worldRenderer.world.blockMap.keySet()));
 
 		float max = Math.max(Math.max(size.x, size.y), size.z);
 		float baseZoom = (float) (3.5f * Math.sqrt(max));

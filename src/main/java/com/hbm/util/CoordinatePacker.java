@@ -1,7 +1,6 @@
 package com.hbm.util;
 
 import net.minecraft.util.ChunkCoordinates;
-import org.joml.Vector3i;
 
 public final class CoordinatePacker {
 
@@ -31,10 +30,6 @@ public final class CoordinatePacker {
 		return pack(coords.posX, coords.posY, coords.posZ);
 	}
 
-	public static long pack(Vector3i coords) {
-		return pack(coords.x, coords.y, coords.z);
-	}
-
 	public static int unpackX(long packed) {
 		return (int) (packed << 64 - BIT_SHIFT_X - SIZE_BITS_X >> 64 - SIZE_BITS_X);
 	}
@@ -51,11 +46,5 @@ public final class CoordinatePacker {
 		coords.posX = unpackX(packed);
 		coords.posY = unpackY(packed);
 		coords.posZ = unpackZ(packed);
-	}
-
-	public static void unpack(long packed, Vector3i coords) {
-		coords.x = unpackX(packed);
-		coords.y = unpackY(packed);
-		coords.z = unpackZ(packed);
 	}
 }

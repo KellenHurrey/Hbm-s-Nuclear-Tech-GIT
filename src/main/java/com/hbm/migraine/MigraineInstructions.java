@@ -69,29 +69,29 @@ public class MigraineInstructions {
 				}
 				else if (type.equals("modifyTileEntity")){
 					// I know this looks bad, but its a fake world, so whats the worst someone could do?
-					JsonObject pos = action.getAsJsonObject("position");
-					TileEntity te = worldRenderer.world.getTileEntity(pos.get("x").getAsInt(), pos.get("y").getAsInt(), pos.get("z").getAsInt());
-					if (te != null){
-						try {
-							Method method = te.getClass().getMethod(action.get("method").getAsString());
-//							te.getBlockType().createTileEntity(null, )
-							JsonArray args = action.getAsJsonArray("arguments");
-							Object[] params = new Object[args.size()];
-							for (int i = 0; i < args.size(); i++){
-								JsonObject arg = args.get(i).getAsJsonObject();
-								String argType = arg.get("type").getAsString();
-								if (argType.equals("int")){
-									params[i] = arg.get("value").getAsInt();
-								}
-							}
-							method.invoke()
-
-						}catch (Exception ex){
-							MainRegistry.logger.warn("[Migraine] No such method " + action.get("method").getAsString());
-						}
-					}else{
-						MainRegistry.logger.warn("[Migraine] Tried to access TileEntity at " + pos.get("x").getAsInt() + ", " + pos.get("y").getAsInt() + ", " + pos.get("z").getAsInt() + ", but failed!");
-					}
+//					JsonObject pos = action.getAsJsonObject("position");
+//					TileEntity te = worldRenderer.world.getTileEntity(pos.get("x").getAsInt(), pos.get("y").getAsInt(), pos.get("z").getAsInt());
+//					if (te != null){
+//						try {
+//							Method method = te.getClass().getMethod(action.get("method").getAsString());
+////							te.getBlockType().createTileEntity(null, )
+//							JsonArray args = action.getAsJsonArray("arguments");
+//							Object[] params = new Object[args.size()];
+//							for (int i = 0; i < args.size(); i++){
+//								JsonObject arg = args.get(i).getAsJsonObject();
+//								String argType = arg.get("type").getAsString();
+//								if (argType.equals("int")){
+//									params[i] = arg.get("value").getAsInt();
+//								}
+//							}
+//							method.invoke()
+//
+//						}catch (Exception ex){
+//							MainRegistry.logger.warn("[Migraine] No such method " + action.get("method").getAsString());
+//						}
+//					}else{
+//						MainRegistry.logger.warn("[Migraine] Tried to access TileEntity at " + pos.get("x").getAsInt() + ", " + pos.get("y").getAsInt() + ", " + pos.get("z").getAsInt() + ", but failed!");
+//					}
 				}
 			}
 		}
