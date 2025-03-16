@@ -1,6 +1,8 @@
 package com.hbm.migraine.client;
 
+import com.hbm.main.MainRegistry;
 import com.hbm.migraine.world.TrackedDummyWorld;
+import com.hbm.tileentity.machine.TileEntityMachineEPress;
 import com.hbm.util.CoordinatePacker;
 import com.hbm.util.Vector4i;
 import net.minecraft.block.Block;
@@ -28,7 +30,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public abstract class WorldSceneRenderer {
 
-	public static int backgroundColor = 0xC6C6C6;
+	public long backgroundColor = 0xC6C6C6;
 	// you have to place blocks in the world before use
 	public final TrackedDummyWorld world;
 	// the Blocks which this renderer needs to render
@@ -178,15 +180,16 @@ public abstract class WorldSceneRenderer {
 		GLU.gluLookAt(eyePos.x, eyePos.y, eyePos.z, lookAt.x, lookAt.y, lookAt.z, worldUp.x, worldUp.y, worldUp.z);
 	}
 
-	public static void setGlClearColorFromInt(int colorValue, int opacity) {
-		int i = (colorValue & 16711680) >> 16;
-		int j = (colorValue & 65280) >> 8;
-		int k = (colorValue & 255);
-		glClearColor(i / 255.0f, j / 255.0f, k / 255.0f, opacity / 255.0f);
+	public static void setGlClearColorFromInt(long color) {
+		float a = (float) (color >> 24 & 255) / 255.0F;
+		float r = (float) (color >> 16 & 255) / 255.0F;
+		float g = (float) (color >> 8 & 255) / 255.0F;
+		float b = (float) (color & 255) / 255.0F;
+		glClearColor(r, b, g, a);
 	}
 
 	protected void clearView(int x, int y, int width, int height) {
-		setGlClearColorFromInt(backgroundColor, backgroundColor >> 24);
+		setGlClearColorFromInt(backgroundColor);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 

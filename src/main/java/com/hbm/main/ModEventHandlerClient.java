@@ -39,6 +39,8 @@ import com.hbm.lib.RefStrings;
 import com.hbm.migraine.GuiMigraine;
 import com.hbm.migraine.MigraineInstructions;
 import com.hbm.migraine.MigraineLoader;
+import com.hbm.migraine.client.ClientFakePlayer;
+import com.hbm.migraine.world.TrackedDummyWorld;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.packet.toserver.AuxButtonPacket;
 import com.hbm.packet.toserver.GunButtonPacket;
@@ -85,6 +87,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -119,6 +122,7 @@ import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -643,6 +647,14 @@ public class ModEventHandlerClient {
 					item.startActionClient(player.getHeldItem(), player.worldObj, player, false);
 				}
 			}
+		}
+	}
+
+	@SubscribeEvent
+	public void onPlaySoundAtEntity(PlaySoundAtEntityEvent e){
+		if (e.entity.worldObj instanceof TrackedDummyWorld){
+			e.setCanceled(true);
+			((TrackedDummyWorld) e.entity.worldObj).SoundHandler.playSound(new PositionedSoundRecord(new net.minecraft.util.ResourceLocation(e.name), e.volume, e.pitch, (float) e.entity.posX, (float) e.entity.posX, (float) e.entity.posX));
 		}
 	}
 

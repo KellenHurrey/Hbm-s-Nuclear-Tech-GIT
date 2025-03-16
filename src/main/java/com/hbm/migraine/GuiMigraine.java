@@ -6,10 +6,10 @@ import com.hbm.migraine.world.DummyWorld;
 import com.hbm.migraine.world.TrackedDummyWorld;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ public class GuiMigraine extends GuiScreen {
 
 	private ImmediateWorldSceneRenderer worldRenderer;
 
-	public static final ClientFakePlayer FAKE_PLAYER = new ClientFakePlayer(DummyWorld.INSTANCE, new GameProfile(UUID.randomUUID(), "Migraine"));
+	public final ClientFakePlayer FAKE_PLAYER;
 
 	protected static int guiMouseX, guiMouseY;
 	private int ticks = 0;
@@ -28,36 +28,47 @@ public class GuiMigraine extends GuiScreen {
 
 	public GuiMigraine(MigraineInstructions instruct){
 		this.instructions = instruct;
+		FAKE_PLAYER = new ClientFakePlayer(DummyWorld.INSTANCE, new GameProfile(UUID.randomUUID(), "Migraine"));
 	}
 
 
 	@Override
 	public void initGui() {
-		worldRenderer = new ImmediateWorldSceneRenderer(new TrackedDummyWorld());
+		worldRenderer = new ImmediateWorldSceneRenderer(new TrackedDummyWorld(this.mc.getSoundHandler(), this.mc.thePlayer));
 		worldRenderer.world.updateEntitiesForNEI();
 
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
 		FAKE_PLAYER.setWorld(worldRenderer.world);
-		worldRenderer.world.unloadEntities(Collections.singletonList(FAKE_PLAYER));
 
 		instructions.zoom = 1f;
-		instructions.yaw = 20f;
-		instructions.pitch = 50f;
+		instructions.yaw = 50f;
+		instructions.pitch = 20f;
 		instructions.center = null;
 	}
 
+	// Gets called whenever the fuck it feels like it (fps)
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float f){
-		if (isPaused) return;
 
 		this.drawDefaultBackground();
 
-		instructions.update(worldRenderer, ticks);
+		long now = System.currentTimeMillis();
+		instructions.render(mouseX, mouseY, f, this.width, this.height);
 
 		updateCamera();
 
 		worldRenderer.render(0, 0, width, height, mouseX, mouseY);
+	}
+
+	// Gets called at a normal 20fps
+	@Override
+	public void updateScreen(){
+		if (isPaused) return;
+
+		worldRenderer.world.updateEntitiesForNEI();
+
+		instructions.update(worldRenderer, ticks);
 
 		ticks++;
 	}
@@ -79,5 +90,10 @@ public class GuiMigraine extends GuiScreen {
 		float zoom = baseZoom * sizeFactor / 1.5f;
 		// ignore how yaw and pitch are reversed
 		worldRenderer.setCameraLookAt(center, zoom, Math.toRadians(instructions.yaw), Math.toRadians(instructions.pitch));
+	}
+
+	@Override
+	public boolean doesGuiPauseGame() {
+		return false;
 	}
 }

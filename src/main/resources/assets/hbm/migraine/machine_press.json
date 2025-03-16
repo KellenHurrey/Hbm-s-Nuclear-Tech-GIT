@@ -57,7 +57,68 @@
 					"y": 1,
 					"z": 1
 				},
-				"tileEntityClass": "com.hbm.tileentity.TileEntity"
+				"tileEntityClass": "com.hbm.tileentity.TileEntityMachineBase",
+				"method": "setInventorySlotContents",
+				"arguments": [
+					{
+						"type": "int",
+						"value": 0
+					},
+					{
+						"type": "itemStack",
+						"modid": "hbm",
+						"name": "item.battery_creative"
+					}
+				]
+			}
+		},
+		{
+			"tick": 21,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				},
+				"tileEntityClass": "com.hbm.tileentity.TileEntityMachineBase",
+				"method": "setInventorySlotContents",
+				"arguments": [
+					{
+						"type": "int",
+						"value": 1
+					},
+					{
+						"type": "itemStack",
+						"modid": "hbm",
+						"name": "item.stamp_iron_plate"
+					}
+				]
+			}
+		},
+		{
+			"tick": 21,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				},
+				"tileEntityClass": "com.hbm.tileentity.TileEntityMachineBase",
+				"method": "setInventorySlotContents",
+				"arguments": [
+					{
+						"type": "int",
+						"value": 2
+					},
+					{
+						"type": "itemStack",
+						"modid": "minecraft",
+						"name": "iron_ingot",
+						"stackSize": 64
+					}
+				]
 			}
 		}
 	]

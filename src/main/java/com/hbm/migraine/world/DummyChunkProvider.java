@@ -28,6 +28,19 @@ public class DummyChunkProvider implements IChunkProvider {
 		return (Chunk) loadedChunks.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
 	}
 
+//	@Nonnull
+//	@Override
+//	public Chunk provideChunk(int x, int z) {
+//		long chunkKey = ChunkCoordIntPair.chunkXZ2Int(x, z);
+//		if (loadedChunks.containsItem(chunkKey)) {
+//			return (Chunk) loadedChunks.getValueByKey(chunkKey);
+//		}
+//
+//		Chunk chunk = new Chunk(world, x, z);
+//		loadedChunks.add(chunkKey, chunk);
+//		return chunk;
+//	}
+
 	@Nonnull
 	@Override
 	public Chunk provideChunk(int x, int z) {
@@ -37,7 +50,13 @@ public class DummyChunkProvider implements IChunkProvider {
 		}
 
 		Chunk chunk = new Chunk(world, x, z);
+		chunk.generateSkylightMap(); // Ensure proper lighting calculations
+		chunk.setChunkModified(); // Mark as modified to prevent unloading
+
 		loadedChunks.add(chunkKey, chunk);
+
+		chunk.onChunkLoad(); // IMPORTANT: Calls readFromNBT() for tile entities!
+
 		return chunk;
 	}
 
@@ -56,7 +75,7 @@ public class DummyChunkProvider implements IChunkProvider {
 
 	@Override
 	public boolean canSave() {
-		return false;
+		return true;
 	}
 
 	@Nonnull

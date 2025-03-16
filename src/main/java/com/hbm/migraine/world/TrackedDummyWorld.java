@@ -1,30 +1,48 @@
 package com.hbm.migraine.world;
 
+import com.hbm.main.MainRegistry;
+import com.hbm.migraine.client.RecordMovingSound;
+import com.hbm.tileentity.IBufPacketReceiver;
 import com.hbm.util.CoordinatePacker;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-//import it.unimi.dsi.fastutil.longs.*;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.block.Block;
+import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import org.lwjgl.util.vector.Vector3f;
 
 import java.util.HashMap;
 import java.util.HashSet;
-//import org.joml.Vector3f;
 
 public class TrackedDummyWorld extends DummyWorld {
 	public final HashMap<Long, Block> blockMap = new HashMap<>();
 	public final HashMap<Long, TileEntity> tileMap = new HashMap<>();
 	public final HashMap<Long, Integer> blockMetaMap = new HashMap<>();
 
+	public final HashSet<Long> tilesToReserialize = new HashSet<>();
+
 	private final Vector3f minPos = new Vector3f(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	private final Vector3f maxPos = new Vector3f(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 	private final Vector3f size = new Vector3f();
 	private boolean hasChanged;
+
+	public final SoundHandler SoundHandler;
+
+	public final EntityPlayer player;
+
+	public TrackedDummyWorld(SoundHandler soundHandler, EntityPlayer owner){
+		this.SoundHandler = soundHandler;
+		player = owner;
+
+	}
 
 	@Override
 	public boolean setBlock(int x, int y, int z, Block block, int meta, int flags) {
@@ -86,12 +104,20 @@ public class TrackedDummyWorld extends DummyWorld {
 
 	@Override
 	public void setTileEntity(int x, int y, int z, TileEntity tile) {
+		if (tile == null) {
+			tileMap.remove(CoordinatePacker.pack(x, y, z));
+			return;
+		}
+
+		long pos = CoordinatePacker.pack(x, y, z);
 		tile.setWorldObj(this);
 		tile.xCoord = x;
 		tile.yCoord = y;
 		tile.zCoord = z;
+
 		tile.validate();
-		tileMap.put(CoordinatePacker.pack(x, y, z), tile);
+
+		tileMap.put(pos, tile);
 	}
 
 	@Override
@@ -106,11 +132,36 @@ public class TrackedDummyWorld extends DummyWorld {
 
 	@Override
 	public void updateEntitiesForNEI() {
-		for (TileEntity tile : tileMap.values()) {
-			if (tile.canUpdate()) {
-				tile.updateEntity();
+		tilesToReserialize.forEach((Long pos) -> {
+			TileEntity tile = getTileEntity(CoordinatePacker.unpackX(pos), CoordinatePacker.unpackY(pos), CoordinatePacker.unpackZ(pos));
+			if (tile instanceof IBufPacketReceiver){
+				ByteBuf buf = Unpooled.buffer();
+				((IBufPacketReceiver) tile).serialize(buf);
+				try {
+					((IBufPacketReceiver) tile).deserialize(buf);
+				}catch (Exception e){
+					MainRegistry.logger.warn("[Migraine] Failed to deserialize a tile entity! ", e);
+				}
 			}
-		}
+		});
+		tilesToReserialize.clear();
+		tileMap.forEach((Long pos, TileEntity tile) -> {
+			if (tile.canUpdate()) {
+				this.isRemote = true;
+				tile.updateEntity();
+				tileMap.replace(pos, tile);
+			}
+		});
+
+		tileMap.forEach((Long pos, TileEntity tile) -> {
+			if (tile.canUpdate()) {
+				this.isRemote = false;
+				tile.updateEntity();
+				this.isRemote = true;
+				tileMap.replace(pos, tile);
+			}
+		});
+
 	}
 
 	/**
@@ -316,5 +367,12 @@ public class TrackedDummyWorld extends DummyWorld {
 		boolean changed = hasChanged;
 		hasChanged = false;
 		return changed;
+	}
+
+	@Override
+	public void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch) {
+		if (this.SoundHandler != null) {
+			this.SoundHandler.playSound(new RecordMovingSound(player, new ResourceLocation(soundName), volume, pitch, (float) x, (float) y, (float) z));
+		}
 	}
 }

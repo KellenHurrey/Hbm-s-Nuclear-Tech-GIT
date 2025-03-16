@@ -1,6 +1,7 @@
 package com.hbm.migraine.client;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.ChunkCoordinates;
