@@ -15,11 +15,12 @@ import java.util.UUID;
 
 public class GuiMigraine extends GuiScreen {
 
-	private ImmediateWorldSceneRenderer worldRenderer;
+	public ImmediateWorldSceneRenderer worldRenderer;
 
-	public final ClientFakePlayer FAKE_PLAYER;
+	public boolean updating = false;
 
-	protected static int guiMouseX, guiMouseY;
+	public ClientFakePlayer FAKE_PLAYER;
+
 	private int ticks = 0;
 
 	private boolean isPaused = false;
@@ -28,16 +29,14 @@ public class GuiMigraine extends GuiScreen {
 
 	public GuiMigraine(MigraineInstructions instruct){
 		this.instructions = instruct;
-		FAKE_PLAYER = new ClientFakePlayer(DummyWorld.INSTANCE, new GameProfile(UUID.randomUUID(), "Migraine"));
 	}
 
 
 	@Override
 	public void initGui() {
 		worldRenderer = new ImmediateWorldSceneRenderer(new TrackedDummyWorld(this.mc.getSoundHandler(), this.mc.thePlayer));
+		FAKE_PLAYER = new ClientFakePlayer(worldRenderer.world, new GameProfile(UUID.randomUUID(), "Migraine"));
 		worldRenderer.world.updateEntitiesForNEI();
-
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
 		FAKE_PLAYER.setWorld(worldRenderer.world);
 
@@ -53,12 +52,11 @@ public class GuiMigraine extends GuiScreen {
 
 		this.drawDefaultBackground();
 
-		long now = System.currentTimeMillis();
-		instructions.render(mouseX, mouseY, f, this.width, this.height);
-
 		updateCamera();
 
 		worldRenderer.render(0, 0, width, height, mouseX, mouseY);
+
+		instructions.render(mouseX, mouseY, f, this.width, this.height);
 	}
 
 	// Gets called at a normal 20fps
@@ -66,14 +64,14 @@ public class GuiMigraine extends GuiScreen {
 	public void updateScreen(){
 		if (isPaused) return;
 
-		worldRenderer.world.updateEntitiesForNEI();
+		this.updating = true;
+		worldRenderer.world.update();
+		this.updating = false;
 
-		instructions.update(worldRenderer, ticks);
+		instructions.update(this, ticks);
 
 		ticks++;
 	}
-
-
 
 	private void updateCamera(){
 		Vector3f size = worldRenderer.world.getSize();
@@ -95,5 +93,11 @@ public class GuiMigraine extends GuiScreen {
 	@Override
 	public boolean doesGuiPauseGame() {
 		return false;
+	}
+
+	// Probably should unload the world and invalidate the tes
+	@Override
+	public void onGuiClosed() {
+		worldRenderer.world.unload();
 	}
 }

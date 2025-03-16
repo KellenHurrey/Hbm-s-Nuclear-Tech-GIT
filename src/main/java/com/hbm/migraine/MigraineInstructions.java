@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.main.MainRegistry;
 import com.hbm.migraine.client.ImmediateWorldSceneRenderer;
+import com.hbm.util.I18nUtil;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -72,6 +73,19 @@ public class MigraineInstructions {
 		worldRenderer.world.setBlock(pos.get("x").getAsInt(), pos.get("y").getAsInt(), pos.get("z").getAsInt(), GameRegistry.findBlock(action.get("modid").getAsString(), action.get("name").getAsString()), action.has("meta") ? action.get("meta").getAsInt() : 0, 3);
 	}
 
+	private void placeBlock(GuiMigraine gui, ImmediateWorldSceneRenderer worldRenderer, JsonObject action){
+		Block block = GameRegistry.findBlock(action.get("modid").getAsString(), action.get("name").getAsString());
+
+		JsonObject pos = action.getAsJsonObject("position");
+
+		gui.FAKE_PLAYER.rotationYaw = action.get("yaw").getAsFloat();
+		gui.FAKE_PLAYER.capabilities.isCreativeMode = true;
+
+		worldRenderer.world.isRemote = false;
+		block.onBlockPlacedBy(worldRenderer.world, pos.get("x").getAsInt(), pos.get("y").getAsInt(), pos.get("z").getAsInt(), gui.FAKE_PLAYER, new ItemStack(block, 1, action.has("meta") ? action.get("meta").getAsInt() : 0));
+		worldRenderer.world.isRemote = true;
+	}
+
 	private void fillBlocks(ImmediateWorldSceneRenderer worldRenderer, JsonObject action){
 		JsonObject posMin = action.getAsJsonObject("positionMin");
 		JsonObject posMax = action.getAsJsonObject("positionMax");
@@ -104,6 +118,7 @@ public class MigraineInstructions {
 				// floats
 				// booleans
 				// chars
+				// shorts
 
 				for (int i = 0; i < args.size(); i++) {
 					JsonObject arg = args.get(i).getAsJsonObject();
@@ -116,11 +131,25 @@ public class MigraineInstructions {
 							if (item != null) {
 								params[i] = new ItemStack(item, arg.has("stackSize") ? arg.get("stackSize").getAsInt() : 1, arg.has("meta") ? arg.get("meta").getAsInt() : 0);
 								types[i] = ItemStack.class;
+								if (arg.has("nbt")){
+									try {
+										((ItemStack) params[i]).setTagCompound((NBTTagCompound) JsonToNBT.func_150315_a(arg.get("nbt").getAsString()));
+									}catch (Exception ex){
+										MainRegistry.logger.debug("[Migraine] Failed to set item nbt! " + ex.getLocalizedMessage());
+									}
+								}
 							} else {
 								Block block = GameRegistry.findBlock(stackModid, stackName);
 								if (block != null) {
 									params[i] = new ItemStack(block, arg.has("stackSize") ? arg.get("stackSize").getAsInt() : 1, arg.has("meta") ? arg.get("meta").getAsInt() : 0);
 									types[i] = ItemStack.class;
+									if (arg.has("nbt")){
+										try {
+											((ItemStack) params[i]).setTagCompound((NBTTagCompound) JsonToNBT.func_150315_a(arg.get("nbt").getAsString()));
+										}catch (Exception ex){
+											MainRegistry.logger.debug("[Migraine] Failed to set item nbt! " + ex.getLocalizedMessage());
+										}
+									}
 								}
 							}
 							break;
@@ -159,7 +188,6 @@ public class MigraineInstructions {
 					}
 				}
 
-//				Class clazz = Class.forName(action.get("tileEntityClass").getAsString());
 				Method method = te.getClass().getMethod(action.get("method").getAsString(), types);
 				method.invoke(te, params);
 
@@ -177,8 +205,18 @@ public class MigraineInstructions {
 		if (pos.isJsonNull()){
 			center = null;
 		}else{
-			center.set(pos.get("x").getAsFloat(), pos.get("y").getAsFloat(), pos.get("z").getAsFloat());
+			center = new Vector3f(pos.get("x").getAsFloat(), pos.get("y").getAsFloat(), pos.get("z").getAsFloat());
 		}
+	}
+
+	private void addCenter(ImmediateWorldSceneRenderer worldRenderer, JsonObject action){
+		JsonObject pos = action.getAsJsonObject("position");
+
+		Vector3f size = worldRenderer.world.getSize();
+		Vector3f minPos = worldRenderer.world.getMinPos();
+		center = center == null ? new Vector3f(minPos.x + size.x / 2, minPos.y + size.y / 2, minPos.z + size.z / 2) : center;
+
+		Vector3f.add(center, new Vector3f(pos.get("x").getAsFloat(), pos.get("y").getAsFloat(), pos.get("z").getAsFloat()), center);
 	}
 
 	private void rotateTo(ImmediateWorldSceneRenderer worldRenderer, JsonObject action){
@@ -205,7 +243,7 @@ public class MigraineInstructions {
 		int forTicks = action.get("forTicks").getAsInt();
 		toAdd.addProperty("type", "moveCenterTo");
 		toAdd.addProperty("tickLeft", forTicks);
-		JsonObject targetPos = action.getAsJsonObject("targetPos");
+		JsonObject targetPos = action.getAsJsonObject("targetPosition");
 
 		Vector3f size = worldRenderer.world.getSize();
 		Vector3f minPos = worldRenderer.world.getMinPos();
@@ -242,15 +280,32 @@ public class MigraineInstructions {
 						Item item = GameRegistry.findItem(stackModid, stackName);
 						if (item != null) {
 							currentLine[i] = new ItemStack(item, data.has("stackSize") ? data.get("stackSize").getAsInt() : 1, data.has("meta") ? data.get("meta").getAsInt() : 0);
+							if (data.has("nbt")){
+								try {
+									((ItemStack) currentLine[i]).setTagCompound((NBTTagCompound) JsonToNBT.func_150315_a(data.get("nbt").getAsString()));
+								}catch (Exception ex){
+									MainRegistry.logger.debug("[Migraine] Failed to set item nbt! " + ex.getLocalizedMessage());
+								}
+							}
 						} else {
 							Block block = GameRegistry.findBlock(stackModid, stackName);
 							if (block != null) {
 								currentLine[i] = new ItemStack(block, data.has("stackSize") ? data.get("stackSize").getAsInt() : 1, data.has("meta") ? data.get("meta").getAsInt() : 0);
+								if (data.has("nbt")){
+									try {
+										((ItemStack) currentLine[i]).setTagCompound((NBTTagCompound) JsonToNBT.func_150315_a(data.get("nbt").getAsString()));
+									}catch (Exception ex){
+										MainRegistry.logger.debug("[Migraine] Failed to set item nbt! " + ex.getLocalizedMessage());
+									}
+								}
 							}
 						}
 						break;
 					case "string":
-						currentLine[i] = data.get("value").getAsString();
+						if (data.has("localized") && data.get("localized").getAsBoolean())
+							currentLine[i] = I18nUtil.resolveKey(data.get("value").getAsString());
+						else
+							currentLine[i] = data.get("value").getAsString();
 						break;
 					default:
 						currentLine[i] = "";
@@ -259,12 +314,13 @@ public class MigraineInstructions {
 			toDisplay[j] = currentLine;
 		}
 
-		MigraineDisplay display = new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, pos.get("x").getAsInt(), pos.get("y").getAsInt(), toDisplay, action.has("autowrap") ? action.get("autowrap").getAsInt() : 0, action.get("ticksRemaining").getAsInt());
+		MigraineDisplay display = new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, pos.get("x").getAsInt(), pos.get("y").getAsInt(), toDisplay, action.has("autowrap") ? action.get("autowrap").getAsInt() : 0, action.get("forTicks").getAsInt());
 
 		if (action.has("backgroundColor")) display.colorBg = Long.parseLong(action.get("backgroundColor").getAsString(), 16);
 		if (action.has("darkerColor")) display.colorDarker = Long.parseLong(action.get("darkerColor").getAsString(), 16);
 		if (action.has("lighterColor")) display.colorBrighter = Long.parseLong(action.get("lighterColor").getAsString(), 16);
 		if (action.has("frameColor")) display.colorFrame = Long.parseLong(action.get("frameColor").getAsString(), 16);
+		if (action.has("orientation")) display.setOrientation(MigraineDisplay.Orientation.valueOf(action.get("orientation").getAsString()));
 
 		displays.add(display);
 	}
@@ -276,7 +332,7 @@ public class MigraineInstructions {
 
 		if (tile != null){
 			try {
-				tile.readFromNBT((NBTTagCompound) JsonToNBT.func_150315_a(action.get("NBTString").getAsString()));
+				tile.readFromNBT((NBTTagCompound) JsonToNBT.func_150315_a(action.get("nbt").getAsString()));
 			} catch(NBTException ex){
 				MainRegistry.logger.debug("[Migraine] Failed to read NBT String! " + ex.getLocalizedMessage());
 			}
@@ -284,7 +340,8 @@ public class MigraineInstructions {
 	}
 
 	// Updated every game tick, not render call
-	public void update(ImmediateWorldSceneRenderer worldRenderer, int tickNum){
+	public void update(GuiMigraine gui, int tickNum){
+		ImmediateWorldSceneRenderer worldRenderer = gui.worldRenderer;
 		JsonArray data = json.getAsJsonArray("update");
 
 		displays.forEach((MigraineDisplay display) -> {
@@ -299,57 +356,59 @@ public class MigraineInstructions {
 		for (JsonElement actionElem : data){
 			JsonObject actionGroup = actionElem.getAsJsonObject();
 
-
 			// If there is tick, then just do that exact tick
 			// If there is start and end tick, then do startTick <= tickNum <= endTick, removing the upper or lower bound if it is -1
-			if ((actionGroup.has("tick") && tickNum == actionGroup.get("tick").getAsInt()) ||
+			if ((actionGroup.has("tick") && tickNum == actionGroup.get("tick").getAsInt()) || // works
 				(actionGroup.has("startTick") && actionGroup.has("endTick") && (
-					(actionGroup.get("startTick").getAsInt() != -1 && actionGroup.get("endTick").getAsInt() != -1 && tickNum >= actionGroup.get("startTick").getAsInt() && tickNum <= actionGroup.get("endTick").getAsInt()) ||
-					(actionGroup.get("startTick").getAsInt() == -1 && actionGroup.get("endTick").getAsInt() != -1 && tickNum <= actionGroup.get("endTick").getAsInt()) ||
-					((actionGroup.get("startTick").getAsInt() != -1 && actionGroup.get("endTick").getAsInt() == -1 && tickNum >= actionGroup.get("startTick").getAsInt()))))){
+					(actionGroup.get("startTick").getAsInt() != -1 && actionGroup.get("endTick").getAsInt() != -1 && tickNum >= actionGroup.get("startTick").getAsInt() && tickNum <= actionGroup.get("endTick").getAsInt()) || // works
+					(actionGroup.get("startTick").getAsInt() == -1 && actionGroup.get("endTick").getAsInt() != -1 && tickNum <= actionGroup.get("endTick").getAsInt()) || // works
+					((actionGroup.get("startTick").getAsInt() != -1 && actionGroup.get("endTick").getAsInt() == -1 && tickNum >= actionGroup.get("startTick").getAsInt()))))){ // works
 
 				JsonObject action = actionGroup.getAsJsonObject("action");
 				String type = action.get("type").getAsString();
 				switch (type) {
 					case "setBlock":
-						setBlock(worldRenderer, action);
+						setBlock(worldRenderer, action); // works
+						break;
+					case "placeBlock": // works
+						placeBlock(gui, worldRenderer, action);
 						break;
 					case "fillBlocks":
-						fillBlocks(worldRenderer, action);
+						fillBlocks(worldRenderer, action); // works
 						break;
 					case "modifyTileEntity":
-						modifyTileEntity(worldRenderer, action);
+						modifyTileEntity(worldRenderer, action); // works // actually works now
 						break;
-					case "setCamera":
+					case "setCamera": // works
 						if (action.has("pitch")) pitch = action.get("pitch").getAsFloat();
 						if (action.has("yaw")) yaw = action.get("yaw").getAsFloat();
 						if (action.has("zoom")) zoom = action.get("zoom").getAsFloat();
 						break;
-					case "addCamera":
+					case "addCamera": // works
 						if (action.has("pitch")) pitch += action.get("pitch").getAsFloat();
 						if (action.has("yaw")) yaw += action.get("yaw").getAsFloat();
 						if (action.has("zoom")) zoom += action.get("zoom").getAsFloat();
 						break;
-					case "setCenter":
+					case "setCenter": // works
 						setCenter(worldRenderer, action);
 						break;
-					case "rotateTo":
+					case "addCenter":
+						addCenter(worldRenderer, action);
+						break;
+					case "rotateTo": // work
 						rotateTo(worldRenderer, action);
 						break;
-					case "zoomTo":
+					case "zoomTo": // work
 						zoomTo(worldRenderer, action);
 						break;
-					case "moveCenterTo":
+					case "moveCenterTo": // works
 						moveCenterTo(worldRenderer, action);
 						break;
-					case "display":
+					case "display": // at least the game didnt crash // welp it did // why no render
 						display(worldRenderer, action);
 						break;
-					case "setTileEntityNBT":
+					case "setTileEntityNBT": // i dont fucking know
 						setTileEntityNBT(worldRenderer, action);
-						break;
-					case "setBackground":
-						worldRenderer.backgroundColor = Long.parseLong(action.get("color").getAsString(), 16);
 						break;
 				}
 			}
@@ -357,7 +416,7 @@ public class MigraineInstructions {
 
 		for (JsonObject overTime : active){
 			String type = overTime.get("type").getAsString();
-			int forTicks = overTime.get("forTicks").getAsInt();
+			int forTicks = overTime.get("tickLeft").getAsInt();
 			if (forTicks <= 0){
 				active.remove(overTime);
 				continue;
@@ -381,8 +440,8 @@ public class MigraineInstructions {
 					break;
 
 			}
-			overTime.remove("forTicks");
-			overTime.addProperty("forTicks", --forTicks);
+			overTime.remove("tickLeft");
+			overTime.addProperty("tickLeft", --forTicks);
 		}
 	}
 

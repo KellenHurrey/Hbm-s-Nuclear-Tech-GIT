@@ -1,8 +1,6 @@
 package com.hbm.migraine.client;
 
-import com.hbm.main.MainRegistry;
 import com.hbm.migraine.world.TrackedDummyWorld;
-import com.hbm.tileentity.machine.TileEntityMachineEPress;
 import com.hbm.util.CoordinatePacker;
 import com.hbm.util.Vector4i;
 import net.minecraft.block.Block;
@@ -30,7 +28,6 @@ import static org.lwjgl.opengl.GL11.*;
 
 public abstract class WorldSceneRenderer {
 
-	public long backgroundColor = 0xC6C6C6;
 	// you have to place blocks in the world before use
 	public final TrackedDummyWorld world;
 	// the Blocks which this renderer needs to render
@@ -180,17 +177,9 @@ public abstract class WorldSceneRenderer {
 		GLU.gluLookAt(eyePos.x, eyePos.y, eyePos.z, lookAt.x, lookAt.y, lookAt.z, worldUp.x, worldUp.y, worldUp.z);
 	}
 
-	public static void setGlClearColorFromInt(long color) {
-		float a = (float) (color >> 24 & 255) / 255.0F;
-		float r = (float) (color >> 16 & 255) / 255.0F;
-		float g = (float) (color >> 8 & 255) / 255.0F;
-		float b = (float) (color & 255) / 255.0F;
-		glClearColor(r, b, g, a);
-	}
 
 	protected void clearView(int x, int y, int width, int height) {
-		setGlClearColorFromInt(backgroundColor);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
 	public static void resetCamera() {
@@ -331,45 +320,7 @@ public abstract class WorldSceneRenderer {
 	private static final Vector3f MUT_3F = new Vector3f();
 	private static final Vector3f RESULT = new Vector3f();
 
-//	public static Vector3f unProject(Vector4i rect, Vector3f eyePos, Vector3f lookat, int mouseX, int mouseY) {
-//		int width = rect.z();
-//		int height = rect.w();
-//
-//		double aspectRatio = ((double) width / (double) height);
-//		double fov = Math.toRadians(30);
-//
-//		double a = -((double) (mouseX - rect.x()) / (double) width - 0.5) * 2;
-//		double b = -((double) (height - (mouseY - rect.y())) / (double) height - 0.5) * 2;
-//		double tanf = Math.tan(fov);
-//
-//		eyePos.sub(lookat, MUT_3F);
-//		float yawn = (float) Math.atan2(MUT_3F.x, -MUT_3F.z);
-//		float pitch = (float) Math.atan2(MUT_3F.y, Math.sqrt(MUT_3F.x * MUT_3F.x + MUT_3F.z * MUT_3F.z));
-//
-//		ROT.identity().rotate(yawn, 0, -1, 0).rotate(pitch, 1, 0, 0);
-//		RESULT.set(ROT.transformPosition(MUT_3F.set(0, 0, 1)));
-//		ROT.transformPosition(MUT_3F.set(1, 0, 0));
-//		RESULT.add(
-//			(float) (MUT_3F.x * tanf * aspectRatio * a),
-//			(float) (MUT_3F.y * tanf * aspectRatio * a),
-//			(float) (MUT_3F.z * tanf * aspectRatio * a));
-//		ROT.transformPosition(MUT_3F.set(0, 1, 0));
-//		RESULT.add((float) (MUT_3F.x * tanf * b), (float) (MUT_3F.y * tanf * b), (float) (MUT_3F.z * tanf * b));
-//		return normalize(RESULT);
-//	}
-//
-//	public static Vector3f normalize(Vector3f vec) {
-//		float length = (float) Math.sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-//
-//		vec.x /= length;
-//		vec.y /= length;
-//		vec.z /= length;
-//
-//		return vec;
-//	}
-
-
-	// CHATGPT TRANSLATE THIS CODE FROM JOML TO LWJGL
+	// actually lets not use joml
 	public static Vector3f unProject(Vector4i rect, Vector3f eyePos, Vector3f lookAt, int mouseX, int mouseY) {
 		int width = rect.z;
 		int height = rect.w;

@@ -19,20 +19,21 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import org.lwjgl.util.vector.Vector3f;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class TrackedDummyWorld extends DummyWorld {
 	public final HashMap<Long, Block> blockMap = new HashMap<>();
 	public final HashMap<Long, TileEntity> tileMap = new HashMap<>();
 	public final HashMap<Long, Integer> blockMetaMap = new HashMap<>();
 
+	public final HashMap<Long, Integer> pendingBlockTicks = new HashMap<>();
+	public final HashMap<Long, Integer> pendingTickPriority = new HashMap<>();
+
 	public final HashSet<Long> tilesToReserialize = new HashSet<>();
 
 	private final Vector3f minPos = new Vector3f(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	private final Vector3f maxPos = new Vector3f(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 	private final Vector3f size = new Vector3f();
-	private boolean hasChanged;
 
 	public final SoundHandler SoundHandler;
 
@@ -65,7 +66,6 @@ public class TrackedDummyWorld extends DummyWorld {
 			block.onBlockAdded(this, x, y, z);
 		}
 
-		hasChanged = true;
 		minPos.x = Math.min(minPos.x, x);
 		minPos.y = Math.min(minPos.y, y);
 		minPos.z = Math.min(minPos.z, z);
@@ -130,8 +130,9 @@ public class TrackedDummyWorld extends DummyWorld {
 		return tileMap.get(CoordinatePacker.pack(x, y, z));
 	}
 
-	@Override
-	public void updateEntitiesForNEI() {
+	public void update() {
+
+		// Override server to client packets (new system)
 		tilesToReserialize.forEach((Long pos) -> {
 			TileEntity tile = getTileEntity(CoordinatePacker.unpackX(pos), CoordinatePacker.unpackY(pos), CoordinatePacker.unpackZ(pos));
 			if (tile instanceof IBufPacketReceiver){
@@ -145,6 +146,8 @@ public class TrackedDummyWorld extends DummyWorld {
 			}
 		});
 		tilesToReserialize.clear();
+
+		// Update tile entities as client
 		tileMap.forEach((Long pos, TileEntity tile) -> {
 			if (tile.canUpdate()) {
 				this.isRemote = true;
@@ -153,6 +156,7 @@ public class TrackedDummyWorld extends DummyWorld {
 			}
 		});
 
+		// Update tile entities as server
 		tileMap.forEach((Long pos, TileEntity tile) -> {
 			if (tile.canUpdate()) {
 				this.isRemote = false;
@@ -162,8 +166,70 @@ public class TrackedDummyWorld extends DummyWorld {
 			}
 		});
 
+
+		// Tick scheduled updated
+
+		// Decrement counters and get blocks that should be updated now
+		List<Long> blocksToUpdate = new ArrayList<>();
+		for (Long pos : pendingBlockTicks.keySet()){
+			int tick = pendingBlockTicks.get(pos);
+			if (tick <= 0){
+				blocksToUpdate.add(pos);
+			}else{
+				pendingBlockTicks.replace(pos, --tick);
+			}
+		}
+
+		// Remove all that are being ticked now
+		blocksToUpdate.forEach(pendingBlockTicks::remove);
+
+		// Sort by tick priority
+		blocksToUpdate.sort(Comparator.comparingInt(pendingTickPriority::get)); // wow intellij is smart
+
+		// Remove tick priorities
+		blocksToUpdate.forEach(pendingTickPriority::remove);
+
+		// Actually update the blocks (as the server)
+		this.isRemote = false;
+		for (Long pos : blocksToUpdate){
+			int x = CoordinatePacker.unpackX(pos);
+			int y = CoordinatePacker.unpackY(pos);
+			int z = CoordinatePacker.unpackZ(pos);
+			getBlock(x, y, z).updateTick(this, x, y, z, this.rand);
+		}
+
+		// Tick blocks every tick, still as the server
+		blockMap.forEach((Long pos, Block block) -> {
+			if (block.getTickRandomly()){
+				block.updateTick(this, CoordinatePacker.unpackX(pos), CoordinatePacker.unpackY(pos), CoordinatePacker.unpackZ(pos), this.rand);
+			}
+		});
+		this.isRemote = true;
+
 	}
 
+	@Override
+	public void scheduleBlockUpdate(int x, int y, int z, Block block, int delay) {
+		this.scheduleBlockUpdateWithPriority(x, y, z, block, delay, 0);
+	}
+
+	@Override
+	public void scheduleBlockUpdateWithPriority(int x, int y, int z, Block block, int delay, int priority){
+		long pos = CoordinatePacker.pack(x, y, z);
+		if (!pendingBlockTicks.containsKey(pos)) {
+			pendingBlockTicks.put(pos, delay);
+			pendingTickPriority.put(pos, priority);
+		}
+	}
+
+	public void unload(){
+		tileMap.forEach((Long pos, TileEntity tile) -> tile.onChunkUnload());
+		tileMap.forEach((Long pos, TileEntity tile) -> tile.invalidate());
+		tileMap.clear();
+		blockMap.clear();
+		blockMetaMap.clear();
+
+	}
 	/**
 	 * Enable fullbright rendering
 	 */
@@ -361,12 +427,6 @@ public class TrackedDummyWorld extends DummyWorld {
 
 	private boolean isBlockTargeted(MovingObjectPosition result, HashSet<Long> targetedBlocks) {
 		return targetedBlocks.contains(CoordinatePacker.pack(result.blockX, result.blockY, result.blockZ));
-	}
-
-	public boolean hasChanged() {
-		boolean changed = hasChanged;
-		hasChanged = false;
-		return changed;
 	}
 
 	@Override

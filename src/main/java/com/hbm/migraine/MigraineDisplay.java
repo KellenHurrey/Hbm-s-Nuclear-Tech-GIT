@@ -2,9 +2,6 @@ package com.hbm.migraine;
 
 import com.hbm.lib.RefStrings;
 import com.hbm.util.I18nUtil;
-import com.hbm.wiaj.JarScene;
-import com.hbm.wiaj.WorldInAJar;
-import com.hbm.wiaj.actors.ActorFancyPanel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -13,7 +10,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -21,6 +17,7 @@ import org.lwjgl.opengl.GL12;
 import java.util.ArrayList;
 import java.util.List;
 
+/** @author hbm **/
 public class MigraineDisplay {
 	static final ResourceLocation guiUtil =  new ResourceLocation(RefStrings.MODID + ":textures/gui/gui_utility.png");
 

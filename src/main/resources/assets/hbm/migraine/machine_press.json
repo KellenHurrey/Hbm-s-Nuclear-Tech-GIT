@@ -38,86 +38,53 @@
 		{
 			"tick": 20,
 			"action": {
-				"type": "setBlock",
+				"type": "placeBlock",
 				"position": {
 					"x": 1,
 					"y": 1,
 					"z": 1
 				},
 				"modid": "hbm",
-				"name": "tile.machine_epress"
+				"name": "tile.machine_assembler",
+				"yaw": 0
 			}
 		},
 		{
 			"tick": 21,
 			"action": {
-				"type": "modifyTileEntity",
+				"type": "setTileEntityNBT",
 				"position": {
 					"x": 1,
 					"y": 1,
 					"z": 1
 				},
-				"tileEntityClass": "com.hbm.tileentity.TileEntityMachineBase",
-				"method": "setInventorySlotContents",
-				"arguments": [
-					{
-						"type": "int",
-						"value": 0
-					},
-					{
-						"type": "itemStack",
-						"modid": "hbm",
-						"name": "item.battery_creative"
-					}
-				]
+				"nbt": "{\"maxProgress\":[0,],\"x\":1,\"muffled\":0,\"y\":1,\"progress\":[0,],\"z\":1,\"id\":\"tileentity_assembly_machine\",\"power\":100000,\"items\":[{\"slot\":0,\"id\":4776,\"Count\":1,\"Damage\":0},{\"slot\":4,\"id\":4869,\"Count\":1,\"tag\":{\"meta\":0,\"count\":2,\"id\":4509},\"Damage\":0},{\"slot\":6,\"id\":265,\"Count\":64,\"Damage\":0}]}"
 			}
 		},
 		{
-			"tick": 21,
+			"tick": 30,
 			"action": {
-				"type": "modifyTileEntity",
+				"type": "display",
+				"forTicks": 20,
 				"position": {
-					"x": 1,
-					"y": 1,
-					"z": 1
+					"x": 0,
+					"y": 0
 				},
-				"tileEntityClass": "com.hbm.tileentity.TileEntityMachineBase",
-				"method": "setInventorySlotContents",
-				"arguments": [
-					{
-						"type": "int",
-						"value": 1
-					},
-					{
-						"type": "itemStack",
-						"modid": "hbm",
-						"name": "item.stamp_iron_plate"
-					}
-				]
-			}
-		},
-		{
-			"tick": 21,
-			"action": {
-				"type": "modifyTileEntity",
-				"position": {
-					"x": 1,
-					"y": 1,
-					"z": 1
-				},
-				"tileEntityClass": "com.hbm.tileentity.TileEntityMachineBase",
-				"method": "setInventorySlotContents",
-				"arguments": [
-					{
-						"type": "int",
-						"value": 2
-					},
-					{
-						"type": "itemStack",
-						"modid": "minecraft",
-						"name": "iron_ingot",
-						"stackSize": 64
-					}
+				"orientation": "CENTER",
+				"lines": [
+					[
+						{
+							"type": "string",
+							"value": "help please help im dying"
+						}
+					],
+					[
+						{
+							"type": "itemStack",
+							"modid": "hbm",
+							"name": "item.screwdriver_desh"
+						}
+					]
 				]
 			}
 		}
