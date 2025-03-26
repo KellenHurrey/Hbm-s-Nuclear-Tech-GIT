@@ -33,8 +33,6 @@ import java.util.Random;
 @Spaghetti("this whole class")
 public class Library {
 
-	static Random rand = new Random();
-
 	public static boolean checkForHeld(EntityPlayer player, Item item) {
 		if(player.getHeldItem() == null) return false;
 		return player.getHeldItem().getItem() == item;
@@ -313,7 +311,7 @@ public class Library {
 		return pos != null;
 	}
 
-	public static Block getRandomConcrete() {
+	public static Block getRandomConcrete(Random rand) {
 		int i = rand.nextInt(20);
 		if(i <= 1) return ModBlocks.brick_concrete_broken;
 		if(i <= 4) return ModBlocks.brick_concrete_cracked;

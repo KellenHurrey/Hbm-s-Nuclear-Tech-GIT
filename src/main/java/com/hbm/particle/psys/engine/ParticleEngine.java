@@ -1,7 +1,6 @@
 package com.hbm.particle.psys.engine;
 
 import java.util.List;
-import java.util.Random;
 
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
@@ -14,7 +13,6 @@ public class ParticleEngine {
 	public World world;
 	public TextureManager texman;
 	public FXLayer[] layers;
-	protected Random rand = new Random();
 	
 	public ParticleEngine(World world, TextureManager texman) {
 		this.world = world;

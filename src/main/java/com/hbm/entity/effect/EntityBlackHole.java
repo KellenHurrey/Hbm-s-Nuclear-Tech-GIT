@@ -1,7 +1,6 @@
 package com.hbm.entity.effect;
 
 import java.util.List;
-import java.util.Random;
 
 import com.hbm.entity.projectile.EntityRubble;
 import com.hbm.items.ModItems;
@@ -23,8 +22,6 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class EntityBlackHole extends Entity {
-	
-	Random rand = new Random();
 
 	public EntityBlackHole(World p_i1582_1_) {
 		super(p_i1582_1_);
@@ -46,8 +43,8 @@ public class EntityBlackHole extends Entity {
 		
 		if(!worldObj.isRemote) {
 			for(int k = 0; k < size * 2; k++) {
-				double phi = rand.nextDouble() * (Math.PI * 2);
-				double costheta = rand.nextDouble() * 2 - 1;
+				double phi = worldObj.rand.nextDouble() * (Math.PI * 2);
+				double costheta = worldObj.rand.nextDouble() * 2 - 1;
 				double theta = Math.acos(costheta);
 				double x = Math.sin( theta) * Math.cos( phi );
 				double y = Math.sin( theta) * Math.sin( phi );

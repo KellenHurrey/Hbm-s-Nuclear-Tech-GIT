@@ -1,7 +1,6 @@
 package com.hbm.blocks.fluid;
 
 import java.util.List;
-import java.util.Random;
 
 import com.hbm.lib.RefStrings;
 import com.hbm.main.MainRegistry;
@@ -26,7 +25,6 @@ public class GenericFluidBlock extends BlockFluidClassic {
 	public static IIcon stillIcon;
 	@SideOnly(Side.CLIENT)
 	public static IIcon flowingIcon;
-	public Random rand = new Random();
 	
 	private String stillName;
 	private String flowingName;

@@ -1,7 +1,6 @@
 package com.hbm.items.weapon;
 
 import java.util.List;
-import java.util.Random;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.config.BombConfig;
@@ -50,8 +49,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 
 public class ItemAmmoArty extends Item {
-	
-	public static Random rand = new Random();
+
 	public static ArtilleryShell[] itemTypes =	new ArtilleryShell[ /* >>> */ 12 /* <<< */ ];
 	/* item types */
 	public final int NORMAL = 0;
@@ -232,9 +230,9 @@ public class ItemAmmoArty extends Item {
 		for(int i = 0; i < amount; i++) {
 			EntityArtilleryShell cluster = new EntityArtilleryShell(shell.worldObj);
 			cluster.setType(clusterType);
-			cluster.motionX = i == 0 ? shell.motionX : (shell.motionX + rand.nextGaussian() * deviation);
+			cluster.motionX = i == 0 ? shell.motionX : (shell.motionX + shell.worldObj.rand.nextGaussian() * deviation);
 			cluster.motionY = shell.motionY;
-			cluster.motionZ = i == 0 ? shell.motionZ : (shell.motionZ + rand.nextGaussian() * deviation);
+			cluster.motionZ = i == 0 ? shell.motionZ : (shell.motionZ + shell.worldObj.rand.nextGaussian() * deviation);
 			cluster.setPositionAndRotation(shell.posX, shell.posY, shell.posZ, shell.rotationYaw, shell.rotationPitch);
 			double[] target = shell.getTarget();
 			cluster.setTarget(target[0], target[1], target[2]);
@@ -270,7 +268,7 @@ public class ItemAmmoArty extends Item {
 		/* PHOSPHORUS */
 		this.itemTypes[PHOSPHORUS] = new ArtilleryShell("ammo_arty_phosphorus", SpentCasing.COLOR_CASE_16INCH_PHOS) {
 			public void onImpact(EntityArtilleryShell shell, MovingObjectPosition mop) {
-				shell.worldObj.playSoundEffect(shell.posX, shell.posY, shell.posZ, "hbm:weapon.explosionMedium", 20.0F, 0.9F + rand.nextFloat() * 0.2F);
+				shell.worldObj.playSoundEffect(shell.posX, shell.posY, shell.posZ, "hbm:weapon.explosionMedium", 20.0F, 0.9F + shell.worldObj.rand.nextFloat() * 0.2F);
 				standardExplosion(shell, mop, 10F, 3F, false);
 				//shell.worldObj.playSoundEffect(shell.posX, shell.posY, shell.posZ, "hbm:weapon.explosionMedium", 20.0F, 0.9F + shell.worldObj.rand.nextFloat() * 0.2F);
 				ExplosionLarge.spawnShrapnels(shell.worldObj, (int) mop.hitVec.xCoord, (int) mop.hitVec.yCoord, (int) mop.hitVec.zCoord, 15);
@@ -330,8 +328,8 @@ public class ItemAmmoArty extends Item {
 					double x = mop.hitVec.xCoord - vec.xCoord;
 					double z = mop.hitVec.zCoord - vec.zCoord;
 					if(i > 0) {
-						x += rand.nextGaussian() * 15;
-						z += rand.nextGaussian() * 15;
+						x += shell.worldObj.rand.nextGaussian() * 15;
+						z += shell.worldObj.rand.nextGaussian() * 15;
 					}
 					mist.setPosition(x, mop.hitVec.yCoord - vec.yCoord - 5, z);
 					mist.setArea(15, 10);
@@ -352,8 +350,8 @@ public class ItemAmmoArty extends Item {
 					double x = mop.hitVec.xCoord - vec.xCoord;
 					double z = mop.hitVec.zCoord - vec.zCoord;
 					if(i > 0) {
-						x += rand.nextGaussian() * 25;
-						z += rand.nextGaussian() * 25;
+						x += shell.worldObj.rand.nextGaussian() * 25;
+						z += shell.worldObj.rand.nextGaussian() * 25;
 					}
 					mist.setPosition(x, mop.hitVec.yCoord - vec.yCoord - 5, z);
 					mist.setArea(20, 10);

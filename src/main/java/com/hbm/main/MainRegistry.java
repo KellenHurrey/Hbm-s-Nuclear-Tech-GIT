@@ -80,12 +80,10 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
-import net.minecraftforge.common.AchievementPage;
-import net.minecraftforge.common.ChestGenHooks;
-import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraft.world.WorldProviderSurface;
+import net.minecraftforge.common.*;
 import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.util.EnumHelper;
 
@@ -240,6 +238,8 @@ public class MainRegistry {
 
 	public static int generalOverride = 0;
 	public static int polaroidID = 1;
+
+	public static int MigraineWorldId;
 
 	public static long startupTime = 0;
 	public static File configDir;
@@ -657,6 +657,10 @@ public class MainRegistry {
 				}
 			}
 		});
+
+		MigraineWorldId = DimensionManager.getNextFreeDimId();
+		DimensionManager.registerProviderType(MigraineWorldId, WorldProviderSurface.class, false);
+		DimensionManager.registerDimension(MigraineWorldId, MigraineWorldId);
 	}
 
 	@EventHandler

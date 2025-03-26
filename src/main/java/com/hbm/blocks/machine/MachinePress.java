@@ -1,7 +1,5 @@
 package com.hbm.blocks.machine;
 
-import java.util.Random;
-
 import com.hbm.main.MainRegistry;
 import com.hbm.tileentity.machine.TileEntityMachinePress;
 import cpw.mods.fml.common.network.internal.FMLNetworkHandler;
@@ -16,8 +14,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 public class MachinePress extends BlockContainer {
-	
-	private final Random field_149933_a = new Random();
+
 	private static boolean keepInventory;
 
 	public MachinePress(Material p_i45386_1_) {
@@ -54,12 +51,12 @@ public class MachinePress extends BlockContainer {
 					ItemStack itemstack = tileentityfurnace.getStackInSlot(i1);
 
 					if(itemstack != null) {
-						float f = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-						float f1 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-						float f2 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
+						float f = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
+						float f1 = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
+						float f2 = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
 
 						while(itemstack.stackSize > 0) {
-							int j1 = this.field_149933_a.nextInt(21) + 10;
+							int j1 = p_149749_1_.rand.nextInt(21) + 10;
 
 							if(j1 > itemstack.stackSize) {
 								j1 = itemstack.stackSize;
@@ -73,9 +70,9 @@ public class MachinePress extends BlockContainer {
 							}
 
 							float f3 = 0.05F;
-							entityitem.motionX = (float) this.field_149933_a.nextGaussian() * f3;
-							entityitem.motionY = (float) this.field_149933_a.nextGaussian() * f3 + 0.2F;
-							entityitem.motionZ = (float) this.field_149933_a.nextGaussian() * f3;
+							entityitem.motionX = (float) p_149749_1_.rand.nextGaussian() * f3;
+							entityitem.motionY = (float) p_149749_1_.rand.nextGaussian() * f3 + 0.2F;
+							entityitem.motionZ = (float) p_149749_1_.rand.nextGaussian() * f3;
 							p_149749_1_.spawnEntityInWorld(entityitem);
 						}
 					}

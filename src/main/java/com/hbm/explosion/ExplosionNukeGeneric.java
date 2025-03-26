@@ -1,7 +1,6 @@
 package com.hbm.explosion;
 
 import java.util.List;
-import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
@@ -36,8 +35,6 @@ import cofh.api.energy.IEnergyProvider;
 
 @Spaghetti("this sucks ass")
 public class ExplosionNukeGeneric {
-
-	private final static Random random = new Random();
 
 	public static void empBlast(World world, int x, int y, int z, int bombStartStrength) {
 		int r = bombStartStrength;
@@ -148,13 +145,13 @@ public class ExplosionNukeGeneric {
 				//blocks to be spared
 				int protection = (int)(b.getExplosionResistance(null)/300f);
 				if (b == ModBlocks.brick_concrete) {
-					rand = random.nextInt(8);
+					rand = world.rand.nextInt(8);
 					if (rand == 0) {
 						world.setBlock(x, y, z, Blocks.gravel, 0, 3);
 						return 0;
 					}
 				} else if (b == ModBlocks.brick_light) {
-					rand = random.nextInt(3);
+					rand = world.rand.nextInt(3);
 					if (rand == 0) {
 						world.setBlock(x, y, z, ModBlocks.waste_planks, 0, 3);
 						return 0;
@@ -163,14 +160,14 @@ public class ExplosionNukeGeneric {
 						return 0;
 					}
 				} else if (b == ModBlocks.brick_obsidian) {
-					rand = random.nextInt(20);
+					rand = world.rand.nextInt(20);
 					if (rand == 0) {
 						world.setBlock(x, y, z, Blocks.obsidian, 0, 3);
 					}
 				} else if (b == Blocks.obsidian) {
 					world.setBlock(x, y, z, ModBlocks.gravel_obsidian, 0, 3);
 					return 0;
-				} else if(random.nextInt(protection+3)==0){
+				} else if(world.rand.nextInt(protection+3)==0){
 					world.setBlock(x, y, z, ModBlocks.block_scrap,0,3);
 				}
 				return protection;
@@ -245,7 +242,7 @@ public class ExplosionNukeGeneric {
 			}
 
 			else if (b == Blocks.sand) {
-				rand = random.nextInt(20);
+				rand = world.rand.nextInt(20);
 				if (rand == 1 && world.getBlockMetadata(x, y, z) == 0) {
 					world.setBlock(x, y, z, ModBlocks.waste_trinitite);
 				}
@@ -263,7 +260,7 @@ public class ExplosionNukeGeneric {
 			}
 
 			else if (b == Blocks.coal_ore) {
-				rand = random.nextInt(10);
+				rand = world.rand.nextInt(10);
 				if (rand == 1 || rand == 2 || rand == 3) {
 					world.setBlock(x, y, z, Blocks.diamond_ore);
 				}
@@ -297,7 +294,7 @@ public class ExplosionNukeGeneric {
 			}
 
 			else if (b == ModBlocks.ore_uranium) {
-				rand = random.nextInt(VersatileConfig.getSchrabOreChance());
+				rand = world.rand.nextInt(VersatileConfig.getSchrabOreChance());
 				if (rand == 1) {
 					world.setBlock(x, y, z, ModBlocks.ore_schrabidium);
 				} else {
@@ -306,7 +303,7 @@ public class ExplosionNukeGeneric {
 			}
 
 			else if (b == ModBlocks.ore_nether_uranium) {
-				rand = random.nextInt(VersatileConfig.getSchrabOreChance());
+				rand = world.rand.nextInt(VersatileConfig.getSchrabOreChance());
 				if (rand == 1) {
 					world.setBlock(x, y, z, ModBlocks.ore_nether_schrabidium);
 				} else {
@@ -315,7 +312,7 @@ public class ExplosionNukeGeneric {
 			}
 
 			else if (b == ModBlocks.ore_gneiss_uranium) {
-				rand = random.nextInt(VersatileConfig.getSchrabOreChance());
+				rand = world.rand.nextInt(VersatileConfig.getSchrabOreChance());
 				if (rand == 1) {
 					world.setBlock(x, y, z, ModBlocks.ore_gneiss_schrabidium);
 				} else {
@@ -367,7 +364,7 @@ public class ExplosionNukeGeneric {
 			}
 
 			else if (world.getBlock(x, y, z) == Blocks.sand) {
-				rand = random.nextInt(20);
+				rand = world.rand.nextInt(20);
 				if (rand == 1 && world.getBlockMetadata(x, y, z) == 0) {
 					world.setBlock(x, y, z, ModBlocks.waste_trinitite);
 				}
@@ -385,7 +382,7 @@ public class ExplosionNukeGeneric {
 			}
 
 			else if (world.getBlock(x, y, z) == Blocks.coal_ore) {
-				rand = random.nextInt(30);
+				rand = world.rand.nextInt(30);
 				if (rand == 1 || rand == 2 || rand == 3) {
 					world.setBlock(x, y, z, Blocks.diamond_ore);
 				}
@@ -428,7 +425,7 @@ public class ExplosionNukeGeneric {
 			
 			if (te != null && te instanceof IEnergyHandlerMK2) {
 				((IEnergyHandlerMK2)te).setPower(0);
-				if(random.nextInt(5) < 1) world.setBlock(x, y, z, ModBlocks.block_electrical_scrap);
+				if(world.rand.nextInt(5) < 1) world.setBlock(x, y, z, ModBlocks.block_electrical_scrap);
 			}
 			if (te != null && te instanceof IEnergyProvider) {
 
@@ -439,10 +436,10 @@ public class ExplosionNukeGeneric {
 				((IEnergyProvider)te).extractEnergy(ForgeDirection.EAST, ((IEnergyProvider)te).getEnergyStored(ForgeDirection.EAST), false);
 				((IEnergyProvider)te).extractEnergy(ForgeDirection.WEST, ((IEnergyProvider)te).getEnergyStored(ForgeDirection.WEST), false);
 				
-				if(random.nextInt(5) <= 1)
+				if(world.rand.nextInt(5) <= 1)
 					world.setBlock(x, y, z, ModBlocks.block_electrical_scrap);
 			}
-			if((b == ModBlocks.fusion_conductor || b == ModBlocks.fusion_motor || b == ModBlocks.fusion_heater) && random.nextInt(10) == 0)
+			if((b == ModBlocks.fusion_conductor || b == ModBlocks.fusion_motor || b == ModBlocks.fusion_heater) && world.rand.nextInt(10) == 0)
 				world.setBlock(x, y, z, ModBlocks.block_electrical_scrap);
 		}
 	}

@@ -10,12 +10,12 @@ import org.lwjgl.opengl.GL11;
 @SideOnly(Side.CLIENT)
 public class ImmediateWorldSceneRenderer extends WorldSceneRenderer {
 
-	public ImmediateWorldSceneRenderer(TrackedDummyWorld world) {
-		super(world);
+	public ImmediateWorldSceneRenderer(TrackedDummyWorld world, ClientFakePlayer player) {
+		super(world, player);
 	}
 
 	@Override
-	public void render(int x, int y, int width, int height, int mouseX, int mouseY) {
+	public void render(int x, int y, int width, int height, int mouseX, int mouseY, float partialTicks) {
 		Minecraft mc = Minecraft.getMinecraft();
 		ScaledResolution resolution = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
 		// compute window size from scaled width & height
@@ -26,7 +26,7 @@ public class ImmediateWorldSceneRenderer extends WorldSceneRenderer {
 		int windowY = mc.displayHeight - getScaledY(mc, resolution, y) - windowHeight;
 		int windowMouseX = getScaledX(mc, resolution, mouseX);
 		int windowMouseY = mc.displayHeight - getScaledY(mc, resolution, mouseY);
-		super.render(windowX, windowY, windowWidth, windowHeight, windowMouseX, windowMouseY);
+		super.render(windowX, windowY, windowWidth, windowHeight, windowMouseX, windowMouseY, partialTicks);
 	}
 
 	private int getScaledX(Minecraft mc, ScaledResolution res, int x) {

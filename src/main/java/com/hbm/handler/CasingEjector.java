@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 public class CasingEjector implements Cloneable {
 	
 	public static HashMap<Integer, CasingEjector> mappings = new HashMap<Integer, CasingEjector>();
-	public static final Random rand = new Random();
+	public static Random rand = new Random();
 
 	private int id;
 	private static int nextId = 0;
@@ -93,6 +93,7 @@ public class CasingEjector implements Cloneable {
 
 	@SideOnly(Side.CLIENT)
 	public void spawnCasing(TextureManager textureManager, SpentCasing config, World world, double x, double y, double z, float pitch, float yaw, boolean crouched) {
+		rand = world.rand;
 		Vec3 rotatedMotionVec = rotateVector(getMotion(), pitch + (float) rand.nextGaussian() * getPitchFactor(), yaw + (float) rand.nextGaussian() * getPitchFactor(), getPitchFactor(), getPitchFactor());
 		ParticleSpentCasing casing = new ParticleSpentCasing(textureManager, world, x, y, z, rotatedMotionVec.xCoord, rotatedMotionVec.yCoord, rotatedMotionVec.zCoord, (float) (world.rand.nextGaussian() * 5F), (float) (world.rand.nextGaussian() * 10F), config, false, 0, 0, 0);
 

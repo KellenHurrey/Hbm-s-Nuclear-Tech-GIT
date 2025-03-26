@@ -1,14 +1,10 @@
 package com.hbm.blocks.turret;
 
-import java.util.Random;
-
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
 
 public abstract class TurretBase extends BlockContainer {
-	
-	Random rand = new Random();
 
 	public TurretBase(Material mat) {
 		super(mat);

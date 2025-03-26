@@ -19,7 +19,7 @@ public class Sellafield {
 		if(world.isRemote)
 			return;
 		
-		Random rand = new Random();
+		Random rand = world.rand;
 		
 		int iRad = (int)Math.round(radius);
 		

@@ -130,23 +130,22 @@ public class CompactLauncher extends BlockContainer implements IMultiblock, IBom
 		return BombReturnCode.ERROR_MISSING_COMPONENT;
 	}
 
-	private final Random field_149933_a = new Random();
-
 	@Override
 	public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_) {
 		ISidedInventory tileentityfurnace = (ISidedInventory) p_149749_1_.getTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
 
 		if(tileentityfurnace != null) {
+			Random field_149933_a = p_149749_1_.rand;
 			for(int i1 = 0; i1 < tileentityfurnace.getSizeInventory(); ++i1) {
 				ItemStack itemstack = tileentityfurnace.getStackInSlot(i1);
 
 				if(itemstack != null) {
-					float f = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-					float f1 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-					float f2 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
+					float f = field_149933_a.nextFloat() * 0.8F + 0.1F;
+					float f1 = field_149933_a.nextFloat() * 0.8F + 0.1F;
+					float f2 = field_149933_a.nextFloat() * 0.8F + 0.1F;
 
 					while(itemstack.stackSize > 0) {
-						int j1 = this.field_149933_a.nextInt(21) + 10;
+						int j1 = field_149933_a.nextInt(21) + 10;
 
 						if(j1 > itemstack.stackSize) {
 							j1 = itemstack.stackSize;
@@ -160,9 +159,9 @@ public class CompactLauncher extends BlockContainer implements IMultiblock, IBom
 						}
 
 						float f3 = 0.05F;
-						entityitem.motionX = (float) this.field_149933_a.nextGaussian() * f3;
-						entityitem.motionY = (float) this.field_149933_a.nextGaussian() * f3 + 0.2F;
-						entityitem.motionZ = (float) this.field_149933_a.nextGaussian() * f3;
+						entityitem.motionX = (float) field_149933_a.nextGaussian() * f3;
+						entityitem.motionY = (float) field_149933_a.nextGaussian() * f3 + 0.2F;
+						entityitem.motionZ = (float) field_149933_a.nextGaussian() * f3;
 						p_149749_1_.spawnEntityInWorld(entityitem);
 					}
 				}

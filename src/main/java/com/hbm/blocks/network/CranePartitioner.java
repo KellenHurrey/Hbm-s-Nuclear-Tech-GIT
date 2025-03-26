@@ -202,29 +202,28 @@ public class CranePartitioner extends BlockContainer implements IConveyorBelt, I
 		this.addStandardInfo(stack, player, list, ext);
 	}
 
-	private final Random dropRandom = new Random();
-
 	@Override
 	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
 		TileEntity tile = world.getTileEntity(x, y, z);
 		if(tile instanceof IInventory) {
+			Random dropRandom = world.rand;
 			IInventory battery = (IInventory) tile;
 			for(int i = 0; i < battery.getSizeInventory(); ++i) {
 				ItemStack itemstack = battery.getStackInSlot(i);
 				if(itemstack != null) {
-					float f = this.dropRandom.nextFloat() * 0.8F + 0.1F;
-					float f1 = this.dropRandom.nextFloat() * 0.8F + 0.1F;
-					float f2 = this.dropRandom.nextFloat() * 0.8F + 0.1F;
+					float f = dropRandom.nextFloat() * 0.8F + 0.1F;
+					float f1 = dropRandom.nextFloat() * 0.8F + 0.1F;
+					float f2 = dropRandom.nextFloat() * 0.8F + 0.1F;
 					while(itemstack.stackSize > 0) {
-						int j1 = this.dropRandom.nextInt(21) + 10;
+						int j1 = dropRandom.nextInt(21) + 10;
 						if(j1 > itemstack.stackSize) j1 = itemstack.stackSize;
 						itemstack.stackSize -= j1;
 						EntityItem entityitem = new EntityItem(world, x + f, y + f1, z + f2, new ItemStack(itemstack.getItem(), j1, itemstack.getItemDamage()));
 						if(itemstack.hasTagCompound()) entityitem.getEntityItem().setTagCompound((NBTTagCompound) itemstack.getTagCompound().copy());
 						float f3 = 0.05F;
-						entityitem.motionX = (float) this.dropRandom.nextGaussian() * f3;
-						entityitem.motionY = (float) this.dropRandom.nextGaussian() * f3 + 0.2F;
-						entityitem.motionZ = (float) this.dropRandom.nextGaussian() * f3;
+						entityitem.motionX = (float) dropRandom.nextGaussian() * f3;
+						entityitem.motionY = (float) dropRandom.nextGaussian() * f3 + 0.2F;
+						entityitem.motionZ = (float) dropRandom.nextGaussian() * f3;
 						world.spawnEntityInWorld(entityitem);
 					}
 				}

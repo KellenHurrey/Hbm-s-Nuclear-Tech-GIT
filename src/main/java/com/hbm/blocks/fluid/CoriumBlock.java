@@ -28,7 +28,6 @@ public class CoriumBlock extends BlockFluidClassic {
 	public static IIcon stillIcon;
 	@SideOnly(Side.CLIENT)
 	public static IIcon flowingIcon;
-	public Random rand = new Random();
 
 	public CoriumBlock(Fluid fluid, Material material) {
 		super(fluid, material);
@@ -60,7 +59,7 @@ public class CoriumBlock extends BlockFluidClassic {
 		
 		if(res < 1)
 			return true;
-		Random rand = new Random();
+		Random rand = world instanceof World ? ((World) world).rand : new Random();
 		
 		return b.getMaterial().isLiquid() || rand.nextInt((int) (res * res)) == 0;
 	}

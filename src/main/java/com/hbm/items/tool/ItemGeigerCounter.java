@@ -2,7 +2,6 @@ package com.hbm.items.tool;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import com.hbm.extprop.HbmLivingProps;
 import com.hbm.handler.radiation.ChunkRadiationManager;
@@ -17,8 +16,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
 public class ItemGeigerCounter extends Item {
-	
-	Random rand = new Random();
 
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int i, boolean bool) {
@@ -41,12 +38,12 @@ public class ItemGeigerCounter extends Item {
 				if(x > 20 && x < 30) list.add(5);
 				if(x > 25) list.add(6);
 			
-				int r = list.get(rand.nextInt(list.size()));
+				int r = list.get(world.rand.nextInt(list.size()));
 				
 				if(r > 0)
 					world.playSoundAtEntity(entity, "hbm:item.geiger" + r, 1.0F, 1.0F);
-			} else if(rand.nextInt(50) == 0) {
-				world.playSoundAtEntity(entity, "hbm:item.geiger"+ (1 + rand.nextInt(1)), 1.0F, 1.0F);
+			} else if(world.rand.nextInt(50) == 0) {
+				world.playSoundAtEntity(entity, "hbm:item.geiger"+ (1 + world.rand.nextInt(1)), 1.0F, 1.0F);
 			}
 		}
 	}

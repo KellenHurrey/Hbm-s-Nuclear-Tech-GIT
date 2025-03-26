@@ -108,7 +108,7 @@ public class ModEventHandlerImpact {
 					}
 				}
 				if(event.entityLiving instanceof EntityWaterMob) {
-					Random rand = new Random();
+					Random rand = event.world.rand;
 					if(rand.nextInt(5) != 0) {
 						event.setResult(Result.DENY);
 						event.entityLiving.setDead();

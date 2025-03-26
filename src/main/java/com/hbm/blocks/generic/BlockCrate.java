@@ -140,7 +140,7 @@ public class BlockCrate extends BlockFalling {
 	}
 
 	public void dropItems(World world, int x, int y, int z) {
-		Random rand = new Random();
+		Random rand = world.rand;
 
 		setDrops();
 

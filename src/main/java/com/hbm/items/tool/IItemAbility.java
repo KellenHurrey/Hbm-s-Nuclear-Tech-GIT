@@ -114,7 +114,7 @@ public interface IItemAbility {
 		IShearable target = (IShearable) block;
 		if(target.isShearable(held, player.worldObj, x, y, z)) {
 			ArrayList<ItemStack> drops = target.onSheared(held, player.worldObj, x, y, z, EnchantmentHelper.getEnchantmentLevel(Enchantment.fortune.effectId, held));
-			Random rand = new Random();
+			Random rand = world.rand;
 
 			for(ItemStack stack : drops) {
 				float f = 0.7F;

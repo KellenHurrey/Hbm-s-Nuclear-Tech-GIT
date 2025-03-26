@@ -1,7 +1,5 @@
 package com.hbm.explosion;
 
-import java.util.Random;
-
 import com.hbm.blocks.ModBlocks;
 
 import net.minecraft.block.Block;
@@ -9,8 +7,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
 public class NukeEnvironmentalEffect {
-	
-	static Random rand = new Random();
 	
 	/**
 	 * Area of effect radiation effect. j > 0 for jagged edges of the spherical area. Args: world, x, y, z, radius, outer radius with random chance.
@@ -29,7 +25,7 @@ public class NukeEnvironmentalEffect {
 				for (int zz = -r; zz < r; zz++) {
 					int Z = zz + z;
 					int ZZ = YY + zz * zz;
-					if (ZZ < r22 + rand.nextInt(j)) {
+					if (ZZ < r22 + world.rand.nextInt(j)) {
 						applyStandardEffect(world, X, Y, Z);
 					}
 				}
@@ -108,7 +104,7 @@ public class NukeEnvironmentalEffect {
 			chance = 100;
 		}
 		
-		if(b != null && rand.nextInt(1000) < chance)
+		if(b != null && world.rand.nextInt(1000) < chance)
 			world.setBlock(x, y, z, b, meta, 2);
 	}
 

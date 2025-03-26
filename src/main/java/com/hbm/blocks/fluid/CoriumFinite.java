@@ -33,7 +33,7 @@ public class CoriumFinite extends GenericFiniteFluid {
 		
 		if(res < 1)
 			return true;
-		Random rand = new Random();
+		Random rand = world instanceof World ? ((World) world).rand : new Random();
 		
 		return b.getMaterial().isLiquid() || rand.nextInt((int) res) == 0;
 	}

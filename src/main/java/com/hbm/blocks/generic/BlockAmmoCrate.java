@@ -53,7 +53,7 @@ public class BlockAmmoCrate extends Block {
 		return false;
 	}
 	
-	Random rand = new Random();
+	Random rand;
 	
 	public void dropContents(World world, int x, int y, int z) {
 		ArrayList<ItemStack> items = getContents(world, x, y, z);
@@ -64,7 +64,7 @@ public class BlockAmmoCrate extends Block {
 	}
 	
 	public ArrayList<ItemStack> getContents(World world, int x, int y, int z) {
-	
+		rand = world.rand;
 		ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
 			
 		ret.add(new ItemStack(ModItems.cap_nuka, 12 + rand.nextInt(21)));

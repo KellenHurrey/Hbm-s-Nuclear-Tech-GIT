@@ -10,7 +10,6 @@ import com.hbm.config.MobConfig;
 import com.hbm.config.RadiationConfig;
 import com.hbm.entity.mob.*;
 import com.hbm.entity.mob.ai.EntityAIFireGun;
-import com.hbm.entity.mob.EntityCreeperTainted;
 import com.hbm.entity.projectile.EntityBulletBaseMK4;
 import com.hbm.entity.projectile.EntityBurningFOEQ;
 import com.hbm.entity.train.EntityRailCarBase;
@@ -39,6 +38,7 @@ import com.hbm.items.weapon.sedna.ItemGunBaseNT;
 import com.hbm.items.weapon.sedna.factory.XFactory12ga;
 import com.hbm.lib.ModDamageSource;
 import com.hbm.lib.RefStrings;
+import com.hbm.migraine.world.DummyMinecraftServer;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.packet.toclient.PermaSyncPacket;
 import com.hbm.packet.toclient.PlayerInformPacket;
@@ -93,6 +93,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
@@ -123,8 +124,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public class ModEventHandler {
-
-	private static Random rand = new Random();
 
 	@SubscribeEvent
 	public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -355,47 +354,47 @@ public class ModEventHandler {
 			return;
 
 		if(entity instanceof EntityZombie) {
-			if(rand.nextInt(64) == 0) {
+			if(event.world.rand.nextInt(64) == 0) {
 				ItemStack mask = new ItemStack(ModItems.gas_mask_m65);
 				ArmorUtil.installGasMaskFilter(mask, new ItemStack(ModItems.gas_mask_filter));
 				entity.setCurrentItemOrArmor(4, mask);
 			}
-			if(rand.nextInt(128) == 0) {
+			if(event.world.rand.nextInt(128) == 0) {
 				ItemStack mask = new ItemStack(ModItems.gas_mask_olde);
 				ArmorUtil.installGasMaskFilter(mask, new ItemStack(ModItems.gas_mask_filter));
 				entity.setCurrentItemOrArmor(4, mask);
 			}
-			if(rand.nextInt(256) == 0)
+			if(event.world.rand.nextInt(256) == 0)
 				entity.setCurrentItemOrArmor(4, new ItemStack(ModItems.mask_of_infamy, 1, world.rand.nextInt(100)));
-			if(rand.nextInt(1024) == 0)
+			if(event.world.rand.nextInt(1024) == 0)
 				entity.setCurrentItemOrArmor(3, new ItemStack(ModItems.starmetal_plate, 1, world.rand.nextInt(ModItems.starmetal_plate.getMaxDamage())));
 
-			if(rand.nextInt(128) == 0)
+			if(event.world.rand.nextInt(128) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.pipe_lead, 1, world.rand.nextInt(100)));
-			if(rand.nextInt(128) == 0)
+			if(event.world.rand.nextInt(128) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.reer_graar, 1, world.rand.nextInt(100)));
-			if(rand.nextInt(128) == 0)
+			if(event.world.rand.nextInt(128) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.pipe_rusty, 1, world.rand.nextInt(100)));
-			if(rand.nextInt(128) == 0)
+			if(event.world.rand.nextInt(128) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.crowbar, 1, world.rand.nextInt(100)));
-			if(rand.nextInt(128) == 0)
+			if(event.world.rand.nextInt(128) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.geiger_counter, 1));
-			if(rand.nextInt(128) == 0)
+			if(event.world.rand.nextInt(128) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.steel_pickaxe, 1, world.rand.nextInt(300)));
-			if(rand.nextInt(512) == 0)
+			if(event.world.rand.nextInt(512) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.stopsign));
-			if(rand.nextInt(512) == 0)
+			if(event.world.rand.nextInt(512) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.sopsign));
-			if(rand.nextInt(512) == 0)
+			if(event.world.rand.nextInt(512) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.chernobylsign));
 		}
 		if(entity instanceof EntitySkeleton) {
-			if(rand.nextInt(16) == 0) {
+			if(event.world.rand.nextInt(16) == 0) {
 				ItemStack mask = new ItemStack(ModItems.gas_mask_m65);
 				ArmorUtil.installGasMaskFilter(mask, new ItemStack(ModItems.gas_mask_filter));
 				entity.setCurrentItemOrArmor(4, mask);
 			}
-			if(rand.nextInt(64) == 0)
+			if(event.world.rand.nextInt(64) == 0)
 				entity.setCurrentItemOrArmor(3, new ItemStack(ModItems.steel_plate, 1, world.rand.nextInt(ModItems.steel_plate.getMaxDamage())));
 
 			float soot = PollutionHandler.getPollution(entity.worldObj, MathHelper.floor_double(event.x), MathHelper.floor_double(event.y), MathHelper.floor_double(event.z), PollutionType.SOOT);
@@ -584,7 +583,7 @@ public class ModEventHandler {
 					if(((EntityPlayer) player).ridingEntity != null) { didSit = true; }
 				}
 				if(didSit && event.world.getTotalWorldTime() % (1 * 20 * 20) == 0) {
-					try { reference.setFloat(null, (float) (rand.nextGaussian() * 0.1 + Math.PI)); } catch(Throwable e) { }
+					try { reference.setFloat(null, (float) (event.world.rand.nextGaussian() * 0.1 + Math.PI)); } catch(Throwable e) { }
 				}
 			}
 
@@ -1028,6 +1027,22 @@ public class ModEventHandler {
 		}
 	}
 
+	private MinecraftServer prevServer;
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public void onPlayerTickFirst(TickEvent.PlayerTickEvent event){
+		// Getting an nei crash where the super constructor of DummyMinecraftServer sets itself to the static variable mcServer, and before i can init the configuration manager nei calls it and throws NPE, so lets just set it back to the original ms. Oh what i would do for mixins
+
+		MinecraftServer server = MinecraftServer.getServer();
+		if (server instanceof DummyMinecraftServer){
+			if (prevServer != null){
+				MinecraftServer.mcServer = prevServer;
+			} // else shit
+		}else{
+			prevServer = server;
+		}
+	}
+
+
 	@SubscribeEvent
 	public void onPlayerTick(TickEvent.PlayerTickEvent event) {
 
@@ -1122,9 +1137,9 @@ public class ModEventHandler {
 
 			if(player.getUniqueID().toString().equals(ShadyUtil.Pu_238)) {
 
-				Vec3 vec = Vec3.createVectorHelper(3 * rand.nextDouble(), 0, 0);
-				vec.rotateAroundZ((float) (rand.nextDouble() * Math.PI));
-				vec.rotateAroundY((float) (rand.nextDouble() * Math.PI * 2));
+				Vec3 vec = Vec3.createVectorHelper(3 * player.worldObj.rand.nextDouble(), 0, 0);
+				vec.rotateAroundZ((float) (player.worldObj.rand.nextDouble() * Math.PI));
+				vec.rotateAroundY((float) (player.worldObj.rand.nextDouble() * Math.PI * 2));
 				player.worldObj.spawnParticle("townaura", player.posX + vec.xCoord, player.posY + 1 + vec.yCoord, player.posZ + vec.zCoord, 0.0, 0.0, 0.0);
 			}
 		}
@@ -1462,7 +1477,7 @@ public class ModEventHandler {
 
 			if(stack.hasTagCompound() && stack.getTagCompound().getBoolean("ntmCyanide")) {
 				for(int i = 0; i < 10; i++) {
-					event.entityPlayer.attackEntityFrom(rand.nextBoolean() ? ModDamageSource.euthanizedSelf : ModDamageSource.euthanizedSelf2, 1000);
+					event.entityPlayer.attackEntityFrom(event.entityPlayer.worldObj.rand.nextBoolean() ? ModDamageSource.euthanizedSelf : ModDamageSource.euthanizedSelf2, 1000);
 				}
 			}
 		}

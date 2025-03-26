@@ -27,7 +27,6 @@ import java.util.Random;
 public class FalloutConfigJSON {
 	
 	public static final List<FalloutEntry> entries = new ArrayList();
-	public static Random rand = new Random();
 
 	public static final Gson gson = new Gson();
 	
@@ -216,7 +215,7 @@ public class FalloutConfigJSON {
 			if(matchesOpaque && !b.isOpaqueCube()) return false;
 			if(dist > maxDist * falloffStart && Math.abs(world.rand.nextGaussian()) < Math.pow((dist - maxDist * falloffStart) / (maxDist - maxDist * falloffStart), 2D) * 3D) return false;
 
-			MetaBlock conversion = chooseRandomOutcome((primaryChance == 1D || rand.nextDouble() < primaryChance) ? primaryBlocks : secondaryBlocks);
+			MetaBlock conversion = chooseRandomOutcome((primaryChance == 1D || world.rand.nextDouble() < primaryChance) ? primaryBlocks : secondaryBlocks, world.rand);
 			
 			if(conversion != null) {
 				if(conversion.block == ModBlocks.sellafield_slaked && originalBlock == ModBlocks.sellafield_slaked && conversion.meta <= originalMeta) return false;
@@ -231,7 +230,7 @@ public class FalloutConfigJSON {
 			return false;
 		}
 		
-		private MetaBlock chooseRandomOutcome(Triplet<Block, Integer, Integer>[] blocks) {
+		private MetaBlock chooseRandomOutcome(Triplet<Block, Integer, Integer>[] blocks, Random rand) {
 			if(blocks == null) return null;
 			
 			int weight = 0;

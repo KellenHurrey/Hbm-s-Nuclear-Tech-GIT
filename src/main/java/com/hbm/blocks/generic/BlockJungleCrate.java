@@ -18,9 +18,8 @@ public class BlockJungleCrate extends Block {
 		super(material);
 	}
 
-	Random rand = new Random();
-
 	public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
+		Random rand = world.rand;
 
 		ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
 

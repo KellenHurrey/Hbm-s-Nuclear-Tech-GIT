@@ -1,7 +1,5 @@
 package com.hbm.blocks.turret;
 
-import java.util.Random;
-
 import com.hbm.main.MainRegistry;
 import com.hbm.tileentity.turret.TileEntityTurretSentry;
 
@@ -55,8 +53,6 @@ public class TurretSentry extends BlockContainer {
 		return false;
 	}
 	
-	Random rand = new Random();
-	
 	@Override
 	public void breakBlock(World world, int x, int y, int z, Block b, int meta) {
 
@@ -67,12 +63,12 @@ public class TurretSentry extends BlockContainer {
 				ItemStack itemstack = sentry.getStackInSlot(i);
 
 				if(itemstack != null) {
-					float oX = this.rand.nextFloat() * 0.8F + 0.1F;
-					float oY = this.rand.nextFloat() * 0.8F + 0.1F;
-					float oZ = this.rand.nextFloat() * 0.8F + 0.1F;
+					float oX = world.rand.nextFloat() * 0.8F + 0.1F;
+					float oY = world.rand.nextFloat() * 0.8F + 0.1F;
+					float oZ = world.rand.nextFloat() * 0.8F + 0.1F;
 
 					while(itemstack.stackSize > 0) {
-						int toDrop = this.rand.nextInt(21) + 10;
+						int toDrop = world.rand.nextInt(21) + 10;
 
 						if(toDrop > itemstack.stackSize) {
 							toDrop = itemstack.stackSize;
@@ -86,9 +82,9 @@ public class TurretSentry extends BlockContainer {
 						}
 
 						float jump = 0.05F;
-						entityitem.motionX = (float) this.rand.nextGaussian() * jump;
-						entityitem.motionY = (float) this.rand.nextGaussian() * jump + 0.2F;
-						entityitem.motionZ = (float) this.rand.nextGaussian() * jump;
+						entityitem.motionX = (float) world.rand.nextGaussian() * jump;
+						entityitem.motionY = (float) world.rand.nextGaussian() * jump + 0.2F;
+						entityitem.motionZ = (float) world.rand.nextGaussian() * jump;
 						world.spawnEntityInWorld(entityitem);
 					}
 				}

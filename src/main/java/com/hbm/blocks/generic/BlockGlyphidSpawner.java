@@ -157,7 +157,7 @@ public class BlockGlyphidSpawner extends BlockContainer implements IBlockMulti {
 
 		public ArrayList<EntityGlyphid> createSwarm(float soot, int meta) {
 
-			Random rand = new Random();
+			Random rand = this.worldObj.rand;
 			ArrayList<EntityGlyphid> currentSpawns = new ArrayList<>();
 			int swarmAmount = (int) Math.min(MobConfig.baseSwarmSize * Math.max(MobConfig.swarmScalingMult * (soot / MobConfig.sootStep), 1), 10);
 			int cap = 100;

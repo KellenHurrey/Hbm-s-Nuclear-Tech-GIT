@@ -50,8 +50,6 @@ public class BlockCanCrate extends Block {
 		return false;
 	}
 
-	Random rand = new Random();
-
 	public void dropContents(World world, int x, int y, int z) {
 		ArrayList<ItemStack> items = getContents(world, x, y, z);
 

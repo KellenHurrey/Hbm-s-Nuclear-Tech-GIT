@@ -264,22 +264,21 @@ public abstract class BlockCraneBase extends BlockContainer implements IBlockSid
 		return IBlockSideRotation.getRenderType();
 	}
 
-	private final Random rand = new Random();
 	public void dropContents(World world, int x, int y, int z, Block block, int meta, int start, int end) {
 		ISidedInventory tileentityfurnace = (ISidedInventory) world.getTileEntity(x, y, z);
 
 		if(tileentityfurnace != null) {
-			
+			Random rand = world.rand;
 			for(int i1 = start; i1 < end; ++i1) {
 				ItemStack itemstack = tileentityfurnace.getStackInSlot(i1);
 
 				if(itemstack != null) {
-					float f = this.rand.nextFloat() * 0.8F + 0.1F;
-					float f1 = this.rand.nextFloat() * 0.8F + 0.1F;
-					float f2 = this.rand.nextFloat() * 0.8F + 0.1F;
+					float f = rand.nextFloat() * 0.8F + 0.1F;
+					float f1 = rand.nextFloat() * 0.8F + 0.1F;
+					float f2 = rand.nextFloat() * 0.8F + 0.1F;
 
 					while(itemstack.stackSize > 0) {
-						int j1 = this.rand.nextInt(21) + 10;
+						int j1 = rand.nextInt(21) + 10;
 
 						if(j1 > itemstack.stackSize) {
 							j1 = itemstack.stackSize;
@@ -293,9 +292,9 @@ public abstract class BlockCraneBase extends BlockContainer implements IBlockSid
 						}
 
 						float f3 = 0.05F;
-						entityitem.motionX = (float) this.rand.nextGaussian() * f3;
-						entityitem.motionY = (float) this.rand.nextGaussian() * f3 + 0.2F;
-						entityitem.motionZ = (float) this.rand.nextGaussian() * f3;
+						entityitem.motionX = (float) rand.nextGaussian() * f3;
+						entityitem.motionY = (float) rand.nextGaussian() * f3 + 0.2F;
+						entityitem.motionZ = (float) rand.nextGaussian() * f3;
 						world.spawnEntityInWorld(entityitem);
 					}
 				}

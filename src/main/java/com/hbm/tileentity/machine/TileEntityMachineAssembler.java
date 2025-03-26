@@ -2,7 +2,6 @@ package com.hbm.tileentity.machine;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ModBlocks;
@@ -36,8 +35,6 @@ public class TileEntityMachineAssembler extends TileEntityMachineAssemblerBase i
 	public int recipe = -1;
 
 	public UpgradeManagerNT upgradeManager = new UpgradeManagerNT();
-
-	Random rand = new Random();
 
 	public TileEntityMachineAssembler() {
 		super(18);

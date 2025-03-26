@@ -25,7 +25,6 @@ public class AcidBlock extends BlockFluidClassic {
 	public static IIcon stillIcon;
 	@SideOnly(Side.CLIENT)
 	public static IIcon flowingIcon;
-	public Random rand = new Random();
 
 	public static DamageSource damageSource;
 

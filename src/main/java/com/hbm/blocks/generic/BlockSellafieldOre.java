@@ -16,6 +16,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 
 public class BlockSellafieldOre extends BlockSellafieldSlaked implements IBlockMultiPass {
 
@@ -94,6 +95,7 @@ public class BlockSellafieldOre extends BlockSellafieldSlaked implements IBlockM
 
 	@Override
 	public int getExpDrop(IBlockAccess world, int meta, int fortune) {
+		if (world instanceof World) rand = ((World) world).rand;
 		if(this.getItemDropped(meta, rand, fortune) != Item.getItemFromBlock(this)) {
 			int j1 = 0;
 

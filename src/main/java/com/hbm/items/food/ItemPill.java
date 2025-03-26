@@ -2,7 +2,6 @@ package com.hbm.items.food;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import com.hbm.config.VersatileConfig;
 import com.hbm.extprop.HbmLivingProps;
@@ -25,8 +24,6 @@ public class ItemPill extends ItemFood {
 		this.setAlwaysEdible();
 	}
 
-	Random rand = new Random();
-
 	@Override
 	protected void onFoodEaten(ItemStack stack, World world, EntityPlayer player) {
 		if(!world.isRemote) {
@@ -47,7 +44,7 @@ public class ItemPill extends ItemFood {
 
 			if(this == ModItems.plan_c) {
 				for(int i = 0; i < 10; i++)
-					player.attackEntityFrom(rand.nextBoolean() ? ModDamageSource.euthanizedSelf : ModDamageSource.euthanizedSelf2, 1000);
+					player.attackEntityFrom(world.rand.nextBoolean() ? ModDamageSource.euthanizedSelf : ModDamageSource.euthanizedSelf2, 1000);
 			}
 
 			if(this == ModItems.pill_red) {
@@ -84,7 +81,7 @@ public class ItemPill extends ItemFood {
 			}
 			
 			if(this == ModItems.chocolate) {
-				if(rand.nextInt(25) == 0) {
+				if(world.rand.nextInt(25) == 0) {
 					player.attackEntityFrom(ModDamageSource.overdose, 1000);
 				}
 				player.addPotionEffect(new PotionEffect(Potion.digSpeed.id, 60 * 20, 3));

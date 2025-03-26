@@ -1,7 +1,5 @@
 package com.hbm.blocks.fluid;
 
-import java.util.Random;
-
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.RefStrings;
 import com.hbm.util.ContaminationUtil;
@@ -28,7 +26,6 @@ public class ToxicBlock extends BlockFluidClassic {
 	public static IIcon stillIcon;
 	@SideOnly(Side.CLIENT)
 	public static IIcon flowingIcon;
-	public Random rand = new Random();
 
 	public static DamageSource damageSource;
 

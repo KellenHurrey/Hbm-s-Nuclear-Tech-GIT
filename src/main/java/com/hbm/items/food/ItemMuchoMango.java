@@ -1,7 +1,6 @@
 package com.hbm.items.food;
 
 import java.util.List;
-import java.util.Random;
 
 import com.hbm.items.ModItems;
 
@@ -19,8 +18,6 @@ public class ItemMuchoMango extends ItemFood {
 		super(hunger, true);
 		this.setAlwaysEdible();
 	}
-
-	Random rand = new Random();
 
 	@Override
 	protected void onFoodEaten(ItemStack stack, World world, EntityPlayer player) {

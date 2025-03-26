@@ -28,7 +28,6 @@ public class MudBlock extends BlockFluidClassic {
 	public static IIcon stillIcon;
 	@SideOnly(Side.CLIENT)
 	public static IIcon flowingIcon;
-	public Random rand = new Random();
 
 	public static DamageSource damageSource;
 
@@ -124,17 +123,17 @@ public class MudBlock extends BlockFluidClassic {
 					block == Blocks.stonebrick || 
 					block == Blocks.stone_slab || 
 					block == Blocks.stone) {
-				if(rand.nextInt(20) == 0)
+				if(world.rand.nextInt(20) == 0)
 					world.setBlock(x, y, z, Blocks.cobblestone);
 			} else if (block == Blocks.cobblestone) {
-				if(rand.nextInt(15) == 0)
+				if(world.rand.nextInt(15) == 0)
 					world.setBlock(x, y, z, Blocks.gravel);
 			} else if (block == Blocks.sandstone) {
-				if(rand.nextInt(5) == 0)
+				if(world.rand.nextInt(5) == 0)
 					world.setBlock(x, y, z, Blocks.sand);
 			} else if (block == Blocks.hardened_clay || 
 					block == Blocks.stained_hardened_clay) {
-				if(rand.nextInt(10) == 0)
+				if(world.rand.nextInt(10) == 0)
 					world.setBlock(x, y, z, Blocks.clay);
 			} else if (block.getMaterial() == Material.wood) {
 				world.setBlock(x, y, z, Blocks.air);

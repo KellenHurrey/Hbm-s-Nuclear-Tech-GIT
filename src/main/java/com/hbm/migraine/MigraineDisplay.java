@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
@@ -19,30 +20,31 @@ import java.util.List;
 
 /** @author hbm **/
 public class MigraineDisplay {
-	static final ResourceLocation guiUtil =  new ResourceLocation(RefStrings.MODID + ":textures/gui/gui_utility.png");
+	private static final ResourceLocation guiUtil =  new ResourceLocation(RefStrings.MODID + ":textures/gui/gui_utility.png");
 
-	List<Object[]> lines = new ArrayList<>();
-	RenderItem itemRender = new RenderItem();
-	TextureManager texman = Minecraft.getMinecraft().getTextureManager();
-	FontRenderer font;
+	private List<Object[]> lines = new ArrayList<>();
+	private RenderItem itemRender = new RenderItem();
+	private TextureManager texman = Minecraft.getMinecraft().getTextureManager();
+	private FontRenderer font;
+	private ItemStack icon;
 
-	int x;
-	int y;
+	private int x;
+	private int y;
 
 	public int ticksRemaining;
 
 	boolean consistentHeight = false;
-	int lineDist = 2;
-	int tallestElement = 0;
-	static final int STACK_HEIGHT = 18;
+	private int lineDist = 2;
+	private int tallestElement = 0;
+	private static final int STACK_HEIGHT = 18;
 
-	MigraineDisplay.Orientation o = MigraineDisplay.Orientation.CENTER;
+	private MigraineDisplay.Orientation o = MigraineDisplay.Orientation.CENTER;
 	long colorBrighter = 0xFFCCCCCC;
 	long colorDarker = 0xFF7D7D7D;
 	long colorFrame = 0xFFA0A0A0;
 	long colorBg = 0xFF302E36;
 
-	public MigraineDisplay(FontRenderer font, int x, int y, Object[][] raw, int autowrap, int ticksRemaining) {
+	public MigraineDisplay(FontRenderer font, int x, int y, Object[][] raw, int autowrap, int ticksRemaining, ItemStack icon) {
 
 		this.font = font;
 		this.x = x;
@@ -68,6 +70,21 @@ public class MigraineDisplay {
 		}
 
 		this.ticksRemaining = ticksRemaining;
+
+		this.icon = icon;
+	}
+
+	public MigraineDisplay(FontRenderer font, int x, int y, Object[][] raw, int autowrap, int ticksRemaining){
+		this(font, x, y, raw, autowrap, ticksRemaining, new ItemStack(Blocks.air));
+	}
+
+	public ItemStack getIcon(){
+		return icon;
+	}
+
+	public MigraineDisplay setIcon(ItemStack icon){
+		this.icon = icon;
+		return this;
 	}
 
 	public MigraineDisplay enforceConsistentHeight() {

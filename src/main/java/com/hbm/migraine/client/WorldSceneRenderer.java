@@ -5,16 +5,18 @@ import com.hbm.util.CoordinatePacker;
 import com.hbm.util.Vector4i;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.particle.EffectRenderer;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.ForgeHooksClient;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
@@ -33,6 +35,8 @@ public abstract class WorldSceneRenderer {
 	// the Blocks which this renderer needs to render
 	public final HashSet<Long> renderedBlocks = new HashSet<>();
 	public final HashSet<Long> renderOpaqueBlocks = new HashSet<>();
+	public final HashSet<Entity> rendererEntities = new HashSet<>();
+	public final EffectRenderer rendererEffect;
 	private Consumer<WorldSceneRenderer> beforeRender;
 	private Consumer<WorldSceneRenderer> onRender;
 	private Consumer<MovingObjectPosition> onLookingAt;
@@ -41,12 +45,16 @@ public abstract class WorldSceneRenderer {
 	private final Vector3f eyePos = new Vector3f(0, 0, -10f);
 	private final Vector3f lookAt = new Vector3f(0, 0, 0);
 	private final Vector3f worldUp = new Vector3f(0, 1, 0);
+	private final Vector3f prevEyePos = new Vector3f(0, 0, -10f);
 	protected Vector4i rect = new Vector4i();
 	private boolean renderAllFaces = false;
 	private final RenderBlocks bufferBuilder = new RenderBlocks();
+	public final ClientFakePlayer camera;
 
-	public WorldSceneRenderer(TrackedDummyWorld world) {
+	public WorldSceneRenderer(TrackedDummyWorld world, ClientFakePlayer player) {
 		this.world = world;
+		this.camera = player;
+		this.rendererEffect = new EffectRenderer(world, Minecraft.getMinecraft().renderEngine);
 	}
 
 	public WorldSceneRenderer setBeforeWorldRender(Consumer<WorldSceneRenderer> callback) {
@@ -71,6 +79,13 @@ public abstract class WorldSceneRenderer {
 		return this;
 	}
 
+	public WorldSceneRenderer addRenderEntities(HashSet<Entity> entities){
+		if (entities != null){
+			this.rendererEntities.addAll(entities);
+		}
+		return this;
+	}
+
 	public WorldSceneRenderer setOnLookingAt(Consumer<MovingObjectPosition> onLookingAt) {
 		this.onLookingAt = onLookingAt;
 		return this;
@@ -84,9 +99,11 @@ public abstract class WorldSceneRenderer {
 		return lastTraceResult;
 	}
 
-	public void resetRenderedBlocks() {
+	public WorldSceneRenderer resetRenders() {
 		renderedBlocks.clear();
 		renderOpaqueBlocks.clear();
+		rendererEntities.clear();
+		return this;
 	}
 
 	/**
@@ -94,13 +111,14 @@ public abstract class WorldSceneRenderer {
 	 * ignore any transformations applied currently to projection/view matrix, so specified coordinates are scaled MC
 	 * gui coordinates. It will return matrices of projection and view in previous state after rendering
 	 */
-	public void render(int x, int y, int width, int height, int mouseX, int mouseY) {
+	public void render(int x, int y, int width, int height, int mouseX, int mouseY, float partialTicks) {
+
 		rect.set(x, y, width, height);
 		// setupCamera
 		setupCamera();
 
 		// render TrackedDummyWorld
-		drawWorld();
+		drawWorld(partialTicks);
 
 		// check lookingAt
 		this.lastTraceResult = null;
@@ -114,6 +132,8 @@ public abstract class WorldSceneRenderer {
 		}
 
 		resetCamera();
+
+		prevEyePos.set(eyePos);
 	}
 
 	public Vector3f getEyePos() {
@@ -134,13 +154,23 @@ public abstract class WorldSceneRenderer {
 		this.worldUp.set(worldUp);
 	}
 
-	public void setCameraLookAt(Vector3f lookAt, double radius, double rotationPitch, double rotationYaw) {
+	public void setCameraLookAt(Vector3f lookAt, double radius, double rotationYaw, double rotationPitch) {
 		this.lookAt.set(lookAt);
-		eyePos.set((float) Math.cos(rotationPitch), 0, (float) Math.sin(rotationPitch));
-		Vector3f.add(eyePos, new Vector3f(0, (float) (Math.tan(rotationYaw) * eyePos.length()), 0), eyePos);
-		eyePos.normalise(eyePos);
-		eyePos.scale((float) radius);
+
+		double radYaw = Math.toRadians(rotationYaw % 360.0F);
+		double radPitch = Math.toRadians(rotationPitch % 360.0F);
+
+		eyePos.x = (float) (Math.cos(radYaw) * Math.cos(radPitch) * radius);
+		eyePos.y = (float) (Math.sin(radPitch) * radius) + camera.getEyeHeight();
+		eyePos.z = (float) (Math.sin(radYaw) * Math.cos(radPitch) * radius);
 		Vector3f.add(eyePos, lookAt, eyePos);
+
+		camera.setPosition(eyePos.x, eyePos.y, eyePos.z);
+		camera.prevRotationPitch = camera.rotationPitch;
+		camera.prevRotationYaw = camera.rotationYaw;
+		camera.rotationYaw = (float) -rotationYaw % 360.0F;
+		camera.rotationPitch = (float) rotationPitch % 360.0F;
+
 	}
 
 	public void setupCamera() {
@@ -157,12 +187,10 @@ public abstract class WorldSceneRenderer {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 
-		// setup viewport and clear GL buffers
 		glViewport(x, y, width, height);
 
 		clearView(x, y, width, height);
 
-		// setup projection matrix to perspective
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
@@ -175,6 +203,8 @@ public abstract class WorldSceneRenderer {
 		glPushMatrix();
 		glLoadIdentity();
 		GLU.gluLookAt(eyePos.x, eyePos.y, eyePos.z, lookAt.x, lookAt.y, lookAt.z, worldUp.x, worldUp.y, worldUp.z);
+
+		ActiveRenderInfo.updateRenderInfo(camera, false);
 	}
 
 
@@ -182,7 +212,7 @@ public abstract class WorldSceneRenderer {
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
-	public static void resetCamera() {
+	public void resetCamera() {
 		// reset viewport
 		Minecraft minecraft = Minecraft.getMinecraft();
 		glViewport(0, 0, minecraft.displayWidth, minecraft.displayHeight);
@@ -202,7 +232,7 @@ public abstract class WorldSceneRenderer {
 		glPopAttrib();
 	}
 
-	protected void drawWorld() {
+	protected void drawWorld(float partialTicks) {
 		if (beforeRender != null) {
 			beforeRender.accept(this);
 		}
@@ -225,6 +255,25 @@ public abstract class WorldSceneRenderer {
 			onPostBlockRendered.accept(this);
 		}
 
+		double d3 = camera.lastTickPosX + (camera.posX - camera.lastTickPosX) * (double)partialTicks;
+		double d4 = camera.lastTickPosY + (camera.posY - camera.lastTickPosY) * (double)partialTicks;
+		double d5 = camera.lastTickPosZ + (camera.posZ - camera.lastTickPosZ) * (double)partialTicks;
+		TileEntityRendererDispatcher.staticPlayerX = d3;
+		TileEntityRendererDispatcher.staticPlayerY = d4;
+		TileEntityRendererDispatcher.staticPlayerZ = d5;
+		RenderManager.renderPosX = d3;
+		RenderManager.renderPosY = d4;
+		RenderManager.renderPosZ = d5;
+		// render Entity
+		RenderManager.instance.worldObj = world;
+
+		GL11.glPushMatrix();
+		GL11.glTranslated(RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
+		for (Entity entity : rendererEntities) {
+			RenderManager.instance.renderEntitySimple(entity, partialTicks);
+		}
+		GL11.glPopMatrix();
+
 		RenderHelper.enableStandardItemLighting();
 		glEnable(GL_LIGHTING);
 
@@ -241,18 +290,52 @@ public abstract class WorldSceneRenderer {
 				TileEntity tile = world.getTileEntity(x, y, z);
 				if (tile != null && tesr.hasSpecialRenderer(tile)) {
 					if (tile.shouldRenderInPass(finalPass)) {
-						tesr.renderTileEntityAt(tile, x, y, z, 0);
+						tesr.renderTileEntityAt(tile, x, y, z, partialTicks);
 					}
 				}
 			});
 		}
+
+
 		ForgeHooksClient.setRenderPass(-1);
+
+		renderParticles(partialTicks);
+
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_BLEND);
 		glDepthMask(true);
+
 	}
 
-	public void renderBlocks(Tessellator tessellator, HashSet<Long> blocksToRender, boolean transparent) {
+	private void renderParticles(float partialTicks) {
+//		GL11.glPushMatrix();
+
+		ForgeHooksClient.setRenderPass(0);
+//		RenderHelper.disableStandardItemLighting();
+//		Minecraft.getMinecraft().entityRenderer.disableLightmap((double)partialTicks);
+//		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+//		GL11.glPopMatrix();
+//		GL11.glPushMatrix();
+//
+//		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+//		GL11.glPopMatrix();
+		GL11.glPushMatrix();
+
+		GL11.glTranslated(RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
+
+		Minecraft.getMinecraft().entityRenderer.enableLightmap((double)partialTicks);
+		rendererEffect.renderLitParticles(camera, partialTicks);
+		RenderHelper.disableStandardItemLighting();
+
+		rendererEffect.renderParticles(camera, partialTicks);
+		Minecraft.getMinecraft().entityRenderer.disableLightmap((double)partialTicks);
+
+		GL11.glPopMatrix();
+		GL11.glDepthMask(false);
+		GL11.glEnable(GL11.GL_CULL_FACE);
+	}
+
+	private void renderBlocks(Tessellator tessellator, HashSet<Long> blocksToRender, boolean transparent) {
 		if (blocksToRender.isEmpty()) return;
 		Minecraft mc = Minecraft.getMinecraft();
 		final int savedAo = mc.gameSettings.ambientOcclusion;

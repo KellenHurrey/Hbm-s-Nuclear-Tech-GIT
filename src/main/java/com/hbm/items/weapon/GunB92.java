@@ -1,7 +1,6 @@
 package com.hbm.items.weapon;
 
 import java.util.List;
-import java.util.Random;
 
 import com.google.common.collect.Multimap;
 import com.hbm.entity.effect.EntityCloudFleijaRainbow;
@@ -24,8 +23,6 @@ import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 
 public class GunB92 extends Item {
-
-	Random rand = new Random();
 
 	public int dmgMin = 16;
 	public int dmgMax = 28;
@@ -69,9 +66,9 @@ public class GunB92 extends Item {
 							divergence = 1F;
 						
 						if(i > 0) {
-							entityarrow1.motionX += rand.nextGaussian() * divergence;
-							entityarrow1.motionY += rand.nextGaussian() * divergence;
-							entityarrow1.motionZ += rand.nextGaussian() * divergence;
+							entityarrow1.motionX += p_77615_2_.rand.nextGaussian() * divergence;
+							entityarrow1.motionY += p_77615_2_.rand.nextGaussian() * divergence;
+							entityarrow1.motionZ += p_77615_2_.rand.nextGaussian() * divergence;
 						}
 				
 						p_77615_1_.damageItem(1, p_77615_3_);

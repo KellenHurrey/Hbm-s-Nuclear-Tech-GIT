@@ -39,7 +39,6 @@ import com.hbm.lib.RefStrings;
 import com.hbm.migraine.GuiMigraine;
 import com.hbm.migraine.MigraineInstructions;
 import com.hbm.migraine.MigraineLoader;
-import com.hbm.migraine.client.ClientFakePlayer;
 import com.hbm.migraine.world.TrackedDummyWorld;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.packet.toserver.AuxButtonPacket;
@@ -66,12 +65,6 @@ import com.hbm.tileentity.bomb.TileEntityNukeCustom.EnumEntryType;
 import com.hbm.tileentity.machine.TileEntityNukeFurnace;
 import com.hbm.util.*;
 import com.hbm.util.ArmorRegistry.HazardClass;
-import com.hbm.wiaj.GuiWorldInAJar;
-import com.hbm.wiaj.cannery.CanneryBase;
-import com.hbm.wiaj.cannery.Jars;
-import com.hbm.util.ArmorRegistry;
-import com.hbm.util.ArmorUtil;
-import com.hbm.util.DamageResistanceHandler;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -826,8 +819,8 @@ public class ModEventHandlerClient {
 		try {
 			if (MigraineLoader.instructions.get(comp) != null){
 				list.add(EnumChatFormatting.GREEN + I18nUtil.resolveKey("cannery.f1"));
-				lastCannery = comp;
-				canneryTimestamp = System.currentTimeMillis();
+				lastMigraine = comp;
+//				canneryTimestamp = System.currentTimeMillis();
 			}
 		} catch (Exception ex){
 			list.add(EnumChatFormatting.RED + "Error loading migraine: " + ex.getLocalizedMessage());
@@ -854,8 +847,9 @@ public class ModEventHandlerClient {
 		}*/
 	}
 
-	private static long canneryTimestamp;
-	private static ComparableStack lastCannery = null;
+//	private static long canneryTimestamp;
+	private static boolean firstHolding = true;
+	private static ComparableStack lastMigraine = null;
 
 	private ResourceLocation ashes = new ResourceLocation(RefStrings.MODID + ":textures/misc/overlay_ash.png");
 
@@ -970,9 +964,11 @@ public class ModEventHandlerClient {
 			}
 		}
 
-		if(Keyboard.isKeyDown(Keyboard.KEY_F1) && Minecraft.getMinecraft().currentScreen != null) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_F1) && Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiMigraine) && firstHolding) {
 
-			ComparableStack comp = canneryTimestamp > System.currentTimeMillis() - 100 ? lastCannery : null;
+			firstHolding = false;
+
+			ComparableStack comp = lastMigraine; //: null; //canneryTimestamp > System.currentTimeMillis() - 100 ?
 
 			if(comp == null) {
 				ItemStack stack = getMouseOverStack();
@@ -987,6 +983,8 @@ public class ModEventHandlerClient {
 //					FMLCommonHandler.instance().showGuiScreen(new GuiWorldInAJar(cannery.createScript(), cannery.getName(), cannery.getIcon(), cannery.seeAlso()));
 				}
 			}
+		}else{
+			firstHolding = true;
 		}
 
 		if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_LMENU)) {

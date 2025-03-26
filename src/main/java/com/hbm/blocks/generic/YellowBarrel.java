@@ -21,8 +21,6 @@ import net.minecraft.world.World;
 
 public class YellowBarrel extends BlockDetonatable {
 
-	Random rand = new Random();
-
 	public YellowBarrel(Material material) {
 		super(material, 0, 0, 100, true, false);
 	}
@@ -95,7 +93,7 @@ public class YellowBarrel extends BlockDetonatable {
 	public void explodeEntity(World world, double x, double y, double z, EntityTNTPrimedBase entity) {
 		int ix = MathHelper.floor_double(x), iy = MathHelper.floor_double(y), iz = MathHelper.floor_double(z);
 
-		if(rand.nextInt(3) == 0) {
+		if(world.rand.nextInt(3) == 0) {
 			world.setBlock(ix, iy, iz, ModBlocks.toxic_block);
 		} else {
 			world.createExplosion(entity, x, y, z, 12.0F, true);

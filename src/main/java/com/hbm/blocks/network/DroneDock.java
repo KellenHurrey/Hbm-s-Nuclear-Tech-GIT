@@ -23,7 +23,6 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
 import java.util.List;
-import java.util.Random;
 
 public class DroneDock extends BlockContainer implements ITooltipProvider {
 
@@ -83,7 +82,6 @@ public class DroneDock extends BlockContainer implements ITooltipProvider {
 		super.breakBlock(world, x, y, z, block, meta);
 	}
 
-	private final Random rand = new Random();
 	public void dropContents(World world, int x, int y, int z, Block block, int meta, int start, int end) {
 		ISidedInventory sidedInventory = (ISidedInventory) world.getTileEntity(x, y, z);
 
@@ -93,12 +91,12 @@ public class DroneDock extends BlockContainer implements ITooltipProvider {
 				ItemStack stack = sidedInventory.getStackInSlot(i1);
 
 				if(stack != null) {
-					float f = this.rand.nextFloat() * 0.8F + 0.1F;
-					float f1 = this.rand.nextFloat() * 0.8F + 0.1F;
-					float f2 = this.rand.nextFloat() * 0.8F + 0.1F;
+					float f = world.rand.nextFloat() * 0.8F + 0.1F;
+					float f1 = world.rand.nextFloat() * 0.8F + 0.1F;
+					float f2 = world.rand.nextFloat() * 0.8F + 0.1F;
 
 					while(stack.stackSize > 0) {
-						int j1 = this.rand.nextInt(21) + 10;
+						int j1 = world.rand.nextInt(21) + 10;
 
 						if(j1 > stack.stackSize) {
 							j1 = stack.stackSize;
@@ -112,9 +110,9 @@ public class DroneDock extends BlockContainer implements ITooltipProvider {
 						}
 
 						float f3 = 0.05F;
-						entity.motionX = (float) this.rand.nextGaussian() * f3;
-						entity.motionY = (float) this.rand.nextGaussian() * f3 + 0.2F;
-						entity.motionZ = (float) this.rand.nextGaussian() * f3;
+						entity.motionX = (float) world.rand.nextGaussian() * f3;
+						entity.motionY = (float) world.rand.nextGaussian() * f3 + 0.2F;
+						entity.motionZ = (float) world.rand.nextGaussian() * f3;
 						world.spawnEntityInWorld(entity);
 					}
 				}

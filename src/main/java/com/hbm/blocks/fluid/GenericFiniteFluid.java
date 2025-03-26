@@ -1,7 +1,5 @@
 package com.hbm.blocks.fluid;
 
-import java.util.Random;
-
 import com.hbm.lib.RefStrings;
 
 import cpw.mods.fml.relauncher.Side;
@@ -19,7 +17,6 @@ public class GenericFiniteFluid extends BlockFluidFinite {
 	public static IIcon stillIcon;
 	@SideOnly(Side.CLIENT)
 	public static IIcon flowingIcon;
-	public Random rand = new Random();
 	
 	private String stillName;
 	private String flowingName;

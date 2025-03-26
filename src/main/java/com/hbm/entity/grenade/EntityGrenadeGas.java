@@ -3,15 +3,12 @@ package com.hbm.entity.grenade;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.World;
 
-import java.util.Random;
-
 import com.hbm.entity.effect.EntityMist;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.items.ModItems;
 import com.hbm.items.weapon.ItemGrenade;
 
 public class EntityGrenadeGas extends EntityGrenadeBouncyBase {
-	Random rand = new Random();
 
 	public EntityGrenadeGas(World p_i1773_1_) {
 		super(p_i1773_1_);

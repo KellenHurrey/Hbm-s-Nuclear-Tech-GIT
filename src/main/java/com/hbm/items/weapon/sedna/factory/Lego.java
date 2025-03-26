@@ -1,7 +1,6 @@
 package com.hbm.items.weapon.sedna.factory;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
@@ -45,8 +44,6 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 @NotableComments
 public class Lego {
-	
-	public static final Random ANIM_RAND = new Random();
 	
 	/**
 	 * If IDLE and the mag of receiver 0 can be loaded, set state to RELOADING. Used by keybinds. */

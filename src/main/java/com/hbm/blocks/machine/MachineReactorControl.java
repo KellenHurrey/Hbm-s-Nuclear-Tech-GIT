@@ -33,7 +33,6 @@ public class MachineReactorControl extends BlockContainer {
 	@SideOnly(Side.CLIENT)
 	private IIcon iconBack;
 
-    private final Random field_149933_a = new Random();
 	private static boolean keepInventory;
 
 	public MachineReactorControl(Material p_i45386_1_) {
@@ -124,13 +123,13 @@ public class MachineReactorControl extends BlockContainer {
 
                     if (itemstack != null)
                     {
-                        float f = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-                        float f1 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-                        float f2 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
+                        float f = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
+                        float f1 = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
+                        float f2 = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
 
                         while (itemstack.stackSize > 0)
                         {
-                            int j1 = this.field_149933_a.nextInt(21) + 10;
+                            int j1 = p_149749_1_.rand.nextInt(21) + 10;
 
                             if (j1 > itemstack.stackSize)
                             {
@@ -146,9 +145,9 @@ public class MachineReactorControl extends BlockContainer {
                             }
 
                             float f3 = 0.05F;
-                            entityitem.motionX = (float)this.field_149933_a.nextGaussian() * f3;
-                            entityitem.motionY = (float)this.field_149933_a.nextGaussian() * f3 + 0.2F;
-                            entityitem.motionZ = (float)this.field_149933_a.nextGaussian() * f3;
+                            entityitem.motionX = (float)p_149749_1_.rand.nextGaussian() * f3;
+                            entityitem.motionY = (float)p_149749_1_.rand.nextGaussian() * f3 + 0.2F;
+                            entityitem.motionZ = (float)p_149749_1_.rand.nextGaussian() * f3;
                             p_149749_1_.spawnEntityInWorld(entityitem);
                         }
                     }

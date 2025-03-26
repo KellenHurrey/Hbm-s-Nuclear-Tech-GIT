@@ -1,7 +1,5 @@
 package com.hbm.render.entity.projectile;
 
-import java.util.Random;
-
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.lib.RefStrings;
@@ -11,8 +9,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 
 public class RenderBeam2 extends Render {
-	
-	Random rand = new Random();
 
 	@Override
 	public void doRender(Entity rocket, double x, double y, double z, float p_76986_8_, float p_76986_9_) {

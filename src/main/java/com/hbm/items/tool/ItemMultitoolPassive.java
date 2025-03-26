@@ -1,7 +1,6 @@
 package com.hbm.items.tool;
 
 import java.util.List;
-import java.util.Random;
 
 import com.google.common.collect.Multimap;
 import com.hbm.entity.projectile.EntityLaserBeam;
@@ -25,8 +24,6 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class ItemMultitoolPassive extends Item {
-	
-	Random rand = new Random();
 	
 	public ItemMultitoolPassive() {
 		this.setMaxDamage(5000);
@@ -97,8 +94,8 @@ public class ItemMultitoolPassive extends Item {
 				return stack;
 			} else if (this == ModItems.multitool_sky) {
 				for(int i = 0; i < 15; i++) {
-					int a = (int)player.posX - 15 + rand.nextInt(31);
-					int b = (int)player.posZ - 15 + rand.nextInt(31);
+					int a = (int)player.posX - 15 + world.rand.nextInt(31);
+					int b = (int)player.posZ - 15 + world.rand.nextInt(31);
 					//if(!world.isRemote) {
 						EntityLightningBolt blitz = new EntityLightningBolt(world, a, world.getHeightValue(a, b), b);
 						world.spawnEntityInWorld(blitz);

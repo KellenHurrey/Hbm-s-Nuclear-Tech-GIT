@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import com.hbm.blocks.ModBlocks;
@@ -33,7 +32,6 @@ public class ExplosionNT extends Explosion {
 	
 	public Set<ExAttrib> atttributes = new HashSet();
 
-	private Random explosionRNG = new Random();
 	private World worldObj;
 	protected int resolution = 16;
 	protected Map affectedEntities = new HashMap();
@@ -236,7 +234,7 @@ public class ExplosionNT extends Explosion {
 					boolean doesErrode = false;
 					Block errodesInto = Blocks.air;
 					
-					if(this.has(ExAttrib.ERRODE) && this.explosionRNG.nextFloat() < 0.6F) { //errosion has a 60% chance to occour
+					if(this.has(ExAttrib.ERRODE) && this.worldObj.rand.nextFloat() < 0.6F) { //errosion has a 60% chance to occour
 						
 						if(errosion.containsKey(block)) {
 							doesErrode = true;
@@ -264,19 +262,19 @@ public class ExplosionNT extends Explosion {
 						if(has(ExAttrib.DIGAMMA)) {
 							this.worldObj.setBlock(i, j, k, ModBlocks.ash_digamma);
 							
-							if(this.explosionRNG.nextInt(5) == 0 && this.worldObj.getBlock(i, j + 1, k) == Blocks.air)
+							if(this.worldObj.rand.nextInt(5) == 0 && this.worldObj.getBlock(i, j + 1, k) == Blocks.air)
 								this.worldObj.setBlock(i, j + 1, k, ModBlocks.fire_digamma);
 							
 						} else if(has(ExAttrib.DIGAMMA_CIRCUIT)) {
 							
 							if(i % 3 == 0 && k % 3 == 0) {
 								this.worldObj.setBlock(i, j, k, ModBlocks.pribris_digamma);
-							} else if((i % 3 == 0 || k % 3 == 0) && this.explosionRNG.nextBoolean()) {
+							} else if((i % 3 == 0 || k % 3 == 0) && this.worldObj.rand.nextBoolean()) {
 								this.worldObj.setBlock(i, j, k, ModBlocks.pribris_digamma);
 							} else {
 								this.worldObj.setBlock(i, j, k, ModBlocks.ash_digamma);
 								
-								if(this.explosionRNG.nextInt(5) == 0 && this.worldObj.getBlock(i, j + 1, k) == Blocks.air)
+								if(this.worldObj.rand.nextInt(5) == 0 && this.worldObj.getBlock(i, j + 1, k) == Blocks.air)
 									this.worldObj.setBlock(i, j + 1, k, ModBlocks.fire_digamma);
 							}
 						} else if(has(ExAttrib.LAVA_V)) {
@@ -303,7 +301,7 @@ public class ExplosionNT extends Explosion {
 				boolean shouldReplace = true;
 
 				if(!has(ExAttrib.ALLMOD) && !has(ExAttrib.DIGAMMA))
-					shouldReplace = this.explosionRNG.nextInt(3) == 0;
+					shouldReplace = this.worldObj.rand.nextInt(3) == 0;
 
 				if(block.getMaterial() == Material.air && block1.func_149730_j() && shouldReplace) {
 					if(has(ExAttrib.FIRE))

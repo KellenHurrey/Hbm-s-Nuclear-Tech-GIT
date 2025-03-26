@@ -1,8 +1,15 @@
 {
 	"owner": {
-		"modid": "hbm",
-		"name": "tile.machine_press"
+		"id": "hbm:tile.machine_assembler"
 	},
+	"chapters": [
+		47,
+		130
+	],
+	"seeAlso": [
+		{ "id": "hbm:tile.machine_press" },
+		{ "id": "hbm:tile.machine_difurnace_off" }
+	],
 	"update": [
 		{
 			"tick": 0,
@@ -18,8 +25,7 @@
 					"y": 0,
 					"z": 2
 				},
-				"modid": "minecraft",
-				"name": "brick_block"
+				"id": "minecraft:brick_block"
 			}
 		},
 		{
@@ -29,14 +35,25 @@
 				"position": {
 					"x": 1,
 					"y": 1,
-					"z": 1
+					"z": 2
 				},
-				"modid": "hbm",
-				"name": "tile.machine_press"
+				"id": "minecraft:brick_block"
 			}
 		},
 		{
-			"tick": 20,
+			"tick": 19,
+			"action": {
+				"type": "setBlock",
+				"position": {
+					"x": 1,
+					"y": 1,
+					"z": 2
+				},
+				"id": "minecraft:air"
+			}
+		},
+		{
+			"tick": 40,
 			"action": {
 				"type": "placeBlock",
 				"position": {
@@ -44,21 +61,75 @@
 					"y": 1,
 					"z": 1
 				},
-				"modid": "hbm",
-				"name": "tile.machine_assembler",
-				"yaw": 0
+				"id": "hbm:tile.machine_chemplant",
+				"yaw": 180
 			}
 		},
 		{
-			"tick": 21,
+			"tick": 41,
 			"action": {
-				"type": "setTileEntityNBT",
+				"type": "modifyTileEntity",
 				"position": {
 					"x": 1,
 					"y": 1,
-					"z": 1
+					"z": 0
 				},
-				"nbt": "{\"maxProgress\":[0,],\"x\":1,\"muffled\":0,\"y\":1,\"progress\":[0,],\"z\":1,\"id\":\"tileentity_assembly_machine\",\"power\":100000,\"items\":[{\"slot\":0,\"id\":4776,\"Count\":1,\"Damage\":0},{\"slot\":4,\"id\":4869,\"Count\":1,\"tag\":{\"meta\":0,\"count\":2,\"id\":4509},\"Damage\":0},{\"slot\":6,\"id\":265,\"Count\":64,\"Damage\":0}]}"
+				"method": "setInventorySlotContents",
+				"arguments": [
+					{
+						"type": "int",
+						"value": 0
+					},
+					{
+						"type": "itemStack",
+						"id": "hbm:item.battery_creative"
+					}
+				]
+			}
+		},
+		{
+			"tick": 41,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 1,
+					"y": 1,
+					"z": 0
+				},
+				"method": "setInventorySlotContents",
+				"arguments": [
+					{
+						"type": "int",
+						"value": 1
+					},
+					{
+						"type": "itemStack",
+						"id": "hbm:item.fluid_barrel_infinite"
+					}
+				]
+			}
+		},
+		{
+			"tick": 41,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 1,
+					"y": 1,
+					"z": 0
+				},
+				"method": "setInventorySlotContents",
+				"arguments": [
+					{
+						"type": "int",
+						"value": 4
+					},
+					{
+						"type": "itemStack",
+						"id": "hbm:item.chemistry_template",
+						"meta": 59
+					}
+				]
 			}
 		},
 		{
@@ -81,11 +152,68 @@
 					[
 						{
 							"type": "itemStack",
-							"modid": "hbm",
-							"name": "item.screwdriver_desh"
+							"id": "hbm:item.screwdriver_desh"
 						}
 					]
 				]
+			}
+		},
+		{
+			"tick": 45,
+			"action": {
+				"type": "fillBlocks",
+				"id": "minecraft:brick_block",
+				"positionMin": {
+					"x": 2,
+					"y": 0,
+					"z": 1
+				},
+				"positionMax": {
+					"x": 12,
+					"y": 0,
+					"z": 2
+				}
+			}
+		},
+		{
+			"tick": 50,
+			"action": {
+				"type": "spawnEntity",
+				"id": "entity_mob_nuclear_creeper",
+				"position": {
+					"x": 3,
+					"y": 5,
+					"z": 2
+				},
+				"entityId": 1
+			}
+		},
+		{
+			"tick": 69,
+			"action": {
+				"type": "removeEntityTasks",
+				"entityId": 1
+			}
+		},
+		{
+			"tick": 70,
+			"action": {
+				"type": "setEntityTarget",
+				"entityId": 1,
+				"position": {
+					"x": 10.0,
+					"y": 1.0,
+					"z": 2.0
+				}
+			}
+		},
+		{
+			"tick": 99,
+			"action": {
+				"type": "modifyEntity",
+				"entityId": 1,
+				"method": "func_146079_cb",
+				"arguments": []
 			}
 		}
 	]

@@ -25,7 +25,6 @@ import java.util.Random;
 
 public class MachineBrickFurnace extends BlockContainer {
 
-	private final Random rand = new Random();
 	private final boolean isActive;
 	private static boolean keepInventory;
 
@@ -136,7 +135,7 @@ public class MachineBrickFurnace extends BlockContainer {
 
 	@Override
 	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
-		if(!keepInventory) ItemStackUtil.spillItems(world, x, y, z, block, rand);
+		if(!keepInventory) ItemStackUtil.spillItems(world, x, y, z, block, world.rand);
 		super.breakBlock(world, x, y, z, block, meta);
 	}
 

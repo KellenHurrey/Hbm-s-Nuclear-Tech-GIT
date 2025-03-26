@@ -1,7 +1,6 @@
 package com.hbm.items.tool;
 
 import java.util.List;
-import java.util.Random;
 
 import com.hbm.handler.BossSpawnHandler;
 
@@ -12,8 +11,6 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 
 public class ItemMeteorRemote extends Item {
-	
-	Random rand = new Random();
 	
 	public ItemMeteorRemote() {
 		this.canRepair = false;

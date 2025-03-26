@@ -35,7 +35,6 @@ public class NukeCustom extends BlockContainer implements IBomb {
 	public TileEntityNukeCustom tetn = new TileEntityNukeCustom();
 
 	private static boolean keepInventory = false;
-	private final static Random field_149933_a = new Random();
 
 	public NukeCustom(Material p_i45386_1_) {
 		super(p_i45386_1_);
@@ -63,12 +62,12 @@ public class NukeCustom extends BlockContainer implements IBomb {
 					ItemStack itemstack = tileentityfurnace.getStackInSlot(i1);
 
 					if (itemstack != null) {
-						float f = NukeCustom.field_149933_a.nextFloat() * 0.8F + 0.1F;
-						float f1 = NukeCustom.field_149933_a.nextFloat() * 0.8F + 0.1F;
-						float f2 = NukeCustom.field_149933_a.nextFloat() * 0.8F + 0.1F;
+						float f = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
+						float f1 = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
+						float f2 = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
 
 						while (itemstack.stackSize > 0) {
-							int j1 = NukeCustom.field_149933_a.nextInt(21) + 10;
+							int j1 = p_149749_1_.rand.nextInt(21) + 10;
 
 							if (j1 > itemstack.stackSize) {
 								j1 = itemstack.stackSize;
@@ -85,9 +84,9 @@ public class NukeCustom extends BlockContainer implements IBomb {
 							}
 
 							float f3 = 0.05F;
-							entityitem.motionX = (float) NukeCustom.field_149933_a.nextGaussian() * f3;
-							entityitem.motionY = (float) NukeCustom.field_149933_a.nextGaussian() * f3 + 0.2F;
-							entityitem.motionZ = (float) NukeCustom.field_149933_a.nextGaussian() * f3;
+							entityitem.motionX = (float) p_149749_1_.rand.nextGaussian() * f3;
+							entityitem.motionY = (float) p_149749_1_.rand.nextGaussian() * f3 + 0.2F;
+							entityitem.motionZ = (float) p_149749_1_.rand.nextGaussian() * f3;
 							p_149749_1_.spawnEntityInWorld(entityitem);
 						}
 					}

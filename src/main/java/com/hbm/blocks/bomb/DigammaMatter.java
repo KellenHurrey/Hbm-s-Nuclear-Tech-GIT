@@ -10,8 +10,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class DigammaMatter extends Block {
-	
-	private static Random rand = new Random(); 
 
 	public DigammaMatter() {
 		super(Material.portal);
@@ -35,6 +33,7 @@ public class DigammaMatter extends Block {
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
 		float pixel = 0.0625F;
+		Random rand = world instanceof World ? ((World) world).rand : new Random();
 		this.setBlockBounds(rand.nextInt(9) * pixel, rand.nextInt(9) * pixel, rand.nextInt(9) * pixel, 1.0F - rand.nextInt(9) * pixel, 1.0F - rand.nextInt(9) * pixel, 1.0F - rand.nextInt(9) * pixel);
 	}
 	
@@ -42,7 +41,7 @@ public class DigammaMatter extends Block {
 	public void onBlockAdded(World world, int x, int y, int z) {
 		
 		if(!world.isRemote)
-			world.scheduleBlockUpdate(x, y, z, this, 10 + rand.nextInt(40));
+			world.scheduleBlockUpdate(x, y, z, this, 10 + world.rand.nextInt(40));
 	}
 
 	@Override

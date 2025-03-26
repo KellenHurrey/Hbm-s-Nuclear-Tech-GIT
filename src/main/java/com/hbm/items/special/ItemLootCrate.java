@@ -17,7 +17,6 @@ public class ItemLootCrate extends Item {
 	public static List<ItemCustomMissilePart> list10 = new ArrayList();
 	public static List<ItemCustomMissilePart> list15 = new ArrayList();
 	public static List<ItemCustomMissilePart> listMisc = new ArrayList();
-	private static Random rand = new Random();
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
@@ -25,17 +24,17 @@ public class ItemLootCrate extends Item {
 		player.inventoryContainer.detectAndSendChanges();
 
 		if(stack.getItem() == ModItems.loot_10)
-			player.inventory.addItemStackToInventory(new ItemStack(choose(list10)));
+			player.inventory.addItemStackToInventory(new ItemStack(choose(list10, world.rand)));
 		if(stack.getItem() == ModItems.loot_15)
-			player.inventory.addItemStackToInventory(new ItemStack(choose(list15)));
+			player.inventory.addItemStackToInventory(new ItemStack(choose(list15, world.rand)));
 		if(stack.getItem() == ModItems.loot_misc)
-			player.inventory.addItemStackToInventory(new ItemStack(choose(listMisc)));
+			player.inventory.addItemStackToInventory(new ItemStack(choose(listMisc, world.rand)));
 		
 		stack.stackSize--;
 		return stack;
 	}
 	
-	private ItemCustomMissilePart choose(List<ItemCustomMissilePart> parts) {
+	private ItemCustomMissilePart choose(List<ItemCustomMissilePart> parts, Random rand) {
 		
 		boolean flag = true;
 		ItemCustomMissilePart item = null;

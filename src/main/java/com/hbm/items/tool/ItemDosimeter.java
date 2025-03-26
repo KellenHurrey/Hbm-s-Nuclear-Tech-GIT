@@ -2,7 +2,6 @@ package com.hbm.items.tool;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import com.hbm.extprop.HbmLivingProps;
 import com.hbm.util.ContaminationUtil;
@@ -15,8 +14,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 public class ItemDosimeter extends Item {
-	
-	Random rand = new Random();
 
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int i, boolean bool) {
@@ -40,13 +37,13 @@ public class ItemDosimeter extends Item {
 				if(x >= 1 && x >= 2)
 					list.add(3);
 			
-				int r = list.get(rand.nextInt(list.size()));
+				int r = list.get(world.rand.nextInt(list.size()));
 				
 				if(r > 0)
 					world.playSoundAtEntity(entity, "hbm:item.geiger" + r, 1.0F, 1.0F); //TODO: rip new sounds either from BM or FO3
 				
-			} else if(rand.nextInt(100) == 0) {
-				world.playSoundAtEntity(entity, "hbm:item.geiger"+ (1 + rand.nextInt(1)), 1.0F, 1.0F);
+			} else if(world.rand.nextInt(100) == 0) {
+				world.playSoundAtEntity(entity, "hbm:item.geiger"+ (1 + world.rand.nextInt(1)), 1.0F, 1.0F);
 			}
 		}
 	}

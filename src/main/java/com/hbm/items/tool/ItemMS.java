@@ -28,7 +28,7 @@ public class ItemMS extends Item {
     			
 				world.func_147480_a(x, y, z, false);
 
-    	    	Random rand = new Random();
+    	    	Random rand = world.rand;
     	    	List<ItemStack> list = new ArrayList<ItemStack>();
 
     	    	list.add(new ItemStack(ModItems.ingot_u238m2, 1, 1));

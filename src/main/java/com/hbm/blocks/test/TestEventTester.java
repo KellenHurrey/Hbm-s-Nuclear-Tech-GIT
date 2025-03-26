@@ -23,7 +23,6 @@ public class TestEventTester extends Block {
 	
     public float explosionSize = 1000F;
     private Map field_77288_k = new HashMap();
-    protected static Random itemRand = new Random();
     public World worldObj;
 
 	public TestEventTester(Material p_i45394_1_) {
@@ -409,7 +408,7 @@ public class TestEventTester extends Block {
     
     public void buildEvent(World world, int x, int y, int z, int r) {
     	
-    	Random rand = new Random();
+    	Random rand = world.rand;
     	
     	for(double h = r; h >= -r; h -= (0.2D + ((r - Math.abs(h)) / r * 0.6D))) {
 
@@ -436,7 +435,7 @@ public class TestEventTester extends Block {
 	
 	public void killEvent(World world, int x, int y, int z) {
 		
-			world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, "random.break", 1.0F, itemRand.nextFloat() * 0.4F + 0.8F);
+			world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, "random.break", 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
 			float f = this.explosionSize;
 	        int i;
 	        int j;

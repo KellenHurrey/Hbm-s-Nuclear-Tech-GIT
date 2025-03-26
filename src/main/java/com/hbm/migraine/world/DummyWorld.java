@@ -1,42 +1,38 @@
 package com.hbm.migraine.world;
 
+import com.hbm.main.MainRegistry;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.world.*;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.IChunkProvider;
 
 import javax.annotation.Nonnull;
 
 public class DummyWorld extends World {
 
-	private static final WorldSettings DEFAULT_SETTINGS = new WorldSettings(
+	public static final WorldSettings DEFAULT_SETTINGS = new WorldSettings(
 		1L,
-		WorldSettings.GameType.SURVIVAL,
+		WorldSettings.GameType.CREATIVE, // SURVIVAL
 		true,
 		false,
 		WorldType.DEFAULT);
 
-	public static final DummyWorld INSTANCE = new DummyWorld();
+	public final DummyWorldServer serverWorld;
 
 	public DummyWorld(){
-		super(new DummySaveHandler(), "DummyServer", DEFAULT_SETTINGS, new WorldProviderSurface(), new Profiler());
-
-		this.provider.setDimension(Integer.MAX_VALUE);
+		super(new DummySaveHandler(), "MigraineWorld", DEFAULT_SETTINGS, new WorldProviderSurface(), new Profiler());
+		this.provider.setDimension(MainRegistry.MigraineWorldId);
 		int providerDim = this.provider.dimensionId;
 		this.provider.worldObj = this;
 		this.provider.setDimension(providerDim);
 		this.chunkProvider = this.createChunkProvider();
 		this.calculateInitialSkylight();
 		this.calculateInitialWeatherBody();
+		this.serverWorld = new DummyWorldServer(this, this.getSaveHandler(), "MigraineServer", MainRegistry.MigraineWorldId, DEFAULT_SETTINGS, new Profiler());
 	}
 
-	// TODO: Entities
-	@Override
-	public void updateEntities() {}
-
-	public void updateEntitiesForNEI(){
-		super.updateEntities();
-	}
+	public void addPacket(long coord){}
 
 	@Override
 	public void markBlockRangeForRenderUpdate(int x1, int y1, int z1, int x2, int y2, int z2) {}
@@ -55,6 +51,12 @@ public class DummyWorld extends World {
 	@Override
 	protected IChunkProvider createChunkProvider(){
 		return new DummyChunkProvider(this);
+	}
+
+	@Override
+	public BiomeGenBase getBiomeGenForCoords(final int p_72807_1_, final int p_72807_2_)
+	{
+		return BiomeGenBase.plains;
 	}
 
 	@Override

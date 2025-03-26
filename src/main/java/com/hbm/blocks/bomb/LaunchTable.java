@@ -174,7 +174,6 @@ public class LaunchTable extends BlockContainer implements IMultiblock, IBomb {
 	}
 
 	public static boolean keepInventory = false;
-	private final static Random field_149933_a = new Random();
 
 	@Override
 	public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_) {
@@ -182,6 +181,7 @@ public class LaunchTable extends BlockContainer implements IMultiblock, IBomb {
 			ISidedInventory tileentityfurnace = (ISidedInventory) p_149749_1_.getTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
 
 			if(tileentityfurnace != null) {
+				Random field_149933_a = p_149749_1_.rand;
 				for(int i1 = 0; i1 < tileentityfurnace.getSizeInventory(); ++i1) {
 					ItemStack itemstack = tileentityfurnace.getStackInSlot(i1);
 

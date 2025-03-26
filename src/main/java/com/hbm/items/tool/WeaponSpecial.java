@@ -1,7 +1,6 @@
 package com.hbm.items.tool;
 
 import java.util.List;
-import java.util.Random;
 
 import com.google.common.collect.Multimap;
 import com.hbm.entity.effect.EntityNukeTorex;
@@ -28,8 +27,6 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class WeaponSpecial extends ItemSword {
-	
-	Random rand = new Random();
 
 	public WeaponSpecial(ToolMaterial p_i45356_1_) {
 		super(p_i45356_1_);
@@ -67,7 +64,7 @@ public class WeaponSpecial extends ItemSword {
 		if(this == ModItems.bottle_opener) {
 			if (!world.isRemote)
         	{
-				int i = rand.nextInt(7);
+				int i = world.rand.nextInt(7);
 				if(i == 0)
 					entity.addPotionEffect(new PotionEffect(Potion.blindness.id, 5 * 60 * 20, 0));
 				if(i == 1)

@@ -25,11 +25,8 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent.Pre;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class DroneCrate extends BlockContainer implements ILookOverlay, ITooltipProvider {
-
-	private static Random rand = new Random();
 
 	@SideOnly(Side.CLIENT) private IIcon iconTop;
 	@SideOnly(Side.CLIENT) private IIcon iconBottom;
@@ -81,12 +78,12 @@ public class DroneCrate extends BlockContainer implements ILookOverlay, ITooltip
 					ItemStack itemstack = tileentityfurnace.getStackInSlot(i1);
 
 					if(itemstack != null) {
-						float f = this.rand.nextFloat() * 0.8F + 0.1F;
-						float f1 = this.rand.nextFloat() * 0.8F + 0.1F;
-						float f2 = this.rand.nextFloat() * 0.8F + 0.1F;
+						float f = world.rand.nextFloat() * 0.8F + 0.1F;
+						float f1 = world.rand.nextFloat() * 0.8F + 0.1F;
+						float f2 = world.rand.nextFloat() * 0.8F + 0.1F;
 
 						while(itemstack.stackSize > 0) {
-							int j1 = this.rand.nextInt(21) + 10;
+							int j1 = world.rand.nextInt(21) + 10;
 
 							if(j1 > itemstack.stackSize) {
 								j1 = itemstack.stackSize;
@@ -100,9 +97,9 @@ public class DroneCrate extends BlockContainer implements ILookOverlay, ITooltip
 							}
 
 							float f3 = 0.05F;
-							entityitem.motionX = (float) this.rand.nextGaussian() * f3;
-							entityitem.motionY = (float) this.rand.nextGaussian() * f3 + 0.2F;
-							entityitem.motionZ = (float) this.rand.nextGaussian() * f3;
+							entityitem.motionX = (float) world.rand.nextGaussian() * f3;
+							entityitem.motionY = (float) world.rand.nextGaussian() * f3 + 0.2F;
+							entityitem.motionZ = (float) world.rand.nextGaussian() * f3;
 							world.spawnEntityInWorld(entityitem);
 						}
 					}

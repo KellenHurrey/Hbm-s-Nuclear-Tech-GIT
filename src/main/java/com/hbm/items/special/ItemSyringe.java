@@ -1,7 +1,6 @@
 package com.hbm.items.special;
 
 import java.util.List;
-import java.util.Random;
 
 import com.hbm.config.VersatileConfig;
 import com.hbm.extprop.HbmLivingProps;
@@ -28,8 +27,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 
 public class ItemSyringe extends Item {
-
-	Random rand = new Random();
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
@@ -84,7 +81,7 @@ public class ItemSyringe extends Item {
 
 		if(this == ModItems.syringe_poison) {
 			if(!world.isRemote) {
-				if(rand.nextInt(2) == 0)
+				if(world.rand.nextInt(2) == 0)
 					player.attackEntityFrom(ModDamageSource.euthanizedSelf, 30);
 				else
 					player.attackEntityFrom(ModDamageSource.euthanizedSelf2, 30);

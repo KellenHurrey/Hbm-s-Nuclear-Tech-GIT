@@ -168,8 +168,7 @@ public class SoyuzLauncher extends BlockDummyable {
 	public int getOffset() {
 		return 0;
 	}
-	
-	private final Random field_149933_a = new Random();
+
 	private static boolean keepInventory;
 	
 	@Override
@@ -182,12 +181,12 @@ public class SoyuzLauncher extends BlockDummyable {
 					ItemStack itemstack = tileentityfurnace.getStackInSlot(i1);
 
 					if(itemstack != null) {
-						float f = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-						float f1 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-						float f2 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
+						float f = world.rand.nextFloat() * 0.8F + 0.1F;
+						float f1 = world.rand.nextFloat() * 0.8F + 0.1F;
+						float f2 = world.rand.nextFloat() * 0.8F + 0.1F;
 
 						while(itemstack.stackSize > 0) {
-							int j1 = this.field_149933_a.nextInt(21) + 10;
+							int j1 = world.rand.nextInt(21) + 10;
 
 							if(j1 > itemstack.stackSize) {
 								j1 = itemstack.stackSize;
@@ -201,9 +200,9 @@ public class SoyuzLauncher extends BlockDummyable {
 							}
 
 							float f3 = 0.05F;
-							entityitem.motionX = (float) this.field_149933_a.nextGaussian() * f3;
-							entityitem.motionY = (float) this.field_149933_a.nextGaussian() * f3 + 0.2F;
-							entityitem.motionZ = (float) this.field_149933_a.nextGaussian() * f3;
+							entityitem.motionX = (float) world.rand.nextGaussian() * f3;
+							entityitem.motionY = (float) world.rand.nextGaussian() * f3 + 0.2F;
+							entityitem.motionZ = (float) world.rand.nextGaussian() * f3;
 							world.spawnEntityInWorld(entityitem);
 						}
 					}

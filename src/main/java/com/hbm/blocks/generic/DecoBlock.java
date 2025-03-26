@@ -27,8 +27,6 @@ import net.minecraft.world.World;
 
 public class DecoBlock extends BlockContainer implements IToolable, INBTTransformable {
 
-	Random rand = new Random();
-
 	public DecoBlock(Material p_i45386_1_) {
 		super(p_i45386_1_);
 	}

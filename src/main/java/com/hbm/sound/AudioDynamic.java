@@ -1,15 +1,13 @@
 package com.hbm.sound;
 
-import com.hbm.main.MainRegistry;
 import com.hbm.migraine.GuiMigraine;
-import com.hbm.migraine.world.TrackedDummyWorld;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MovingSound;
-import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
 
@@ -56,9 +54,12 @@ public class AudioDynamic extends MovingSound {
 		
 		if(player != null) {
 			if (isInDummyWorld){
-				GuiMigraine screen = (GuiMigraine)Minecraft.getMinecraft().currentScreen;
-				if (screen != null && screen.worldRenderer != null)
-					f = (float)	Math.sqrt(Math.pow(xPosF - screen.worldRenderer.getEyePos().x, 2) + Math.pow(yPosF - screen.worldRenderer.getEyePos().y, 2) + Math.pow(zPosF - screen.worldRenderer.getEyePos().z, 2));
+				Gui screen = Minecraft.getMinecraft().currentScreen;
+				if (screen instanceof GuiMigraine) {
+					GuiMigraine migraine = (GuiMigraine) screen;
+					if (migraine.worldRenderer != null)
+						f = (float) Math.sqrt(Math.pow(xPosF - migraine.worldRenderer.getEyePos().x, 2) + Math.pow(yPosF - migraine.worldRenderer.getEyePos().y, 2) + Math.pow(zPosF - migraine.worldRenderer.getEyePos().z, 2));
+				}
 			}else {
 				f = (float) Math.sqrt(Math.pow(xPosF - player.posX, 2) + Math.pow(yPosF - player.posY, 2) + Math.pow(zPosF - player.posZ, 2));
 			}
@@ -66,10 +67,6 @@ public class AudioDynamic extends MovingSound {
 		} else {
 			volume = maxVolume;
 		}
-
-//		if (isInDummyWorld){
-//			volume = maxVolume;
-//		}
 
 		if(this.shouldExpire) {
 			
