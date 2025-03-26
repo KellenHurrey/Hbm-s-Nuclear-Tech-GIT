@@ -2,6 +2,8 @@ package com.hbm.blocks.machine;
 
 import com.hbm.main.MainRegistry;
 import com.hbm.tileentity.machine.TileEntityMachineEPress;
+import com.hbm.world.gen.INBTTransformable;
+
 import cpw.mods.fml.common.network.internal.FMLNetworkHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
@@ -16,7 +18,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-public class MachineEPress extends BlockContainer {
+public class MachineEPress extends BlockContainer implements INBTTransformable {
 
 	private static boolean keepInventory;
 
@@ -115,5 +117,10 @@ public class MachineEPress extends BlockContainer {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public int transformMeta(int meta, int coordBaseMode) {
+		return INBTTransformable.transformMetaDeco(meta, coordBaseMode);
 	}
 }

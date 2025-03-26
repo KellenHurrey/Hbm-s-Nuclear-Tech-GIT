@@ -53,7 +53,7 @@ public class FluidNetMK2 extends NodeNet<IFluidReceiverMK2, IFluidProviderMK2, F
 		
 		while(iterator.hasNext()) {
 			Entry<IFluidProviderMK2, Long> entry = iterator.next();
-			if(currentTime - entry.getValue() > timeout) { iterator.remove(); continue; }
+			if(currentTime - entry.getValue() > timeout || isBadLink(entry.getKey())) { iterator.remove(); continue; }
 			IFluidProviderMK2 provider = entry.getKey();
 			int[] pressureRange = provider.getProvidingPressureRange(type);
 			for(int p = pressureRange[0]; p <= pressureRange[1]; p++) {
@@ -69,7 +69,7 @@ public class FluidNetMK2 extends NodeNet<IFluidReceiverMK2, IFluidProviderMK2, F
 		
 		while(iterator.hasNext()) {
 			Entry<IFluidReceiverMK2, Long> entry = iterator.next();
-			if(currentTime - entry.getValue() > timeout) { iterator.remove(); continue; }
+			if(currentTime - entry.getValue() > timeout || isBadLink(entry.getKey())) { iterator.remove(); continue; }
 			IFluidReceiverMK2 receiver = entry.getKey();
 			int[] pressureRange = receiver.getReceivingPressureRange(type);
 			for(int p = pressureRange[0]; p <= pressureRange[1]; p++) {
@@ -88,9 +88,11 @@ public class FluidNetMK2 extends NodeNet<IFluidReceiverMK2, IFluidProviderMK2, F
 		
 		for(int p = 0; p <= IFluidUserMK2.HIGHEST_VALID_PRESSURE; p++) { // if the pressure range were ever to increase, we might have to rethink this
 			
+			long totalAvailable = fluidAvailable[p];
+			
 			for(int i = ConnectionPriority.values().length - 1; i >= 0; i--) {
 				
-				long toTransfer = Math.min(fluidDemand[p][i], fluidAvailable[p]);
+				long toTransfer = Math.min(fluidDemand[p][i], totalAvailable);
 				if(toTransfer <= 0) continue;
 
 				long priorityDemand = fluidDemand[p][i];
@@ -102,6 +104,8 @@ public class FluidNetMK2 extends NodeNet<IFluidReceiverMK2, IFluidProviderMK2, F
 					received[p] += toSend;
 					fluidTracker += toSend;
 				}
+				
+				totalAvailable -= received[p];
 			}
 			
 			notAccountedFor[p] = received[p];

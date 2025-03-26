@@ -370,11 +370,13 @@ public class ModEventHandler {
 				entity.setCurrentItemOrArmor(3, new ItemStack(ModItems.starmetal_plate, 1, world.rand.nextInt(ModItems.starmetal_plate.getMaxDamage())));
 
 			if(event.world.rand.nextInt(128) == 0)
+			if(event.world.rand.nextInt(64) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.pipe_lead, 1, world.rand.nextInt(100)));
 			if(event.world.rand.nextInt(128) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.reer_graar, 1, world.rand.nextInt(100)));
 			if(event.world.rand.nextInt(128) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.pipe_rusty, 1, world.rand.nextInt(100)));
+			if(event.world.rand.nextInt(128) == 0)
 			if(event.world.rand.nextInt(128) == 0)
 				entity.setCurrentItemOrArmor(0, new ItemStack(ModItems.crowbar, 1, world.rand.nextInt(100)));
 			if(event.world.rand.nextInt(128) == 0)

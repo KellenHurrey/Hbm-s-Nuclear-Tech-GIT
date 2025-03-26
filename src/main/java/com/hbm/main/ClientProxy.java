@@ -1762,7 +1762,7 @@ public class ClientProxy extends ServerProxy {
 								.addPos(90, 0, 1, 800)
 								.addPos(0, 0, 1, 50));
 
-				HbmAnimations.hotbar[player.inventory.currentItem][0] = new Animation(player.getHeldItem().getItem().getUnlocalizedName(), System.currentTimeMillis(), animation);
+				HbmAnimations.hotbar[player.inventory.currentItem][0] = new Animation(player.getHeldItem().getItem().getUnlocalizedName(), System.currentTimeMillis(), animation, null);
 			}
 
 			/* crucible swing */
@@ -1784,7 +1784,7 @@ public class ClientProxy extends ServerProxy {
 
 					Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("hbm:weapon.cSwing"), 0.8F + player.getRNG().nextFloat() * 0.2F));
 
-					HbmAnimations.hotbar[player.inventory.currentItem][0] = new Animation(player.getHeldItem().getItem().getUnlocalizedName(), System.currentTimeMillis(), animation);
+					HbmAnimations.hotbar[player.inventory.currentItem][0] = new Animation(player.getHeldItem().getItem().getUnlocalizedName(), System.currentTimeMillis(), animation, null);
 				}
 			}
 
@@ -1808,7 +1808,7 @@ public class ClientProxy extends ServerProxy {
 									.addPos(0, 0, 0, retire));
 
 
-					HbmAnimations.hotbar[player.inventory.currentItem][0] = new Animation(player.getHeldItem().getItem().getUnlocalizedName(), System.currentTimeMillis(), animation);
+					HbmAnimations.hotbar[player.inventory.currentItem][0] = new Animation(player.getHeldItem().getItem().getUnlocalizedName(), System.currentTimeMillis(), animation, null);
 
 				} else {
 
@@ -1829,7 +1829,7 @@ public class ClientProxy extends ServerProxy {
 									.addPos(2, 0, 2, sideways)
 									.addPos(0, 0, 0, retire));
 
-					HbmAnimations.hotbar[player.inventory.currentItem][0] = new Animation(player.getHeldItem().getItem().getUnlocalizedName(), System.currentTimeMillis(), animation);
+					HbmAnimations.hotbar[player.inventory.currentItem][0] = new Animation(player.getHeldItem().getItem().getUnlocalizedName(), System.currentTimeMillis(), animation, null);
 				}
 			}
 
@@ -1841,7 +1841,7 @@ public class ClientProxy extends ServerProxy {
 					BusAnimation anim = item.getAnimation(data, stack);
 
 					if(anim != null) {
-						HbmAnimations.hotbar[player.inventory.currentItem][0] = new Animation(player.getHeldItem().getItem().getUnlocalizedName(), System.currentTimeMillis(), anim);
+						HbmAnimations.hotbar[player.inventory.currentItem][0] = new Animation(player.getHeldItem().getItem().getUnlocalizedName(), System.currentTimeMillis(), anim, null);
 					}
 				}
 			}
@@ -2040,6 +2040,7 @@ public class ClientProxy extends ServerProxy {
 		switch(key){
 		case JETPACK:			return Minecraft.getMinecraft().gameSettings.keyBindJump.getIsKeyPressed();
 		case TOGGLE_JETPACK:	return HbmKeybinds.jetpackKey.getIsKeyPressed();
+		case TOGGLE_MAGNET:		return HbmKeybinds.magnetKey.getIsKeyPressed();
 		case TOGGLE_HEAD:		return HbmKeybinds.hudKey.getIsKeyPressed();
 		case RELOAD:			return HbmKeybinds.reloadKey.getIsKeyPressed();
 		case DASH:				return HbmKeybinds.dashKey.getIsKeyPressed();
