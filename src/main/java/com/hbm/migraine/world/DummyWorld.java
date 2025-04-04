@@ -1,6 +1,9 @@
 package com.hbm.migraine.world;
 
 import com.hbm.main.MainRegistry;
+import com.hbm.migraine.player.ClientFakePlayer;
+import com.hbm.migraine.world.client.DummyWorldClient;
+import com.hbm.migraine.world.server.DummyWorldServer;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.world.*;
@@ -9,16 +12,20 @@ import net.minecraft.world.chunk.IChunkProvider;
 
 import javax.annotation.Nonnull;
 
+/** @author kellen, @https://github.com/GTNewHorizons/BlockRenderer6343 */
 public class DummyWorld extends World {
 
 	public static final WorldSettings DEFAULT_SETTINGS = new WorldSettings(
 		1L,
-		WorldSettings.GameType.CREATIVE, // SURVIVAL
+		WorldSettings.GameType.CREATIVE,
 		true,
 		false,
 		WorldType.DEFAULT);
 
 	public final DummyWorldServer serverWorld;
+	public final DummyWorldClient clientWorld;
+
+	public ClientFakePlayer fakePlayer;
 
 	public DummyWorld(){
 		super(new DummySaveHandler(), "MigraineWorld", DEFAULT_SETTINGS, new WorldProviderSurface(), new Profiler());
@@ -30,9 +37,8 @@ public class DummyWorld extends World {
 		this.calculateInitialSkylight();
 		this.calculateInitialWeatherBody();
 		this.serverWorld = new DummyWorldServer(this, this.getSaveHandler(), "MigraineServer", MainRegistry.MigraineWorldId, DEFAULT_SETTINGS, new Profiler());
+		this.clientWorld = DummyWorldClient.createDummyClientWorld(this, DEFAULT_SETTINGS, MainRegistry.MigraineWorldId, EnumDifficulty.HARD, new Profiler());
 	}
-
-	public void addPacket(long coord){}
 
 	@Override
 	public void markBlockRangeForRenderUpdate(int x1, int y1, int z1, int x2, int y2, int z2) {}
@@ -47,6 +53,8 @@ public class DummyWorld extends World {
 		return null;
 	}
 
+	public void doVoidFogParticles(int p_73029_1_, int p_73029_2_, int p_73029_3_){}
+
 	@Nonnull
 	@Override
 	protected IChunkProvider createChunkProvider(){
@@ -60,7 +68,7 @@ public class DummyWorld extends World {
 	}
 
 	@Override
-	protected boolean chunkExists(int x, int z){
+	public boolean chunkExists(int x, int z){
 		return chunkProvider.chunkExists(x, z);
 	}
 

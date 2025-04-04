@@ -1,9 +1,10 @@
-package com.hbm.migraine.world;
+package com.hbm.migraine.world.server;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 
+/** @author kellen */
 public class DummyServerConfigurationManager extends ServerConfigurationManager {
 	public DummyServerConfigurationManager(MinecraftServer p_i1500_1_) {
 		super(p_i1500_1_);

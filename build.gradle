@@ -145,7 +145,7 @@ if(Files.exists(Paths.get("curseforge.properties"))) {
 		gameVersions.addAll([
 				"Forge",
 				"Java 8",
-				"Client", "Server"
+				"Client", "server"
 		])
 
 		if (Files.exists(Paths.get("changelog"))) {

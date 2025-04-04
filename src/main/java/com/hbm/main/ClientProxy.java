@@ -863,6 +863,7 @@ public class ClientProxy extends ServerProxy {
 		TextureManager man = Minecraft.getMinecraft().renderEngine;
 		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
 		int particleSetting = Minecraft.getMinecraft().gameSettings.particleSetting;
+		EffectRenderer effectRenderer = Minecraft.getMinecraft().effectRenderer;
 		Random rand = world.rand;
 		String type = data.getString("type");
 		double x = data.getDouble("posX");
@@ -870,7 +871,7 @@ public class ClientProxy extends ServerProxy {
 		double z = data.getDouble("posZ");
 
 		if(ParticleCreators.particleCreators.containsKey(type)) {
-			ParticleCreators.particleCreators.get(type).makeParticle(world, player, man, rand, x, y, z, data);
+			ParticleCreators.particleCreators.get(type).makeParticle(world, player, man, rand, x, y, z, data, effectRenderer);
 			return;
 		}
 
@@ -879,18 +880,18 @@ public class ClientProxy extends ServerProxy {
 		if("waterSplash".equals(type)) {
 			for (int i = 0; i < 10; i++) {
 				EntityCloudFX smoke = new EntityCloudFX(world, x + world.rand.nextGaussian(), y + world.rand.nextGaussian(), z + world.rand.nextGaussian(), 0.0, 0.0, 0.0);
-				Minecraft.getMinecraft().effectRenderer.addEffect(smoke);
+				effectRenderer.addEffect(smoke);
 			}
 		}
 
 		if("cloudFX2".equals(type)) { // i have genuinely no idea what used this
 			EntityCloudFX smoke = new EntityCloudFX(world, x, y, z, 0.0, 0.1, 0.0);
-			Minecraft.getMinecraft().effectRenderer.addEffect(smoke);
+			effectRenderer.addEffect(smoke);
 		}
 
 		if("ABMContrail".equals(type)) {
 			ParticleContrail contrail = new ParticleContrail(man, world, x, y, z);
-			Minecraft.getMinecraft().effectRenderer.addEffect(contrail);
+			effectRenderer.addEffect(contrail);
 		}
 
 		// End MK1 porting.
@@ -902,32 +903,32 @@ public class ClientProxy extends ServerProxy {
 			contrail.motionX = data.getDouble("moX");
 			contrail.motionY = data.getDouble("moY");
 			contrail.motionZ = data.getDouble("moZ");
-			Minecraft.getMinecraft().effectRenderer.addEffect(contrail);
+			effectRenderer.addEffect(contrail);
 		}
 
 		if("exKerosene".equals(type)) {
 			ParticleContrail contrail = new ParticleContrail(man, world, x, y, z, 0F, 0F, 0F, 1F);
-			Minecraft.getMinecraft().effectRenderer.addEffect(contrail);
+			effectRenderer.addEffect(contrail);
 		}
 
 		if("exSolid".equals(type)) {
 			ParticleContrail contrail = new ParticleContrail(man, world, x, y, z, 0.3F, 0.2F, 0.05F, 1F);
-			Minecraft.getMinecraft().effectRenderer.addEffect(contrail);
+			effectRenderer.addEffect(contrail);
 		}
 
 		if("exHydrogen".equals(type)) {
 			ParticleContrail contrail = new ParticleContrail(man, world, x, y, z, 0.7F, 0.7F, 0.7F, 1F);
-			Minecraft.getMinecraft().effectRenderer.addEffect(contrail);
+			effectRenderer.addEffect(contrail);
 		}
 
 		if("exBalefire".equals(type)) {
 			ParticleContrail contrail = new ParticleContrail(man, world, x, y, z, 0.2F, 0.7F, 0.2F, 1F);
-			Minecraft.getMinecraft().effectRenderer.addEffect(contrail);
+			effectRenderer.addEffect(contrail);
 		}
 
 		if("radFog".equals(type)) {
 			ParticleRadiationFog contrail = new ParticleRadiationFog(man, world, x, y, z);
-			Minecraft.getMinecraft().effectRenderer.addEffect(contrail);
+			effectRenderer.addEffect(contrail);
 		}
 
 		// End MK2 porting.
@@ -945,14 +946,14 @@ public class ClientProxy extends ServerProxy {
 			contrail.motionX = mX;
 			contrail.motionY = mY;
 			contrail.motionZ = mZ;
-			Minecraft.getMinecraft().effectRenderer.addEffect(contrail);*/
+			effectRenderer.addEffect(contrail);*/
 
 			ParticleRocketFlame fx = new ParticleRocketFlame(man, world, x, y, z).setScale(scale);
 			fx.motionX = mX;
 			fx.motionY = mY;
 			fx.motionZ = mZ;
 			if(data.hasKey("maxAge")) fx.setMaxAge(data.getInteger("maxAge"));
-			Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+			effectRenderer.addEffect(fx);
 		}
 
 		if("smoke".equals(type)) {
@@ -968,7 +969,7 @@ public class ClientProxy extends ServerProxy {
 					fx.motionX = rand.nextGaussian() * (1 + (count / 150));
 					fx.motionZ = rand.nextGaussian() * (1 + (count / 150));
 					if(rand.nextBoolean()) fx.motionY = Math.abs(fx.motionY);
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 				}
 			}
 
@@ -979,7 +980,7 @@ public class ClientProxy extends ServerProxy {
 					fx.motionY = rand.nextGaussian() * (1 + (count / 50));
 					fx.motionX = rand.nextGaussian() * (1 + (count / 50));
 					fx.motionZ = rand.nextGaussian() * (1 + (count / 50));
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 				}
 			}
 
@@ -993,7 +994,7 @@ public class ClientProxy extends ServerProxy {
 					fx.motionY = 0;
 					fx.motionX = vec.xCoord;
 					fx.motionZ = vec.zCoord;
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 
 					vec.rotateAroundY((float)Math.PI * 2F / (float)count);
 				}
@@ -1011,7 +1012,7 @@ public class ClientProxy extends ServerProxy {
 					fx.motionY = 0;
 					fx.motionX = vec.xCoord;
 					fx.motionZ = vec.zCoord;
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 
 					vec.rotateAroundY((float)Math.PI * 2F / (float)count);
 				}
@@ -1031,7 +1032,7 @@ public class ClientProxy extends ServerProxy {
 					fx.motionY = 0;
 					fx.motionX = vec.xCoord * r;
 					fx.motionZ = vec.zCoord * r;
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 
 					vec.rotateAroundY(360 / count);
 				}
@@ -1052,7 +1053,7 @@ public class ClientProxy extends ServerProxy {
 					fx.motionY = 0;
 					fx.motionX = 0;
 					fx.motionZ = 0;
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 
 					vec.rotateAroundY(360 / count);
 				}
@@ -1075,7 +1076,7 @@ public class ClientProxy extends ServerProxy {
 
 					ParticleRocketFlame fx = new ParticleRocketFlame(man, world, x + rand.nextGaussian() * width, y, z + rand.nextGaussian() * width);
 					fx.motionY = -0.75 + rand.nextDouble() * 0.5;
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 				}
 			}
 
@@ -1090,7 +1091,7 @@ public class ClientProxy extends ServerProxy {
 				for(int i = 0; i < count; i++) {
 
 					ParticleRocketFlame fx = new ParticleRocketFlame(man, world, x + rand.nextGaussian() * width, y + rand.nextGaussian() * width, z + rand.nextGaussian() * width);
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 				}
 			}
 		}
@@ -1100,15 +1101,15 @@ public class ClientProxy extends ServerProxy {
 			char c = (char)data.getInteger("char");
 
 			ParticleLetter fx = new ParticleLetter(world, x, y, z, color, c);
-			Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+			effectRenderer.addEffect(fx);
 
 			for(int i = 0; i < 50; i++) {
 				EntityFireworkSparkFX blast = new EntityFireworkSparkFX(world, x, y, z,
 						0.4 * world.rand.nextGaussian(),
 						0.4 * world.rand.nextGaussian(),
-						0.4 * world.rand.nextGaussian(), Minecraft.getMinecraft().effectRenderer);
+						0.4 * world.rand.nextGaussian(), effectRenderer);
 				blast.setColour(color);
-				Minecraft.getMinecraft().effectRenderer.addEffect(blast);
+				effectRenderer.addEffect(blast);
 			}
 		}
 
@@ -1155,7 +1156,7 @@ public class ClientProxy extends ServerProxy {
 				}
 
 				if(fx != null)
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 			}
 		}
 
@@ -1212,7 +1213,7 @@ public class ClientProxy extends ServerProxy {
 			}
 
 			if("fireworks".equals(data.getString("mode"))) {
-				fx = new EntityFireworkSparkFX(world, x, y, z, 0, 0, 0, Minecraft.getMinecraft().effectRenderer);
+				fx = new EntityFireworkSparkFX(world, x, y, z, 0, 0, 0, effectRenderer);
 			}
 
 			if("largeexplode".equals(data.getString("mode"))) {
@@ -1227,7 +1228,7 @@ public class ClientProxy extends ServerProxy {
 					float r2 = 1.0F - rand.nextFloat() * 0.5F;
 					sec.setRBGColorF(0.5F * r2, 0.5F * r2, 0.5F * r2);
 					sec.multipleParticleScaleBy(i + 1);
-					Minecraft.getMinecraft().effectRenderer.addEffect(sec);
+					effectRenderer.addEffect(sec);
 				}
 			}
 
@@ -1263,7 +1264,7 @@ public class ClientProxy extends ServerProxy {
 					ReflectionHelper.setPrivateValue(EntityFX.class, fx, data.getInteger("overrideAge"), "particleMaxAge", "field_70547_e");
 				}
 
-				Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+				effectRenderer.addEffect(fx);
 			}
 		}
 
@@ -1334,7 +1335,7 @@ public class ClientProxy extends ServerProxy {
 
 						for(int i = 0; i < (10 - delta.lengthVector()); i++) {
 							vel.rotateAroundY(world.rand.nextFloat() * (float)Math.PI * 2F);
-							Minecraft.getMinecraft().effectRenderer.addEffect(new EntityBlockDustFX(world, mop.hitVec.xCoord, mop.hitVec.yCoord + 0.1, mop.hitVec.zCoord, vel.xCoord, 0.1, vel.zCoord, b, meta));
+							effectRenderer.addEffect(new EntityBlockDustFX(world, mop.hitVec.xCoord, mop.hitVec.yCoord + 0.1, mop.hitVec.zCoord, vel.xCoord, 0.1, vel.zCoord, b, meta));
 						}
 					}
 				}
@@ -1346,12 +1347,12 @@ public class ClientProxy extends ServerProxy {
 				double mY3 = BobMathUtil.safeClamp(p.motionY + moY * 2, -10, 10);
 				double mZ3 = BobMathUtil.safeClamp(p.motionZ + moZ * 2, -10, 10);
 
-				Minecraft.getMinecraft().effectRenderer.addEffect(new EntityFlameFX(world, ix + ox, iy, iz + oz, mX2, mY2, mZ2));
-				Minecraft.getMinecraft().effectRenderer.addEffect(new EntityFlameFX(world, ix - ox, iy, iz - oz, mX2, mY2, mZ2));
+				effectRenderer.addEffect(new EntityFlameFX(world, ix + ox, iy, iz + oz, mX2, mY2, mZ2));
+				effectRenderer.addEffect(new EntityFlameFX(world, ix - ox, iy, iz - oz, mX2, mY2, mZ2));
 
 				if(particleSetting == 0) {
-					Minecraft.getMinecraft().effectRenderer.addEffect(new net.minecraft.client.particle.EntitySmokeFX(world, ix + ox, iy, iz + oz, mX3, mY3, mZ3));
-					Minecraft.getMinecraft().effectRenderer.addEffect(new net.minecraft.client.particle.EntitySmokeFX(world, ix - ox, iy, iz - oz, mX3, mY3, mZ3));
+					effectRenderer.addEffect(new net.minecraft.client.particle.EntitySmokeFX(world, ix + ox, iy, iz + oz, mX3, mY3, mZ3));
+					effectRenderer.addEffect(new net.minecraft.client.particle.EntitySmokeFX(world, ix - ox, iy, iz - oz, mX3, mY3, mZ3));
 				}
 			}
 		}
@@ -1389,14 +1390,14 @@ public class ClientProxy extends ServerProxy {
 				double mX = vec.xCoord * mult;
 				double mZ = vec.zCoord * mult;
 
-				//Minecraft.getMinecraft().effectRenderer.addEffect(new EntityFlameFX(world, ix + ox, iy, iz + oz, 0, 0, 0));
-				//Minecraft.getMinecraft().effectRenderer.addEffect(new EntityFlameFX(world, ix - ox, iy, iz - oz, 0, 0, 0));
+				//effectRenderer.addEffect(new EntityFlameFX(world, ix + ox, iy, iz + oz, 0, 0, 0));
+				//effectRenderer.addEffect(new EntityFlameFX(world, ix - ox, iy, iz - oz, 0, 0, 0));
 
 				for(int i = 0; i < 2; i++) {
 					net.minecraft.client.particle.EntitySmokeFX fx = new net.minecraft.client.particle.EntitySmokeFX(world, ix + ox * (i == 0 ? -1 : 1), iy, iz + oz * (i == 0 ? -1 : 1), mX, 0, mZ);
 					float scale = 0.5F;
 					ReflectionHelper.setPrivateValue(net.minecraft.client.particle.EntitySmokeFX.class, (net.minecraft.client.particle.EntitySmokeFX)fx, scale, "smokeParticleScale", "field_70587_a");
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 				}
 			}
 		}
@@ -1441,7 +1442,7 @@ public class ClientProxy extends ServerProxy {
 
 						for(int i = 0; i < (10 - delta.lengthVector()); i++) {
 							vel.rotateAroundY(world.rand.nextFloat() * (float)Math.PI * 2F);
-							Minecraft.getMinecraft().effectRenderer.addEffect(new EntityBlockDustFX(world, mop.hitVec.xCoord, mop.hitVec.yCoord + 0.1, mop.hitVec.zCoord, vel.xCoord, 0.1, vel.zCoord, b, meta));
+							effectRenderer.addEffect(new EntityBlockDustFX(world, mop.hitVec.xCoord, mop.hitVec.yCoord + 0.1, mop.hitVec.zCoord, vel.xCoord, 0.1, vel.zCoord, b, meta));
 						}
 					}
 				}
@@ -1450,8 +1451,8 @@ public class ClientProxy extends ServerProxy {
 				EntityReddustFX dust2 = new EntityReddustFX(world, ix - ox, iy, iz - oz, 0.8F, 0.5F, 1.0F);
 				dust1.setVelocity(p.motionX, p.motionY, p.motionZ);
 				dust2.setVelocity(p.motionX, p.motionY, p.motionZ);
-				Minecraft.getMinecraft().effectRenderer.addEffect(dust1);
-				Minecraft.getMinecraft().effectRenderer.addEffect(dust2);
+				effectRenderer.addEffect(dust1);
+				effectRenderer.addEffect(dust2);
 			}
 		}
 
@@ -1493,7 +1494,7 @@ public class ClientProxy extends ServerProxy {
 
 						for(int i = 0; i < (10 - delta.lengthVector()); i++) {
 							vel.rotateAroundY(world.rand.nextFloat() * (float)Math.PI * 2F);
-							Minecraft.getMinecraft().effectRenderer.addEffect(new EntityBlockDustFX(world, mop.hitVec.xCoord, mop.hitVec.yCoord + 0.1, mop.hitVec.zCoord, vel.xCoord, 0.1, vel.zCoord, b, meta));
+							effectRenderer.addEffect(new EntityBlockDustFX(world, mop.hitVec.xCoord, mop.hitVec.yCoord + 0.1, mop.hitVec.zCoord, vel.xCoord, 0.1, vel.zCoord, b, meta));
 						}
 					}
 				}
@@ -1502,8 +1503,8 @@ public class ClientProxy extends ServerProxy {
 				EntityReddustFX dust2 = new EntityReddustFX(world, ix - ox, iy, iz - oz, 0.01F, 1.0F, 1.0F);
 				dust1.setVelocity(p.motionX, p.motionY, p.motionZ);
 				dust2.setVelocity(p.motionX, p.motionY, p.motionZ);
-				Minecraft.getMinecraft().effectRenderer.addEffect(dust1);
-				Minecraft.getMinecraft().effectRenderer.addEffect(dust2);
+				effectRenderer.addEffect(dust1);
+				effectRenderer.addEffect(dust2);
 			}
 		}
 
@@ -1512,8 +1513,8 @@ public class ClientProxy extends ServerProxy {
 			ParticleMukeWave wave = new ParticleMukeWave(man, world, x, y, z);
 			ParticleMukeFlash flash = new ParticleMukeFlash(man, world, x, y, z, data.getBoolean("balefire"));
 
-			Minecraft.getMinecraft().effectRenderer.addEffect(wave);
-			Minecraft.getMinecraft().effectRenderer.addEffect(flash);
+			effectRenderer.addEffect(wave);
+			effectRenderer.addEffect(flash);
 
 			//single swing: 			HT 15,  MHT 15
 			//double swing: 			HT 60,  MHT 50
@@ -1526,15 +1527,15 @@ public class ClientProxy extends ServerProxy {
 		if("tinytot".equals(type)) {
 
 			ParticleMukeWave wave = new ParticleMukeWave(man, world, x, y, z);
-			Minecraft.getMinecraft().effectRenderer.addEffect(wave);
+			effectRenderer.addEffect(wave);
 
     		for(double d = 0.0D; d <= 1.6D; d += 0.1) {
 	    		ParticleMukeCloud cloud = new ParticleMukeCloud(man, world, x, y, z, rand.nextGaussian() * 0.05, d + rand.nextGaussian() * 0.02, rand.nextGaussian() * 0.05);
-	    		Minecraft.getMinecraft().effectRenderer.addEffect(cloud);
+	    		effectRenderer.addEffect(cloud);
     		}
     		for(int i = 0; i < 50; i++) {
 	    		ParticleMukeCloud cloud = new ParticleMukeCloud(man, world, x, y + 0.5, z, rand.nextGaussian() * 0.5, rand.nextInt(5) == 0 ? 0.02 : 0, rand.nextGaussian() * 0.5);
-	    		Minecraft.getMinecraft().effectRenderer.addEffect(cloud);
+	    		effectRenderer.addEffect(cloud);
     		}
     		for(int i = 0; i < 15; i++) {
     			double ix = rand.nextGaussian() * 0.2;
@@ -1548,7 +1549,7 @@ public class ClientProxy extends ServerProxy {
     			double iy = 1.6 + (rand.nextDouble() * 2 - 1) * (0.75 - (ix * ix + iz * iz)) * 0.5;
 
 	    		ParticleMukeCloud cloud = new ParticleMukeCloud(man, world, x, y, z, ix, iy + rand.nextGaussian() * 0.02, iz);
-	    		Minecraft.getMinecraft().effectRenderer.addEffect(cloud);
+	    		effectRenderer.addEffect(cloud);
     		}
 			player.hurtTime = 15;
 			player.maxHurtTime = 15;
@@ -1558,25 +1559,25 @@ public class ClientProxy extends ServerProxy {
 		if("ufo".equals(type)) {
 			double motion = data.getDouble("motion");
 			ParticleMukeCloud cloud = new ParticleMukeCloud(man, world, x, y, z, rand.nextGaussian() * motion, 0, rand.nextGaussian() * motion);
-			Minecraft.getMinecraft().effectRenderer.addEffect(cloud);
+			effectRenderer.addEffect(cloud);
 		}
 
 		if("bf".equals(type)) {
 			ParticleMukeCloud cloud = new ParticleMukeCloudBF(man, world, x, y, z, 0, 0, 0);
-			Minecraft.getMinecraft().effectRenderer.addEffect(cloud);
+			effectRenderer.addEffect(cloud);
 		}
 
 		if("haze".equals(type)) {
 
 			ParticleHaze fog = new ParticleHaze(man, world, x, y, z);
-			Minecraft.getMinecraft().effectRenderer.addEffect(fog);
+			effectRenderer.addEffect(fog);
 		}
 
 		if("plasmablast".equals(type)) {
 
 			ParticlePlasmaBlast cloud = new ParticlePlasmaBlast(man, world, x, y, z, data.getFloat("r"), data.getFloat("g"), data.getFloat("b"), data.getFloat("pitch"), data.getFloat("yaw"));
 			cloud.setScale(data.getFloat("scale"));
-			Minecraft.getMinecraft().effectRenderer.addEffect(cloud);
+			effectRenderer.addEffect(cloud);
 		}
 
 		if("justTilt".equals(type)) {
@@ -1610,7 +1611,7 @@ public class ClientProxy extends ServerProxy {
 					EntityFX fx = new net.minecraft.client.particle.EntityBlockDustFX(world, ix, iy, iz, 0, 0, 0, b, meta);
 					ReflectionHelper.setPrivateValue(EntityFX.class, fx, 150 + rand.nextInt(50), "particleMaxAge", "field_70547_e");
 
-					Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+					effectRenderer.addEffect(fx);
 				}
 			}
 		}
@@ -1633,19 +1634,19 @@ public class ClientProxy extends ServerProxy {
 					if("normal".equals(data.getString("mode"))) {
 						EntityFX fx = new net.minecraft.client.particle.EntityBlockDustFX(world, ix, iy, iz, (vec.xCoord + rand.nextGaussian() * 0.2) * 0.2, (vec.yCoord + rand.nextGaussian() * 0.2) * 0.2, (vec.zCoord + rand.nextGaussian() * 0.2) * 0.2, Blocks.stained_hardened_clay, (rand.nextBoolean() ? 5 : 13));
 						ReflectionHelper.setPrivateValue(EntityFX.class, fx, 150 + rand.nextInt(50), "particleMaxAge", "field_70547_e");
-						Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+						effectRenderer.addEffect(fx);
 					}
 
 					if("blood".equals(data.getString("mode"))) {
 						EntityFX fx = new net.minecraft.client.particle.EntityBlockDustFX(world, ix, iy, iz, (vec.xCoord + rand.nextGaussian() * 0.2) * 0.2, (vec.yCoord + rand.nextGaussian() * 0.2) * 0.2, (vec.zCoord + rand.nextGaussian() * 0.2) * 0.2, Blocks.redstone_block, 0);
 						ReflectionHelper.setPrivateValue(EntityFX.class, fx, 150 + rand.nextInt(50), "particleMaxAge", "field_70547_e");
-						Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+						effectRenderer.addEffect(fx);
 					}
 
 					if("smoke".equals(data.getString("mode"))) {
 						EntityFX fx = new net.minecraft.client.particle.EntitySmokeFX(world, ix, iy, iz, (vec.xCoord + rand.nextGaussian() * 0.1) * 0.05, (vec.yCoord + rand.nextGaussian() * 0.1) * 0.05, (vec.zCoord + rand.nextGaussian() * 0.1) * 0.05, 0.2F);
 						ReflectionHelper.setPrivateValue(EntityFX.class, fx, 10 + rand.nextInt(10), "particleMaxAge", "field_70547_e");
-						Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+						effectRenderer.addEffect(fx);
 					}
 				}
 			}
@@ -1663,7 +1664,7 @@ public class ClientProxy extends ServerProxy {
 
 				flash.setRBGColorF(0F, 0.75F, 1F);
 				flash.setVelocity(rand.nextGaussian(), rand.nextGaussian(), rand.nextGaussian());
-				Minecraft.getMinecraft().effectRenderer.addEffect(flash);
+				effectRenderer.addEffect(flash);
 			}
 		}
 
@@ -1671,27 +1672,27 @@ public class ClientProxy extends ServerProxy {
 
 			EntityAuraFX flash = new EntityAuraFX(world, x, y, z, 0, 0, 0);
 			flash.setRBGColorF(0F, 1F, 1F);
-			Minecraft.getMinecraft().effectRenderer.addEffect(flash);
+			effectRenderer.addEffect(flash);
 		}
 
 		if("hadron".equals(type)) {
 
-			Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleHadron(man, world, x, y, z));
+			effectRenderer.addEffect(new ParticleHadron(man, world, x, y, z));
 		}
 
 		if("rift".equals(type)) {
 
-			Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleRift(man, world, x, y, z));
+			effectRenderer.addEffect(new ParticleRift(man, world, x, y, z));
 		}
 
 		if("rbmkflame".equals(type)) {
 			int maxAge = data.getInteger("maxAge");
-			Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleRBMKFlame(man, world, x, y, z, maxAge));
+			effectRenderer.addEffect(new ParticleRBMKFlame(man, world, x, y, z, maxAge));
 		}
 
 		if("rbmkmush".equals(type)) {
 			float scale = data.getFloat("scale");
-			Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleRBMKMush(man, world, x, y, z, scale));
+			effectRenderer.addEffect(new ParticleRBMKMush(man, world, x, y, z, scale));
 		}
 
 		if("tower".equals(type)) {
@@ -1710,7 +1711,7 @@ public class ClientProxy extends ServerProxy {
 					fx.setRBGColorF(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F);
 				}
 
-				Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+				effectRenderer.addEffect(fx);
 			}
 		}
 
@@ -1724,7 +1725,7 @@ public class ClientProxy extends ServerProxy {
 					fx.setRBGColorF(color.getRed() / 255F * f, color.getGreen() / 255F * f, color.getBlue() / 255F * f);
 				}
 
-				Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+				effectRenderer.addEffect(fx);
 			}
 		}
 
@@ -1741,12 +1742,12 @@ public class ClientProxy extends ServerProxy {
 				fx.setRBGColorF(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F);
 			}
 
-			Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+			effectRenderer.addEffect(fx);
 		}
 
 		if("deadleaf".equals(type)) {
 			if(particleSetting == 0 || (particleSetting == 1 && rand.nextBoolean()))
-				Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleDeadLeaf(man, world, x, y, z));
+				effectRenderer.addEffect(new ParticleDeadLeaf(man, world, x, y, z));
 		}
 
 		if("anim".equals(type)) {
@@ -1850,8 +1851,8 @@ public class ClientProxy extends ServerProxy {
 		if("tau".equals(type)) {
 
 			for(int i = 0; i < data.getByte("count"); i++)
-				Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleSpark(world, x, y, z, rand.nextGaussian() * 0.05, 0.05, rand.nextGaussian() * 0.05));
-			Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleHadron(man, world, x, y, z));
+				effectRenderer.addEffect(new ParticleSpark(world, x, y, z, rand.nextGaussian() * 0.05, 0.05, rand.nextGaussian() * 0.05));
+			effectRenderer.addEffect(new ParticleHadron(man, world, x, y, z));
 		}
 
 		if("vanish".equals(type)) {
@@ -1884,12 +1885,12 @@ public class ClientProxy extends ServerProxy {
 				mult *= 10;
 
 			for(int i = 0; i < count; i++) {
-				Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleGiblet(man, world, x, y, z, rand.nextGaussian() * 0.25 * mult, rand.nextDouble() * mult, rand.nextGaussian() * 0.25 * mult));
+				effectRenderer.addEffect(new ParticleGiblet(man, world, x, y, z, rand.nextGaussian() * 0.25 * mult, rand.nextDouble() * mult, rand.nextGaussian() * 0.25 * mult));
 			}
 		}
 
 		if("amat".equals(type)) {
-			Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleAmatFlash(world, x, y, z, data.getFloat("scale")));
+			effectRenderer.addEffect(new ParticleAmatFlash(world, x, y, z, data.getFloat("scale")));
 		}
 
 		if("debug".equals(type)) {
@@ -1898,7 +1899,7 @@ public class ClientProxy extends ServerProxy {
 			float scale = data.getFloat("scale");
 			ParticleText text = new ParticleText(world, x, y, z, color, t);
 			text.multipleParticleScaleBy(scale);
-			Minecraft.getMinecraft().effectRenderer.addEffect(text);
+			effectRenderer.addEffect(text);
 		}
 
 		if("debugline".equals(type)) {
@@ -1907,7 +1908,7 @@ public class ClientProxy extends ServerProxy {
 			double mZ = data.getDouble("mZ");
 			int color = data.getInteger("color");
 			ParticleDebugLine text = new ParticleDebugLine(world, x, y, z, mX, mY, mZ, color);
-			Minecraft.getMinecraft().effectRenderer.addEffect(text);
+			effectRenderer.addEffect(text);
 		}
 
 		if("debugdrone".equals(type)) {
@@ -1925,7 +1926,7 @@ public class ClientProxy extends ServerProxy {
 				double mZ = data.getDouble("mZ");
 				int color = data.getInteger("color");
 				ParticleDebugLine text = new ParticleDebugLine(world, x, y, z, mX, mY, mZ, color);
-				Minecraft.getMinecraft().effectRenderer.addEffect(text);
+				effectRenderer.addEffect(text);
 			}
 		}
 
@@ -1942,7 +1943,7 @@ public class ClientProxy extends ServerProxy {
 				int color = data.getInteger("color");
 				debug = new ParticleDebug(man, world, x, y, z, mX, mY, mZ, color);
 			}
-			Minecraft.getMinecraft().effectRenderer.addEffect(debug);
+			effectRenderer.addEffect(debug);
 		}
 
 		if("gasfire".equals(type)) {
@@ -1951,7 +1952,7 @@ public class ClientProxy extends ServerProxy {
 			double mZ = data.getDouble("mZ");
 			float scale = data.getFloat("scale");
 			ParticleGasFlame text = new ParticleGasFlame(world, x, y, z, mX, mY, mZ, scale > 0 ? scale : 6.5F);
-			Minecraft.getMinecraft().effectRenderer.addEffect(text);
+			effectRenderer.addEffect(text);
 		}
 
 		if("marker".equals(type)) {
@@ -1982,7 +1983,7 @@ public class ClientProxy extends ServerProxy {
 			float offset = data.getFloat("off");
 
 			ParticleFoundry sploosh = new ParticleFoundry(man, world, x, y, z, color, dir, length, base, offset);
-			Minecraft.getMinecraft().effectRenderer.addEffect(sploosh);
+			effectRenderer.addEffect(sploosh);
 		}
 
 		if("frozen".equals(type)) {

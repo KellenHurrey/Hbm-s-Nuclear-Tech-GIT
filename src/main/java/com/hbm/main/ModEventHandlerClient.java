@@ -821,7 +821,8 @@ public class ModEventHandlerClient {
 				list.add(EnumChatFormatting.GREEN + I18nUtil.resolveKey("cannery.f1"));
 				lastMigraine = comp;
 //				canneryTimestamp = System.currentTimeMillis();
-			}
+			}else
+				lastMigraine = null;
 		} catch (Exception ex){
 			list.add(EnumChatFormatting.RED + "Error loading migraine: " + ex.getLocalizedMessage());
 		}
@@ -964,28 +965,15 @@ public class ModEventHandlerClient {
 			}
 		}
 
-		if(Keyboard.isKeyDown(Keyboard.KEY_F1) && Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiMigraine) && firstHolding) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_F1) && Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiMigraine) && firstHolding && lastMigraine != null) {
 
 			firstHolding = false;
 
-			ComparableStack comp = lastMigraine; //: null; //canneryTimestamp > System.currentTimeMillis() - 100 ?
-
-			if(comp == null) {
-				ItemStack stack = getMouseOverStack();
-				if(stack != null) comp = new ComparableStack(stack).makeSingular();
-			}
-
-			if(comp != null) {
-//				CanneryBase cannery = Jars.canneries.get(comp);
-				MigraineInstructions instructions = MigraineLoader.instructions.get(comp);
-				if(instructions != null) {
-					FMLCommonHandler.instance().showGuiScreen(new GuiMigraine(instructions));
-//					FMLCommonHandler.instance().showGuiScreen(new GuiWorldInAJar(cannery.createScript(), cannery.getName(), cannery.getIcon(), cannery.seeAlso()));
-				}
-			}
-		}else{
+			MigraineInstructions instructions = MigraineLoader.instructions.get(lastMigraine);
+			if(instructions != null)
+				FMLCommonHandler.instance().showGuiScreen(new GuiMigraine(instructions));
+		} else
 			firstHolding = true;
-		}
 
 		if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_LMENU)) {
 

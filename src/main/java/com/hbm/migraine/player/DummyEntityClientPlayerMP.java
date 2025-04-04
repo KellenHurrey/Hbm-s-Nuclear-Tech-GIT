@@ -1,19 +1,20 @@
-package com.hbm.migraine.client;
+package com.hbm.migraine.player;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.stats.StatBase;
+import net.minecraft.stats.StatFileWriter;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.Session;
 import net.minecraft.world.World;
 
-// Ok it is showing an error but still compiles fine the fuck
-public class ClientFakePlayer extends EntityPlayer {
-
-	public ClientFakePlayer(World world, GameProfile name) {
-		super(world, name);
+public class DummyEntityClientPlayerMP extends EntityClientPlayerMP {
+	public DummyEntityClientPlayerMP(Minecraft p_i45064_1_, World p_i45064_2_, Session p_i45064_3_, NetHandlerPlayClient p_i45064_4_, StatFileWriter p_i45064_5_) {
+		super(p_i45064_1_, p_i45064_2_, p_i45064_3_, p_i45064_4_, p_i45064_5_);
 	}
 
 	@Override

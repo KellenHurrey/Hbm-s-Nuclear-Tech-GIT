@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
+/** @author kellen, @https://github.com/GTNewHorizons/BlockRenderer6343 */
 public class DummyChunkProvider implements IChunkProvider {
 	private final World world;
 	private LongHashMap loadedChunks = new LongHashMap();
@@ -28,19 +29,6 @@ public class DummyChunkProvider implements IChunkProvider {
 		return (Chunk) loadedChunks.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
 	}
 
-//	@Nonnull
-//	@Override
-//	public Chunk provideChunk(int x, int z) {
-//		long chunkKey = ChunkCoordIntPair.chunkXZ2Int(x, z);
-//		if (loadedChunks.containsItem(chunkKey)) {
-//			return (Chunk) loadedChunks.getValueByKey(chunkKey);
-//		}
-//
-//		Chunk chunk = new Chunk(world, x, z);
-//		loadedChunks.add(chunkKey, chunk);
-//		return chunk;
-//	}
-
 	@Nonnull
 	@Override
 	public Chunk provideChunk(int x, int z) {
@@ -50,12 +38,12 @@ public class DummyChunkProvider implements IChunkProvider {
 		}
 
 		Chunk chunk = new Chunk(world, x, z);
-		chunk.generateSkylightMap(); // Ensure proper lighting calculations
-		chunk.setChunkModified(); // Mark as modified to prevent unloading
+		chunk.generateSkylightMap();
+		chunk.setChunkModified();
 
 		loadedChunks.add(chunkKey, chunk);
 
-		chunk.onChunkLoad(); // IMPORTANT: Calls readFromNBT() for tile entities!
+		chunk.onChunkLoad();
 
 		return chunk;
 	}

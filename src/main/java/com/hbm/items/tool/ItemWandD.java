@@ -32,7 +32,7 @@ public class ItemWandD extends Item {
 
 			int y = world.getHeightValue(pos.blockX, pos.blockZ);
 
-			Random rand = new Random();
+			Random rand = world.rand;
 
 			if(world.getBlock(pos.blockX, y - 1, pos.blockZ).canPlaceTorchOnTop(world, pos.blockX, y - 1, pos.blockZ)) {
 				world.setBlock(pos.blockX, y, pos.blockZ, ModBlocks.safe, rand.nextInt(4) + 2, 2);

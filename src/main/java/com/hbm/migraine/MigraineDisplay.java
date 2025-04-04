@@ -18,7 +18,7 @@ import org.lwjgl.opengl.GL12;
 import java.util.ArrayList;
 import java.util.List;
 
-/** @author hbm **/
+/** @author hbm, kellen **/
 public class MigraineDisplay {
 	private static final ResourceLocation guiUtil =  new ResourceLocation(RefStrings.MODID + ":textures/gui/gui_utility.png");
 

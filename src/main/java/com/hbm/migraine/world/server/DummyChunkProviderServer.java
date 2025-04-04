@@ -1,4 +1,4 @@
-package com.hbm.migraine.world;
+package com.hbm.migraine.world.server;
 
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.IProgressUpdate;
@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
+/** @author kellen */
 public class DummyChunkProviderServer extends ChunkProviderServer {
 	private LongHashMap loadedChunks = new LongHashMap();
 

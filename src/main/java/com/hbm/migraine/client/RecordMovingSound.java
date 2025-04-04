@@ -4,6 +4,7 @@ import net.minecraft.client.audio.MovingSound;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 
+/** @author kellen */
 public class RecordMovingSound extends MovingSound {
 
 	private final Entity entity;

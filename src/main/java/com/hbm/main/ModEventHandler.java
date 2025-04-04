@@ -38,7 +38,7 @@ import com.hbm.items.weapon.sedna.ItemGunBaseNT;
 import com.hbm.items.weapon.sedna.factory.XFactory12ga;
 import com.hbm.lib.ModDamageSource;
 import com.hbm.lib.RefStrings;
-import com.hbm.migraine.world.DummyMinecraftServer;
+import com.hbm.migraine.world.server.DummyMinecraftServer;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.packet.toclient.PermaSyncPacket;
 import com.hbm.packet.toclient.PlayerInformPacket;
@@ -1043,7 +1043,6 @@ public class ModEventHandler {
 			prevServer = server;
 		}
 	}
-
 
 	@SubscribeEvent
 	public void onPlayerTick(TickEvent.PlayerTickEvent event) {

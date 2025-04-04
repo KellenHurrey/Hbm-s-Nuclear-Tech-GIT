@@ -1,0 +1,412 @@
+{
+	"owner": {
+		"id": "hbm:tile.machine_crucible"
+	},
+	"seeAlso": [
+		{ "id": "hbm:tile.foundry_channel" }
+	],
+	"chapters": [
+		240,
+		720
+	],
+	"size": {
+		"x": 5,
+		"y": 4,
+		"z": 5
+	},
+	"update": [
+		{
+			"tick": 0,
+			"action": {
+				"type": "fillBlocks",
+				"id": "minecraft:brick_block",
+				"positionMin": {
+					"x": 0,
+					"y": 0,
+					"z": 0
+				},
+				"positionMax": {
+					"x": 4,
+					"y": 0,
+					"z": 4
+				}
+			}
+		},
+		{
+			"tick": 5,
+			"action": {
+				"type": "fillBlocks",
+				"id": "minecraft:brick_block",
+				"positionMin": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				},
+				"positionMax": {
+					"x": 3,
+					"y": 1,
+					"z": 3
+				}
+			}
+		},
+		{
+			"tick": 10,
+			"action": {
+				"type": "placeBlock",
+				"id": "hbm:tile.machine_crucible",
+				"position": {
+					"x": 3,
+					"y": 2,
+					"z": 2
+				},
+				"yaw": 90
+			}
+		},
+		{
+			"tick": 20,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": 0,
+					"y": -30
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.crucible.0"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "BOTTOM",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 80,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": 0,
+					"y": -30
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.crucible.1"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "BOTTOM",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 150,
+			"priority": 2,
+			"action": {
+				"type": "fillBlocks",
+				"id": "minecraft:air",
+				"positionMin": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				},
+				"positionMax": {
+					"x": 3,
+					"y": 1,
+					"z": 3
+				}
+			}
+		},
+		{
+			"tick": 150,
+			"priority": 1,
+			"action": {
+				"type": "placeBlock",
+				"id": "hbm:tile.heater_firebox",
+				"position": {
+					"x": 2,
+					"y": 1,
+					"z": 1
+				},
+				"yaw": 0
+			}
+		},
+		{
+			"tick": 150,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 2,
+					"y": 1,
+					"z": 2
+				},
+				"callList": "openInventory()",
+				"openInventory": [],
+				"client": false
+			}
+		},
+		{
+			"tick": 180,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 2,
+					"y": 1,
+					"z": 2
+				},
+				"callList": "setInventorySlotContents()",
+				"setInventorySlotContents": [
+					{
+						"type": "int",
+						"value": 0
+					},
+					{
+						"type": "itemStack",
+						"id": "minecraft:coal_block",
+						"count": 64
+					}
+				]
+			}
+		},
+		{
+			"tick": 180,
+			"action": {
+				"type": "display",
+				"ticksFor": 20,
+				"position": {
+					"x": -50,
+					"y": 25
+				},
+				"lines": [
+					[
+						{
+							"type": "itemStack",
+							"id": "minecraft:coal"
+						}
+					]
+				],
+				"autowrap": 0,
+				"orientation": "RIGHT",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 210,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 2,
+					"y": 1,
+					"z": 2
+				},
+				"callList": "closeInventory()",
+				"closeInventory": [],
+				"client": false
+			}
+		},
+
+
+		{
+			"tick": 240,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": 0,
+					"y": -30
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.crucible.2"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "BOTTOM",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 300,
+			"action": {
+				"type": "rotateTo",
+				"ticksFor": 20,
+				"yaw": 0,
+				"pitch": -90
+			}
+		},
+		{
+			"tick": 330,
+			"action": {
+				"type": "display",
+				"ticksFor": 40,
+				"position": {
+					"x": 0,
+					"y": 0
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.crucible.3"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "CENTER",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 360,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": 30,
+					"y": 0
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.crucible.4"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "RIGHT",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 420,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": 30,
+					"y": 0
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.crucible.5"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "RIGHT",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 480,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": 30,
+					"y": 0
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.crucible.6"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "RIGHT",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 560,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": -30,
+					"y": 0
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.crucible.7"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "LEFT",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 620,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": -30,
+					"y": 0
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.crucible.8"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "LEFT",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 480,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": -30,
+					"y": 0
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.crucible.9"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "LEFT",
+				"colors": "COPPER"
+			}
+		}
+	]
+}

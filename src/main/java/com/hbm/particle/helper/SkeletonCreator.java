@@ -15,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -42,7 +43,7 @@ public class SkeletonCreator implements IParticleCreator {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data) {
+	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data, EffectRenderer effectRenderer) {
 		
 		if(skullanizer.isEmpty()) init();
 		
@@ -63,7 +64,7 @@ public class SkeletonCreator implements IParticleCreator {
 				ParticleSkeleton skeleton = new ParticleSkeleton(Minecraft.getMinecraft().getTextureManager(), world, bone.x, bone.y, bone.z, brightness, brightness, brightness, bone.type);
 				skeleton.prevRotationYaw = skeleton.rotationYaw = bone.yaw;
 				skeleton.prevRotationPitch = skeleton.rotationPitch = bone.pitch;
-				Minecraft.getMinecraft().effectRenderer.addEffect(skeleton);
+				effectRenderer.addEffect(skeleton);
 			}
 		}
 	}

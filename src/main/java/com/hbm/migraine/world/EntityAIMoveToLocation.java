@@ -3,6 +3,7 @@ package com.hbm.migraine.world;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIBase;
 
+/** @author kellen */
 public class EntityAIMoveToLocation extends EntityAIBase {
 	private final EntityCreature entity;
 	private double targetX, targetY, targetZ;

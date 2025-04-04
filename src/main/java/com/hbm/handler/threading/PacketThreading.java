@@ -3,11 +3,13 @@ package com.hbm.handler.threading;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hbm.config.GeneralConfig;
 import com.hbm.main.MainRegistry;
+import com.hbm.migraine.GuiMigraine;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.packet.threading.PrecompiledPacket;
 import com.hbm.packet.threading.ThreadedPacket;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.util.ArrayList;
@@ -85,6 +87,14 @@ public class PacketThreading {
 	 */
 	public static void createAllAroundThreadedPacket(IMessage message, TargetPoint target) {
 
+		if (target.dimension == MainRegistry.MigraineWorldId){
+			if (Minecraft.getMinecraft() != null && Minecraft.getMinecraft().currentScreen instanceof GuiMigraine)
+				((GuiMigraine) Minecraft.getMinecraft().currentScreen).worldRenderer.world.addPacket(message, target);
+			else
+				MainRegistry.logger.warn("[Migraine] Tried to create an all around threaded packet, and failed to send it to the Migraine World, at: " + target.x + ", " + target.y + ", " + target.z + "!");
+			return;
+		}
+
 		if(preparePacket(message))
 			return;
 
@@ -110,6 +120,14 @@ public class PacketThreading {
 	 * @param player PlayerMP to send to.
 	 */
 	public static void createSendToThreadedPacket(IMessage message, EntityPlayerMP player) {
+
+		if (player.dimension == MainRegistry.MigraineWorldId){
+			if (Minecraft.getMinecraft() != null && Minecraft.getMinecraft().currentScreen instanceof GuiMigraine)
+				((GuiMigraine) Minecraft.getMinecraft().currentScreen).worldRenderer.world.addPacket(message, player);
+			else
+				MainRegistry.logger.warn("[Migraine] Tried to create a send to threaded packet, which is not supported, for: " + player.posX + ", " + player.posY + ", " + player.posZ + "!");
+			return;
+		}
 
 		if(preparePacket(message))
 			return;

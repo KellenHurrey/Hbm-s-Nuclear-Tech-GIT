@@ -1,4 +1,4 @@
-package com.hbm.migraine.world;
+package com.hbm.migraine.world.server;
 
 import com.hbm.main.MainRegistry;
 import net.minecraft.server.MinecraftServer;
@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
 
+/** @author kellen */
 public class DummyMinecraftServer extends MinecraftServer {
 
 	public DummyMinecraftServer(MinecraftServer reset) {

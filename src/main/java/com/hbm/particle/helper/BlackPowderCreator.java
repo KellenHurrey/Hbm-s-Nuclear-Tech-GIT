@@ -8,7 +8,7 @@ import com.hbm.util.Vec3NT;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -33,7 +33,7 @@ public class BlackPowderCreator implements IParticleCreator {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data) {
+	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data, EffectRenderer effectRenderer) {
 
 		double headingX = data.getDouble("hX");
 		double headingY = data.getDouble("hY");
@@ -52,7 +52,7 @@ public class BlackPowderCreator implements IParticleCreator {
 			particle.motionX = heading.xCoord * cloudSpeedMult * speedMult + rand.nextGaussian() * 0.05;
 			particle.motionY = heading.yCoord * cloudSpeedMult * speedMult + rand.nextGaussian() * 0.05;
 			particle.motionZ = heading.zCoord * cloudSpeedMult * speedMult + rand.nextGaussian() * 0.05; 
-			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+			effectRenderer.addEffect(particle);
 		}
 
 		for(int i = 0; i < sparkCount; i++) {
@@ -61,7 +61,7 @@ public class BlackPowderCreator implements IParticleCreator {
 					heading.xCoord * sparkSpeedMult * speedMult + rand.nextGaussian() * 0.02,
 					heading.yCoord * sparkSpeedMult * speedMult + rand.nextGaussian() * 0.02,
 					heading.zCoord * sparkSpeedMult * speedMult + rand.nextGaussian() * 0.02);
-			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+			effectRenderer.addEffect(particle);
 		}
 	}
 }

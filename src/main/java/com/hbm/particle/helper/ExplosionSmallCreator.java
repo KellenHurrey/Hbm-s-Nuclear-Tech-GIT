@@ -10,6 +10,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.particle.EntityBlockDustFX;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -37,7 +38,7 @@ public class ExplosionSmallCreator implements IParticleCreator {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data) {
+	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data, EffectRenderer effectRenderer) {
 
 		int cloudCount = data.getInteger("cloudCount");
 		float cloudScale = data.getFloat("cloudScale");
@@ -55,7 +56,7 @@ public class ExplosionSmallCreator implements IParticleCreator {
 		
 		for(int i = 0; i < cloudCount; i++) {
 			ParticleExplosionSmall particle = new ParticleExplosionSmall(world, x, y, z, cloudScale, cloudSpeedMult);
-			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+			effectRenderer.addEffect(particle);
 		}
 		
 		Block b = Blocks.air;
@@ -71,7 +72,7 @@ public class ExplosionSmallCreator implements IParticleCreator {
 			EntityBlockDustFX fx = new EntityBlockDustFX(world, x, y + 0.1, z, world.rand.nextGaussian() * 0.2, 0.5F + world.rand.nextDouble() * 0.7, world.rand.nextGaussian() * 0.2, b, meta);
 			fx.multipleParticleScaleBy(2);
 			ReflectionHelper.setPrivateValue(EntityFX.class, fx, 50 + rand.nextInt(20), "particleMaxAge", "field_70547_e");
-			Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+			effectRenderer.addEffect(fx);
 		}
 	}
 }

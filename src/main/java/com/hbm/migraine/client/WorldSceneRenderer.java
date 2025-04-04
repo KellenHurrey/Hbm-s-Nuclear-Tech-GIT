@@ -1,10 +1,16 @@
 package com.hbm.migraine.client;
 
+import com.hbm.main.MainRegistry;
+import com.hbm.migraine.GuiMigraine;
+import com.hbm.migraine.player.ClientFakePlayer;
 import com.hbm.migraine.world.TrackedDummyWorld;
+import com.hbm.util.BobMathUtil;
 import com.hbm.util.CoordinatePacker;
-import com.hbm.util.Vector4i;
+import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -16,93 +22,57 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.ForgeHooksClient;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.glu.GLU;
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
+import org.lwjgl.util.glu.Project;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.HashSet;
-import java.util.function.Consumer;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public abstract class WorldSceneRenderer {
+/** @author kellen, @https://github.com/GTNewHorizons/BlockRenderer6343 */
+public class WorldSceneRenderer {
 
-	// you have to place blocks in the world before use
-	public final TrackedDummyWorld world;
+	// The world
+	public TrackedDummyWorld world;
 	// the Blocks which this renderer needs to render
 	public final HashSet<Long> renderedBlocks = new HashSet<>();
 	public final HashSet<Long> renderOpaqueBlocks = new HashSet<>();
 	public final HashSet<Entity> rendererEntities = new HashSet<>();
 	public final EffectRenderer rendererEffect;
-	private Consumer<WorldSceneRenderer> beforeRender;
-	private Consumer<WorldSceneRenderer> onRender;
-	private Consumer<MovingObjectPosition> onLookingAt;
-	private Consumer<WorldSceneRenderer> onPostBlockRendered;
 	private MovingObjectPosition lastTraceResult;
-	private final Vector3f eyePos = new Vector3f(0, 0, -10f);
-	private final Vector3f lookAt = new Vector3f(0, 0, 0);
-	private final Vector3f worldUp = new Vector3f(0, 1, 0);
-	private final Vector3f prevEyePos = new Vector3f(0, 0, -10f);
-	protected Vector4i rect = new Vector4i();
+	private Vec3 centerOffset = Vec3.createVectorHelper(0, 0, 0);
+	private Vec3 prevCenterOffset = Vec3.createVectorHelper(0, 0, 0);
+	private int width = 0, height = 0;
 	private boolean renderAllFaces = false;
 	private final RenderBlocks bufferBuilder = new RenderBlocks();
 	public final ClientFakePlayer camera;
+	private double prevZoom = 1, zoom = 1;
+	private boolean isometric = true;
+	private Vec3 size, prevSize;
+	private Vec3 min, prevMin;
 
 	public WorldSceneRenderer(TrackedDummyWorld world, ClientFakePlayer player) {
 		this.world = world;
 		this.camera = player;
-		this.rendererEffect = new EffectRenderer(world, Minecraft.getMinecraft().renderEngine);
+		this.rendererEffect = new EffectRenderer(world.clientWorld, Minecraft.getMinecraft().renderEngine);
 	}
 
-	public WorldSceneRenderer setBeforeWorldRender(Consumer<WorldSceneRenderer> callback) {
-		this.beforeRender = callback;
-		return this;
-	}
-
-	public WorldSceneRenderer setPostBlockRender(Consumer<WorldSceneRenderer> callback) {
-		this.onPostBlockRendered = callback;
-		return this;
-	}
-
-	public WorldSceneRenderer setOnWorldRender(Consumer<WorldSceneRenderer> callback) {
-		this.onRender = callback;
-		return this;
-	}
-
-	public WorldSceneRenderer addRenderedBlocks(HashSet<Long> blocks) {
-		if (blocks != null) {
-			this.renderedBlocks.addAll(blocks);
-		}
-		return this;
-	}
-
-	public WorldSceneRenderer addRenderEntities(HashSet<Entity> entities){
-		if (entities != null){
-			this.rendererEntities.addAll(entities);
-		}
-		return this;
-	}
-
-	public WorldSceneRenderer setOnLookingAt(Consumer<MovingObjectPosition> onLookingAt) {
-		this.onLookingAt = onLookingAt;
-		return this;
-	}
-
-	public void setRenderAllFaces(boolean renderAllFaces) {
-		this.renderAllFaces = renderAllFaces;
-	}
-
-	public MovingObjectPosition getLastTraceResult() {
-		return lastTraceResult;
+	public void setSize(Vec3 size){
+		this.size = size;
+		this.prevSize = size;
 	}
 
 	public WorldSceneRenderer resetRenders() {
 		renderedBlocks.clear();
+		renderedBlocks.addAll(world.blockMap.keySet());
 		renderOpaqueBlocks.clear();
 		rendererEntities.clear();
+		rendererEntities.addAll(world.entities);
 		return this;
 	}
 
@@ -111,73 +81,54 @@ public abstract class WorldSceneRenderer {
 	 * ignore any transformations applied currently to projection/view matrix, so specified coordinates are scaled MC
 	 * gui coordinates. It will return matrices of projection and view in previous state after rendering
 	 */
-	public void render(int x, int y, int width, int height, int mouseX, int mouseY, float partialTicks) {
+	public String[] render(int width, int height, int mouseX, int mouseY, float partialTicks) {
 
-		rect.set(x, y, width, height);
+		this.width = width;
+		this.height = height;
+
 		// setupCamera
-		setupCamera();
+		setupCamera(partialTicks);
 
 		// render TrackedDummyWorld
 		drawWorld(partialTicks);
 
-		// check lookingAt
-		this.lastTraceResult = null;
-		if (onLookingAt != null && isInsideRect(mouseX, mouseY)) {
-			Vector3f lookVec = unProject(rect, eyePos, lookAt, mouseX, mouseY);
-			MovingObjectPosition result = rayTrace(lookVec);
-			if (result != null) {
-				this.lastTraceResult = result;
-				onLookingAt.accept(result);
-			}
-		}
+		// get looking at block
+		final ScaledResolution scaledresolution = new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+		this.lastTraceResult = unProject(mouseX * scaledresolution.getScaleFactor(), mouseY * scaledresolution.getScaleFactor());
 
 		resetCamera();
 
-		prevEyePos.set(eyePos);
+		// pos
+		// localized name
+		// registry name, meta
+		if (lastTraceResult != null)
+		{
+			int posX = Math.round(lastTraceResult.blockX);
+			int posY = Math.round(lastTraceResult.blockY);
+			int posZ = Math.round(lastTraceResult.blockZ);
+			Block block = world.getBlock(posX, posY, posZ);
+			String[] lines = {"(" + posX + ", " + posY + ", " + posZ + ")", block.getLocalizedName(), "(" + GameRegistry.findUniqueIdentifierFor(block).toString() + ", meta: " + world.getBlockMetadata(posX, posY, posZ) + ")"};
+
+			return lines;
+		}
+
+		return new String[]{};
+
 	}
 
-	public Vector3f getEyePos() {
-		return eyePos;
-	}
-
-	public Vector3f getLookAt() {
-		return lookAt;
-	}
-
-	public Vector3f getWorldUp() {
-		return worldUp;
-	}
-
-	public void setCameraLookAt(Vector3f eyePos, Vector3f lookAt, Vector3f worldUp) {
-		this.eyePos.set(eyePos);
-		this.lookAt.set(lookAt);
-		this.worldUp.set(worldUp);
-	}
-
-	public void setCameraLookAt(Vector3f lookAt, double radius, double rotationYaw, double rotationPitch) {
-		this.lookAt.set(lookAt);
-
-		double radYaw = Math.toRadians(rotationYaw % 360.0F);
-		double radPitch = Math.toRadians(rotationPitch % 360.0F);
-
-		eyePos.x = (float) (Math.cos(radYaw) * Math.cos(radPitch) * radius);
-		eyePos.y = (float) (Math.sin(radPitch) * radius) + camera.getEyeHeight();
-		eyePos.z = (float) (Math.sin(radYaw) * Math.cos(radPitch) * radius);
-		Vector3f.add(eyePos, lookAt, eyePos);
-
-		camera.setPosition(eyePos.x, eyePos.y, eyePos.z);
-		camera.prevRotationPitch = camera.rotationPitch;
-		camera.prevRotationYaw = camera.rotationYaw;
-		camera.rotationYaw = (float) -rotationYaw % 360.0F;
+	public void setCamera(Vec3 centerOffset, double zoom, double rotationYaw, double rotationPitch, boolean isometric){
+//		this.prevCenterOffset = Vec3.createVectorHelper(this.centerOffset.xCoord, this.centerOffset.yCoord, this.centerOffset.zCoord);
+		this.centerOffset = Vec3.createVectorHelper(centerOffset.xCoord, centerOffset.yCoord, centerOffset.zCoord);
+		camera.rotationYaw = (float) rotationYaw % 360.0F;
 		camera.rotationPitch = (float) rotationPitch % 360.0F;
-
+		this.zoom = zoom;
+		this.isometric = isometric;
+		camera.onUpdate();
 	}
 
-	public void setupCamera() {
-		int x = rect.x;
-		int y = rect.y;
-		int width = rect.z;
-		int height = rect.w;
+	public void setupCamera(float partialTicks) {
+
+		glPushMatrix();
 
 		Minecraft mc = Minecraft.getMinecraft();
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -186,38 +137,83 @@ public abstract class WorldSceneRenderer {
 		glDisable(GL_LIGHTING);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
-
-		glViewport(x, y, width, height);
-
-		clearView(x, y, width, height);
-
-		glMatrixMode(GL_PROJECTION);
+		glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		glMatrixMode(GL11.GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
 
-		float aspectRatio = width / (height * 1.0f);
-		GLU.gluPerspective(60.0f, aspectRatio, 0.1f, 10000.0f);
+		ScaledResolution scaledresolution = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
+		if (isometric)
+			GL11.glOrtho(0.0D, scaledresolution.getScaledWidth_double(), scaledresolution.getScaledHeight_double(), 0.0D, 1000.0D, 3000.0D);
+		else
+			GLU.gluPerspective(40, (float)Minecraft.getMinecraft().displayWidth / (float)Minecraft.getMinecraft().displayHeight, 0.05f, 1024f);
 
-		// setup modelview matrix
-		glMatrixMode(GL_MODELVIEW);
+		glMatrixMode(GL11.GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
-		GLU.gluLookAt(eyePos.x, eyePos.y, eyePos.z, lookAt.x, lookAt.y, lookAt.z, worldUp.x, worldUp.y, worldUp.z);
 
+		// Get interped size
+		Vec3 size = this.size != null ? this.size : world.getSize();
+		this.prevSize = this.prevSize != null ? this.prevSize : size;
+		Vec3 sizeInterp = BobMathUtil.interpVec(size, this.prevSize, partialTicks);
+		this.prevSize = size;
+
+		Vec3 min = world.getMinPos();
+		this.prevMin = this.prevMin != null ? this.prevMin : min;
+		Vec3 minInterp = BobMathUtil.interpVec(min, this.prevMin, partialTicks);
+		this.prevMin = min;
+
+		glColor4f(1, 1, 1, 1);
+		// rotate around 0,0,0
+		if (isometric) {
+			glTranslatef(0.0F, 0.0F, -2000.0F);
+
+			double scale = -30;
+			glTranslated(width / 2, height / 2, 400);
+			glScaled(scale, scale, scale);
+			glScaled(1, 1, 0.5);
+		} else {
+			double max = Math.max(sizeInterp.xCoord, Math.max(sizeInterp.yCoord, sizeInterp.zCoord));
+
+			glTranslated(0, 0, -(max + 13 / scaledresolution.getScaleFactor()));
+		}
+
+
+		double yawInterp = BobMathUtil.interp(camera.rotationYaw, camera.prevRotationYaw, partialTicks);
+		double pitchInterp = BobMathUtil.interp(camera.rotationPitch, camera.prevRotationPitch, partialTicks);
+		glRotated((isometric ? 1 : -1) * pitchInterp, 1, 0, 0);
+		glRotated((isometric ? 0 : 180) + yawInterp, 0, 1, 0);
+		camera.prevRotationPitch = camera.rotationPitch;
+		camera.prevRotationYaw = camera.rotationYaw;
+
+		Vec3 centerOffsetInterp = BobMathUtil.interpVec(centerOffset, prevCenterOffset, partialTicks);
+		this.prevCenterOffset = this.centerOffset;
+		glTranslated((sizeInterp.xCoord - minInterp.xCoord) / -2, (sizeInterp.yCoord - minInterp.yCoord) / -2, (sizeInterp.zCoord - minInterp.zCoord) / -2);
+		glTranslated(-centerOffsetInterp.xCoord, -centerOffsetInterp.yCoord, -centerOffsetInterp.zCoord);
+
+		// Update camera position
+		FloatBuffer matModelView = BufferUtils.createFloatBuffer(16);
+		FloatBuffer matProjection = BufferUtils.createFloatBuffer(16);
+		IntBuffer viewport = BufferUtils.createIntBuffer(16);
+		FloatBuffer cameraPos = BufferUtils.createFloatBuffer(3);
+
+		glGetFloat(GL_MODELVIEW_MATRIX, matModelView);
+		glGetFloat(GL_PROJECTION_MATRIX, matProjection);
+		glGetInteger(GL_VIEWPORT, viewport);
+		GLU.gluUnProject((viewport.get(2) - viewport.get(0)) / 2 , (viewport.get(3) - viewport.get(1)) / 2, 0, matModelView, matProjection, viewport, cameraPos);
+
+		camera.setPosition(cameraPos.get(0), cameraPos.get(1), cameraPos.get(2));
+		camera.onUpdate();
+
+		// Update render info
 		ActiveRenderInfo.updateRenderInfo(camera, false);
 	}
 
-
-	protected void clearView(int x, int y, int width, int height) {
-		glClear(GL_DEPTH_BUFFER_BIT);
-	}
-
 	public void resetCamera() {
-		// reset viewport
+
 		Minecraft minecraft = Minecraft.getMinecraft();
 		glViewport(0, 0, minecraft.displayWidth, minecraft.displayHeight);
 
-		// reset modelview matrix
 		glMatrixMode(GL_MODELVIEW);
 		glPopMatrix();
 
@@ -230,12 +226,10 @@ public abstract class WorldSceneRenderer {
 		// reset attributes
 		glPopClientAttrib();
 		glPopAttrib();
+		glPopMatrix();
 	}
 
 	protected void drawWorld(float partialTicks) {
-		if (beforeRender != null) {
-			beforeRender.accept(this);
-		}
 
 		Minecraft mc = Minecraft.getMinecraft();
 		glEnable(GL_CULL_FACE);
@@ -251,10 +245,6 @@ public abstract class WorldSceneRenderer {
 		renderBlocks(tessellator, renderedBlocks, false);
 		renderBlocks(tessellator, renderOpaqueBlocks, true);
 
-		if (onPostBlockRendered != null) {
-			onPostBlockRendered.accept(this);
-		}
-
 		double d3 = camera.lastTickPosX + (camera.posX - camera.lastTickPosX) * (double)partialTicks;
 		double d4 = camera.lastTickPosY + (camera.posY - camera.lastTickPosY) * (double)partialTicks;
 		double d5 = camera.lastTickPosZ + (camera.posZ - camera.lastTickPosZ) * (double)partialTicks;
@@ -267,12 +257,21 @@ public abstract class WorldSceneRenderer {
 		// render Entity
 		RenderManager.instance.worldObj = world;
 
-		GL11.glPushMatrix();
-		GL11.glTranslated(RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
+		glPushMatrix();
+		glTranslated(RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
 		for (Entity entity : rendererEntities) {
 			RenderManager.instance.renderEntitySimple(entity, partialTicks);
 		}
-		GL11.glPopMatrix();
+		glPopMatrix();
+
+		glEnable(GL_CULL_FACE);
+		glEnable(GL12.GL_RESCALE_NORMAL);
+		RenderHelper.disableStandardItemLighting();
+		mc.entityRenderer.disableLightmap(0);
+		mc.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
+		glDisable(GL_LIGHTING);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_ALPHA_TEST);
 
 		RenderHelper.enableStandardItemLighting();
 		glEnable(GL_LIGHTING);
@@ -308,20 +307,17 @@ public abstract class WorldSceneRenderer {
 	}
 
 	private void renderParticles(float partialTicks) {
-//		GL11.glPushMatrix();
-
 		ForgeHooksClient.setRenderPass(0);
-//		RenderHelper.disableStandardItemLighting();
-//		Minecraft.getMinecraft().entityRenderer.disableLightmap((double)partialTicks);
-//		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-//		GL11.glPopMatrix();
-//		GL11.glPushMatrix();
-//
-//		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-//		GL11.glPopMatrix();
-		GL11.glPushMatrix();
+		glPushMatrix();
 
-		GL11.glTranslated(RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glDisable(GL11.GL_LIGHTING);
+		GL11.glColor3f(1F, 1F, 1F);
+
+		glTranslated(RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
+
+		world.clientWorld.setMinecraft();
 
 		Minecraft.getMinecraft().entityRenderer.enableLightmap((double)partialTicks);
 		rendererEffect.renderLitParticles(camera, partialTicks);
@@ -330,9 +326,11 @@ public abstract class WorldSceneRenderer {
 		rendererEffect.renderParticles(camera, partialTicks);
 		Minecraft.getMinecraft().entityRenderer.disableLightmap((double)partialTicks);
 
-		GL11.glPopMatrix();
-		GL11.glDepthMask(false);
-		GL11.glEnable(GL11.GL_CULL_FACE);
+		world.clientWorld.resetMinecraft();
+
+		glPopMatrix();
+		glDepthMask(false);
+		glEnable(GL11.GL_CULL_FACE);
 	}
 
 	private void renderBlocks(Tessellator tessellator, HashSet<Long> blocksToRender, boolean transparent) {
@@ -361,9 +359,6 @@ public abstract class WorldSceneRenderer {
 					bufferBuilder.renderBlockByRenderType(block, x, y, z);
 				}
 			}
-			if (onRender != null) {
-				onRender.accept(this);
-			}
 		} finally {
 			mc.gameSettings.ambientOcclusion = savedAo;
 			tessellator.draw();
@@ -384,85 +379,60 @@ public abstract class WorldSceneRenderer {
 		}
 	}
 
-	public boolean isInsideRect(int x, int y) {
-		return x > rect.x && x < rect.x + rect.z && y > rect.y && y < rect.y + rect.w;
+	public MovingObjectPosition unProject(int mouseX, int mouseY) {
+		FloatBuffer modelview = BufferUtils.createFloatBuffer(16);
+		FloatBuffer projection = BufferUtils.createFloatBuffer(16);
+		IntBuffer viewport = BufferUtils.createIntBuffer(16);
+		FloatBuffer worldCoords = BufferUtils.createFloatBuffer(3);
+
+		// Get matrices
+		glGetFloat(GL_MODELVIEW_MATRIX, modelview);
+		glGetFloat(GL11.GL_PROJECTION_MATRIX, projection);
+		glGetInteger(GL_VIEWPORT, viewport);
+
+		// Convert from window space (Y is flipped in OpenGL)
+		float winX = mouseX;
+		float winY = viewport.get(3) - mouseY - 1;
+
+
+		// Unproject near plane
+		worldCoords.clear();
+		boolean successNear = GLU.gluUnProject(winX, winY, 0, modelview, projection, viewport, worldCoords);
+		if (!successNear) return null;
+
+		Vec3 startRay = Vec3.createVectorHelper(worldCoords.get(0), worldCoords.get(1), worldCoords.get(2));
+
+
+		// Unproject far plane
+		worldCoords.clear();
+		boolean successFar = GLU.gluUnProject(winX, winY, 1, modelview, projection, viewport, worldCoords);
+		if (!successFar) return null;
+
+		Vec3 endRay = Vec3.createVectorHelper(worldCoords.get(0), worldCoords.get(1), worldCoords.get(2));
+
+		return this.world.rayTraceBlocksWithTargetMap(startRay, endRay, new HashSet<>(world.blockMap.keySet()));
 	}
 
-	public MovingObjectPosition rayTrace(Vector3f lookVec) {
-		Vec3 startPos = Vec3.createVectorHelper(this.eyePos.x, this.eyePos.y, this.eyePos.z);
-		lookVec.scale(100); // range: 100 Blocks
-		Vec3 endPos = Vec3.createVectorHelper(
-			(lookVec.x + startPos.xCoord),
-			(lookVec.y + startPos.yCoord),
-			(lookVec.z + startPos.zCoord));
-		return this.world.rayTraceBlocksWithTargetMap(startPos, endPos, new HashSet<>(world.blockMap.keySet()));
-	}
+	// Leaving this here if needed, basicly the opposite of above. returns (x, y, depth)
+	public Vec3 projectToScreen(Vec3 worldPos) {
+		FloatBuffer modelview = BufferUtils.createFloatBuffer(16);
+		FloatBuffer projection = BufferUtils.createFloatBuffer(16);
+		IntBuffer viewport = BufferUtils.createIntBuffer(16);
+		FloatBuffer screenCoords = BufferUtils.createFloatBuffer(3);
 
+		// Get the current matrices
+		glGetFloat(GL_MODELVIEW_MATRIX, modelview);
+		glGetFloat(GL_PROJECTION_MATRIX, projection);
+		glGetInteger(GL_VIEWPORT, viewport);
 
-	private static final Matrix4f ROT = new Matrix4f();
-	private static final Vector3f MUT_3F = new Vector3f();
-	private static final Vector3f RESULT = new Vector3f();
+		// Project the world coordinates to screen space
+		GLU.gluProject((float) worldPos.xCoord + 0.5f, (float) worldPos.yCoord + 0.5f, (float) worldPos.zCoord + 0.5f, modelview, projection, viewport, screenCoords);
 
-	// actually lets not use joml
-	public static Vector3f unProject(Vector4i rect, Vector3f eyePos, Vector3f lookAt, int mouseX, int mouseY) {
-		int width = rect.z;
-		int height = rect.w;
+		// Get screen coordinates
+		float screenX = screenCoords.get(0);
+		float screenY = viewport.get(3) - screenCoords.get(1); // Flip Y-axis
+		float screenZ = screenCoords.get(2); // Depth value
 
-		double aspectRatio = (double) width / (double) height;
-		double fov = Math.toRadians(30);
-
-		double a = -((double) (mouseX - rect.x) / width - 0.5) * 2;
-		double b = -((double) (height - (mouseY - rect.y)) / height - 0.5) * 2;
-		double tanf = Math.tan(fov);
-
-		Vector3f.sub(eyePos, lookAt, MUT_3F);
-		float yawn = (float) Math.atan2(MUT_3F.x, -MUT_3F.z);
-		float pitch = (float) Math.atan2(MUT_3F.y, Math.sqrt(MUT_3F.x * MUT_3F.x + MUT_3F.z * MUT_3F.z));
-
-		ROT.setIdentity();
-		rotateY(ROT, yawn);
-		rotateX(ROT, pitch);
-
-		MUT_3F.set(0, 0, 1);
-		transformPosition(ROT, MUT_3F, RESULT);
-		MUT_3F.set(1, 0, 0);
-		transformPosition(ROT, MUT_3F, MUT_3F);
-
-		RESULT.x += MUT_3F.x * tanf * aspectRatio * a;
-		RESULT.y += MUT_3F.y * tanf * aspectRatio * a;
-		RESULT.z += MUT_3F.z * tanf * aspectRatio * a;
-
-		MUT_3F.set(0, 1, 0);
-		transformPosition(ROT, MUT_3F, MUT_3F);
-
-		RESULT.x += MUT_3F.x * tanf * b;
-		RESULT.y += MUT_3F.y * tanf * b;
-		RESULT.z += MUT_3F.z * tanf * b;
-
-		return normalize(RESULT);
-	}
-
-	private static void rotateX(Matrix4f mat, float angle) {
-		Matrix4f.rotate(angle, new Vector3f(1, 0, 0), mat, mat);
-	}
-
-	private static void rotateY(Matrix4f mat, float angle) {
-		Matrix4f.rotate(angle, new Vector3f(0, -1, 0), mat, mat);
-	}
-
-	private static void transformPosition(Matrix4f mat, Vector3f vec, Vector3f dest) {
-		Vector4f temp = new Vector4f(vec.x, vec.y, vec.z, 1.0f); // Homogeneous coordinate w = 1
-		Matrix4f.transform(mat, temp, temp);
-		dest.set(temp.x, temp.y, temp.z); // Extract only x, y, z
-	}
-
-	public static Vector3f normalize(Vector3f vec) {
-		float length = (float) Math.sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-		if (length != 0) {
-			vec.x /= length;
-			vec.y /= length;
-			vec.z /= length;
-		}
-		return vec;
+		return Vec3.createVectorHelper(screenX, screenY, screenZ);
 	}
 }

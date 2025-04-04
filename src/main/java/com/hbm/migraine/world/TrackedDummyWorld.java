@@ -1,10 +1,18 @@
 package com.hbm.migraine.world;
 
 import com.hbm.main.MainRegistry;
+import com.hbm.main.NetworkHandler;
 import com.hbm.migraine.GuiMigraine;
 import com.hbm.migraine.client.RecordMovingSound;
+import com.hbm.packet.threading.PrecompiledPacket;
+import com.hbm.packet.threading.ThreadedPacket;
 import com.hbm.tileentity.IBufPacketReceiver;
 import com.hbm.util.CoordinatePacker;
+import com.hbm.util.Tuple;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
@@ -18,16 +26,19 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.network.INetHandler;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraftforge.common.DimensionManager;
-import org.lwjgl.util.vector.Vector3f;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
 
+/** @author kellen, @https://github.com/GTNewHorizons/BlockRenderer6343 */
 public class TrackedDummyWorld extends DummyWorld {
 	public final HashMap<Long, Block> blockMap = new HashMap<>();
 	public final HashMap<Long, TileEntity> tileMap = new HashMap<>();
@@ -41,9 +52,9 @@ public class TrackedDummyWorld extends DummyWorld {
 	public final IntHashMap entityIdMap = new IntHashMap();
 	public final HashSet<Entity> entities = new HashSet<>();
 
-	private final Vector3f minPos = new Vector3f(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
-	private final Vector3f maxPos = new Vector3f(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
-	private final Vector3f size = new Vector3f();
+	private final Vec3 minPos = Vec3.createVectorHelper(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+	private final Vec3 maxPos = Vec3.createVectorHelper(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+	private Vec3 size = Vec3.createVectorHelper(0, 0, 0);
 
 	public final SoundHandler SoundHandler;
 
@@ -54,24 +65,24 @@ public class TrackedDummyWorld extends DummyWorld {
 	public TrackedDummyWorld(SoundHandler soundHandler, EntityPlayer owner) {
 		this.SoundHandler = soundHandler;
 		this.player = owner;
-		this.rand = new Random(0);
-
+		rand.setSeed(0);
+		serverWorld.rand.setSeed(0);
 	}
 
 	public void calcMinMax(){
-		minPos.scale(0);
-		maxPos.scale(0);
+		minPos.subtract(minPos);
+		maxPos.subtract(maxPos);
 		for (Long pos : blockMap.keySet()){
 			int x = CoordinatePacker.unpackX(pos);
 			int y = CoordinatePacker.unpackY(pos);
 			int z = CoordinatePacker.unpackZ(pos);
 
-			minPos.x = Math.min(minPos.x, x);
-			minPos.y = Math.min(minPos.y, y);
-			minPos.z = Math.min(minPos.z, z);
-			maxPos.x = Math.max(maxPos.x, x);
-			maxPos.y = Math.max(maxPos.y, y);
-			maxPos.z = Math.max(maxPos.z, z);
+			minPos.xCoord = Math.min(minPos.xCoord, x);
+			minPos.yCoord = Math.min(minPos.yCoord, y);
+			minPos.zCoord = Math.min(minPos.zCoord, z);
+			maxPos.xCoord = Math.max(maxPos.xCoord, x);
+			maxPos.yCoord = Math.max(maxPos.yCoord, y);
+			maxPos.zCoord = Math.max(maxPos.zCoord, z);
 		}
 	}
 
@@ -139,6 +150,56 @@ public class TrackedDummyWorld extends DummyWorld {
 		}
 	}
 
+	@Override
+	public int getBlockLightOpacity(int x, int y, int z)
+	{
+		if (x < -30000000 || z < -30000000 || x >= 30000000 || z >= 30000000)
+		{
+			return 0;
+		}
+
+		if (y < 0 || y >= 256)
+		{
+			return 0;
+		}
+
+		/**
+		 * Returns back a chunk looked up by chunk coordinates Args: x, y
+		 */
+		return getBlock(x, y, z).getLightOpacity(this, x, y, z);
+	}
+
+	@Override
+	public float getLightBrightness(int x, int y, int z){
+		return 15 << 20 | 15 << 4;
+	}
+
+	@Override
+	public void doVoidFogParticles(int p_73029_1_, int p_73029_2_, int p_73029_3_)
+	{
+		byte b0 = 16;
+		Random random = new Random();
+
+		for (int l = 0; l < 1000; ++l)
+		{
+			int i1 = p_73029_1_ + this.rand.nextInt(b0) - this.rand.nextInt(b0);
+			int j1 = p_73029_2_ + this.rand.nextInt(b0) - this.rand.nextInt(b0);
+			int k1 = p_73029_3_ + this.rand.nextInt(b0) - this.rand.nextInt(b0);
+			Block block = this.getBlock(i1, j1, k1);
+
+			if (block.getMaterial() == Material.air)
+			{
+				if (this.rand.nextInt(8) > j1 && this.provider.getWorldHasVoidParticles())
+				{
+					this.spawnParticle("depthsuspend", (double)((float)i1 + this.rand.nextFloat()), (double)((float)j1 + this.rand.nextFloat()), (double)((float)k1 + this.rand.nextFloat()), 0.0D, 0.0D, 0.0D);
+				}
+			}
+			else
+			{
+				block.randomDisplayTick(this, i1, j1, k1, random);
+			}
+		}
+	}
 
 	// Tile Entites
 	@Override
@@ -169,9 +230,61 @@ public class TrackedDummyWorld extends DummyWorld {
 		return tileMap.get(CoordinatePacker.pack(x, y, z));
 	}
 
-	@Override
-	public void addPacket(long coord){
-		this.tilesToReserialize.add(coord);
+	private static boolean preparePacket(IMessage message) {
+		// `message` can be precompiled or not.
+		if(message instanceof PrecompiledPacket)
+			((PrecompiledPacket) message).getCompiledBuffer(); // Gets the precompiled buffer, doing nothing if it already exists.
+
+		if(!(message instanceof ThreadedPacket)) {
+			MainRegistry.logger.error("[Migraine] Invalid packet class, expected ThreadedPacket, got {}.", message.getClass().getSimpleName());
+			return true;
+		}
+		return false;
+	}
+
+	// You got sent to the client, i swear
+	public void addPacket(IMessage message, NetworkRegistry.TargetPoint point){
+		if (preparePacket(message)) return;
+
+		// Quick and dirty, but the fuck am i going to do for vanilla packets
+		Tuple.Pair sideHandler = NetworkHandler.messageHandlers.get(message.getClass());
+
+		if (sideHandler != null){
+			Side side = (Side) sideHandler.key;
+
+			isRemote = side.isClient();
+
+			if (isRemote) clientWorld.setMinecraft();
+
+			ByteBuf buf = Unpooled.buffer();
+			try { // Reflection is scary
+
+				message.toBytes(buf);
+
+				IMessageHandler handler = (IMessageHandler) ((Class) sideHandler.value).newInstance();
+
+				Constructor constructor = MessageContext.class.getDeclaredConstructor(new Class[]{ INetHandler.class, Side.class });
+
+				constructor.setAccessible(true);
+
+				MessageContext ctx = (MessageContext) constructor.newInstance(null, side);
+
+				message.fromBytes(buf);
+
+				handler.onMessage(message, ctx);
+			}catch(Exception ex) {
+				MainRegistry.logger.warn("[Migraine] Failed to fake packet!");
+			}
+
+			if (isRemote) clientWorld.resetMinecraft();
+
+			isRemote = true;
+		}
+
+	}
+
+	public void addPacket(IMessage message, EntityPlayerMP player){
+		addPacket(message, new NetworkRegistry.TargetPoint(0, 0, 0, 0, 0));
 	}
 
 	// Entities
@@ -319,18 +432,24 @@ public class TrackedDummyWorld extends DummyWorld {
 		}
 	}
 
+	public EntityPlayer getClosestPlayerToEntity(Entity p_72890_1_, double p_72890_2_)
+	{
+		return fakePlayer;
+	}
+
+	public EntityPlayer getClosestPlayer(double p_72977_1_, double p_72977_3_, double p_72977_5_, double p_72977_7_) {
+		return fakePlayer;
+	}
 
 	// Particles
 	@Override
 	public void spawnParticle(String particleName, double x, double y, double z, double velX, double velY, double velZ){
 		if (!this.isRemote) return;
+		clientWorld.setMinecraft();
 		Minecraft mc = Minecraft.getMinecraft();
-		if (!(mc.currentScreen instanceof GuiMigraine)) return;
-		GuiMigraine gui = (GuiMigraine) mc.currentScreen;
-		EntityLivingBase renderViewEntity = gui.worldRenderer.camera;
-		EffectRenderer effectRenderer = gui.worldRenderer.rendererEffect;
+		EntityLivingBase renderViewEntity = mc.renderViewEntity;
+		EffectRenderer effectRenderer = mc.effectRenderer;
 		TextureManager renderEngine = mc.renderEngine;
-		
 		if (renderViewEntity != null && effectRenderer != null)
 		{
 			int i = mc.gameSettings.particleSetting;
@@ -347,10 +466,10 @@ public class TrackedDummyWorld extends DummyWorld {
 
 			switch (particleName) {
 				case "hugeexplosion":
-					effectRenderer.addEffect(entityfx = new EntityHugeExplodeFX(this, x, y, z, velX, velY, velZ));
+					effectRenderer.addEffect(entityfx = new EntityHugeExplodeFX(clientWorld, x, y, z, velX, velY, velZ));
 					break;
 				case "largeexplode":
-					effectRenderer.addEffect(entityfx = new EntityLargeExplodeFX(renderEngine, this, x, y, z, velX, velY, velZ));
+					effectRenderer.addEffect(entityfx = new EntityLargeExplodeFX(renderEngine, clientWorld, x, y, z, velX, velY, velZ));
 					break;
 				case "fireworksSpark":
 					effectRenderer.addEffect(entityfx = new EntityFireworkSparkFX(this, x, y, z, velX, velY, velZ, effectRenderer));
@@ -359,7 +478,8 @@ public class TrackedDummyWorld extends DummyWorld {
 
 			if (entityfx == null)
 			{
-				double d9 = 16.0D;
+				// The render distance needs to be cranked
+				double d9 = 128.0D;
 
 				if (!(d6 * d6 + d7 * d7 + d8 * d8 > d9 * d9) && i <= 1) {
 					switch (particleName) {
@@ -437,7 +557,7 @@ public class TrackedDummyWorld extends DummyWorld {
 							entityfx = new EntitySmokeFX(this, x, y, z, velX, velY, velZ, 2.5F);
 							break;
 						case "cloud":
-							entityfx = new EntityCloudFX(this, x, y, z, velX, velY, velZ);
+							entityfx = new EntityCloudFX(clientWorld, x, y, z, velX, velY, velZ);
 							break;
 						case "reddust":
 							entityfx = new EntityReddustFX(this, x, y, z, (float) velX, (float) velY, (float) velZ);
@@ -509,12 +629,15 @@ public class TrackedDummyWorld extends DummyWorld {
 				}
 			}
 		}
+		clientWorld.resetMinecraft();
 	}
 
 	// main loop
 	public void update() {
 		// Time
 		this.func_82738_a(this.getTotalWorldTime() + 1L);
+
+		fakePlayer.onUpdate();
 
 		// Override server to client packets (new system)
 		tilesToReserialize.forEach((Long pos) -> {
@@ -525,7 +648,7 @@ public class TrackedDummyWorld extends DummyWorld {
 				try {
 					((IBufPacketReceiver) tile).deserialize(buf);
 				}catch (Exception e){
-					MainRegistry.logger.warn("[Migraine] Failed to deserialize a tile entity! ", e);
+					MainRegistry.logger.warn("[Migraine] Failed to deserialize a tile entity!");
 				}
 			}
 		});
@@ -582,12 +705,27 @@ public class TrackedDummyWorld extends DummyWorld {
 		}
 
 		// Tick blocks every tick, still as the server
-		HashMap<Long, Block> blocks = new HashMap<>(blockMap);
-		blocks.forEach((Long pos, Block block) -> {
-			if (block.getTickRandomly())
-				block.updateTick(serverWorld, CoordinatePacker.unpackX(pos), CoordinatePacker.unpackY(pos), CoordinatePacker.unpackZ(pos), this.rand);
-		});
+		List<Long> keys = new ArrayList<>(blockMap.keySet()); // Get all block positions
+
+		// Aprox 3 per chunk (num chunks = x*z/16^2)
+		int randomTicksPerTick = Math.max(1, (int) Math.max(1, 3 * ((size.xCoord * size.zCoord) / 256f)));
+
+		for (int i = 0; i < randomTicksPerTick; i++) {
+			if (keys.isEmpty()) break; // Prevent errors
+
+			// Select a random block
+			int index = rand.nextInt(keys.size());
+			Long pos = keys.get(index);
+			Block block = blockMap.get(pos);
+
+			if (block != null && block.getTickRandomly()) {
+				block.updateTick(serverWorld, CoordinatePacker.unpackX(pos), CoordinatePacker.unpackY(pos), CoordinatePacker.unpackZ(pos), rand);
+			}
+		}
 		this.isRemote = true;
+
+		// Block render tick
+		doVoidFogParticles(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
 
 		// Update entities as server and client
 		this.isRemote = false;
@@ -621,6 +759,8 @@ public class TrackedDummyWorld extends DummyWorld {
 		tileMap.clear();
 		if (Minecraft.getMinecraft().currentScreen instanceof GuiMigraine)
 			((GuiMigraine) Minecraft.getMinecraft().currentScreen).worldRenderer.rendererEffect.clearEffects(this);
+		rand.setSeed(0);
+		serverWorld.rand.setSeed(0);
 	}
 
 
@@ -634,17 +774,19 @@ public class TrackedDummyWorld extends DummyWorld {
 		return 15 << 20 | 15 << 4;
 	}
 
-	public Vector3f getSize() {
+	public Vec3 getSize() {
 		calcMinMax();
-		size.set(maxPos.x - minPos.x + 1, maxPos.y - minPos.y + 1, maxPos.z - minPos.z + 1);
+		size = Vec3.createVectorHelper(maxPos.xCoord - minPos.xCoord + 1, maxPos.yCoord - minPos.yCoord + 1, maxPos.zCoord - minPos.zCoord + 1);
 		return size;
 	}
 
-	public Vector3f getMinPos() {
+	public Vec3 getMinPos() {
+		calcMinMax();
 		return minPos;
 	}
 
-	public Vector3f getMaxPos() {
+	public Vec3 getMaxPos() {
+		calcMinMax();
 		return maxPos;
 	}
 

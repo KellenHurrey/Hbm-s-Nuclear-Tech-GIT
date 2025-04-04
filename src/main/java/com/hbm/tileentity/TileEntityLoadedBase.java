@@ -2,11 +2,11 @@ package com.hbm.tileentity;
 
 import api.hbm.tile.ILoadedTile;
 import com.hbm.handler.threading.PacketThreading;
-import com.hbm.migraine.world.DummyWorldServer;
-import com.hbm.migraine.world.TrackedDummyWorld;
+//import com.hbm.migraine.world.DummyWorldServer;
+//import com.hbm.migraine.world.TrackedDummyWorld;
 import com.hbm.packet.toclient.BufPacket;
 import com.hbm.sound.AudioWrapper;
-import com.hbm.util.CoordinatePacker;
+//import com.hbm.util.CoordinatePacker;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
@@ -84,15 +84,16 @@ public class TileEntityLoadedBase extends TileEntity implements ILoadedTile, IBu
 
 		this.lastPackedBuf = preBuf.copy();
 
-		if (worldObj instanceof TrackedDummyWorld){
-			// Don't crash, but still update the client
-			((TrackedDummyWorld) worldObj).addPacket(CoordinatePacker.pack(xCoord, yCoord, zCoord));
-		} else if (worldObj instanceof DummyWorldServer){
-			((DummyWorldServer) worldObj).addPacket(CoordinatePacker.pack(xCoord, yCoord, zCoord));
-		}else
-		{
+//		if (worldObj instanceof TrackedDummyWorld){
+//			// Don't crash, but still update the client
+//			((TrackedDummyWorld) worldObj).addPacket(CoordinatePacker.pack(xCoord, yCoord, zCoord));
+//		} else if (worldObj instanceof DummyWorldServer){
+//			((DummyWorldServer) worldObj).addPacket(CoordinatePacker.pack(xCoord, yCoord, zCoord));
+//		}
+//		else
+//		{
 			PacketThreading.createAllAroundThreadedPacket(packet, new NetworkRegistry.TargetPoint(this.worldObj.provider.dimensionId, xCoord, yCoord, zCoord, range));
-		}
+//		}
 	}
 
 }

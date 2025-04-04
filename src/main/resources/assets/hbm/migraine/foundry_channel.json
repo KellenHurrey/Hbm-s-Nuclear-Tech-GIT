@@ -1,0 +1,625 @@
+{
+	"owner": {
+		"id": "hbm:tile.foundry_channel"
+	},
+	"seeAlso": [
+		{ "id": "hbm:tile.machine_crucible" }
+	],
+	"chapters": [
+		285,
+		640
+	],
+	"size": {
+		"x": 5,
+		"y": 4,
+		"z": 4
+	},
+	"update": [
+		{
+			"tick": 0,
+			"action": {
+				"type": "fillBlocks",
+				"id": "minecraft:brick_block",
+				"positionMin": {
+					"x": 0,
+					"y": 0,
+					"z": 0
+				},
+				"positionMax": {
+					"x": 4,
+					"y": 0,
+					"z": 3
+				}
+			}
+		},
+		{
+			"tick": 5,
+			"action": {
+				"type": "fillBlocks",
+				"id": "minecraft:brick_block",
+				"positionMin": {
+					"x": 1,
+					"y": 1,
+					"z": 2
+				},
+				"positionMax": {
+					"x": 3,
+					"y": 1,
+					"z": 2
+				}
+			}
+		},
+		{
+			"tick": 5,
+			"action": {
+				"type": "setBlock",
+				"id": "minecraft:brick_block",
+				"position": {
+					"x": 3,
+					"y": 1,
+					"z": 3
+				}
+			}
+		},
+		{
+			"tick": 5,
+			"action": {
+				"type": "setBlock",
+				"id": "hbm:tile.foundry_basin",
+				"position": {
+					"x": 3,
+					"y": 1,
+					"z": 1
+				}
+			}
+		},
+		{
+			"tick": 5,
+			"priority": -1,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 3,
+					"y": 1,
+					"z": 1
+				},
+				"callList": "setInventorySlotContents()",
+				"setInventorySlotContents": [
+					{
+						"type": "int",
+						"value": 0
+					},
+					{
+						"type": "itemStack",
+						"id": "hbm:item.mold",
+						"meta": 12
+					}
+				],
+				"client": false
+			}
+		},
+		{
+			"tick": 5,
+			"action": {
+				"type": "setBlock",
+				"id": "hbm:tile.foundry_mold",
+				"position": {
+					"x": 2,
+					"y": 1,
+					"z": 1
+				}
+			}
+		},
+		{
+			"tick": 5,
+			"priority": -1,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 2,
+					"y": 1,
+					"z": 1
+				},
+				"callList": "setInventorySlotContents()",
+				"setInventorySlotContents": [
+					{
+						"type": "int",
+						"value": 0
+					},
+					{
+						"type": "itemStack",
+						"id": "hbm:item.mold",
+						"meta": 2
+					}
+				],
+				"client": false
+			}
+		},
+		{
+			"tick": 10,
+			"action": {
+				"type": "setBlock",
+				"id": "minecraft:brick_block",
+				"position": {
+					"x": 3,
+					"y": 2,
+					"z": 3
+				}
+			}
+		},
+		{
+			"tick": 10,
+			"action": {
+				"type": "setBlock",
+				"id": "hbm:tile.foundry_mold",
+				"position": {
+					"x": 1,
+					"y": 2,
+					"z": 2
+				}
+			}
+		},
+		{
+			"tick": 10,
+			"priority": -1,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 1,
+					"y": 2,
+					"z": 2
+				},
+				"callList": "setInventorySlotContents()",
+				"setInventorySlotContents": [
+					{
+						"type": "int",
+						"value": 0
+					},
+					{
+						"type": "itemStack",
+						"id": "hbm:item.mold",
+						"meta": 2
+					}
+				],
+				"client": false
+			}
+		},
+		{
+			"tick": 10,
+			"action": {
+				"type": "fillBlocks",
+				"id": "hbm:tile.foundry_channel",
+				"positionMin": {
+					"x": 2,
+					"y": 2,
+					"z": 2
+				},
+				"positionMax": {
+					"x": 3,
+					"y": 2,
+					"z": 2
+				}
+			}
+		},
+		{
+			"tick": 10,
+			"action": {
+				"type": "fillBlocks",
+				"id": "hbm:tile.foundry_outlet",
+				"meta": 2,
+				"positionMin": {
+					"x": 2,
+					"y": 2,
+					"z": 1
+				},
+				"positionMax": {
+					"x": 3,
+					"y": 2,
+					"z": 1
+				}
+			}
+		},
+		{
+			"tick": 15,
+			"action": {
+				"type": "setBlock",
+				"id": "hbm:tile.foundry_tank",
+				"position": {
+					"x": 3,
+					"y": 3,
+					"z": 3
+				}
+			}
+		},
+		{
+			"tick": 15,
+			"priority": -1,
+			"action": {
+				"type": "modifyTileEntityNBT",
+				"position": {
+					"x": 3,
+					"y": 3,
+					"z": 3
+				},
+				"nbt": "{type:7900,amount:648}"
+			}
+		},
+		{
+			"tick": 15,
+			"action": {
+				"type": "setBlock",
+				"id": "hbm:tile.foundry_outlet",
+				"meta": 2,
+				"position": {
+					"x": 3,
+					"y": 3,
+					"z": 2
+				}
+			}
+		},
+		{
+			"tick": 15,
+			"priority": -1,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 3,
+					"y": 3,
+					"z": 2
+				},
+				"value": {
+					"type": "boolean",
+					"value": true
+				},
+				"setTo": "invertRedstone"
+			}
+		},
+		{
+			"tick": 25,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": 0,
+					"y": -25
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.foundryChannel.0"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "LEFT",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 85,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": -5,
+					"y": -40
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.foundryChannel.1"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "TOP",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 145,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": 0,
+					"y": -25
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.foundryChannel.2"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "LEFT",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 215,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 3,
+					"y": 3,
+					"z": 2
+				},
+				"value": {
+					"type": "boolean",
+					"value": false
+				},
+				"setTo": "invertRedstone"
+			}
+		},
+
+		{
+			"tick": 295,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": 0,
+					"y": -25
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.foundryChannel.3"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "LEFT",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 365,
+			"action": {
+				"type": "modifyTileEntityNBT",
+				"position": {
+					"x": 3,
+					"y": 3,
+					"z": 3
+				},
+				"nbt": "{type:7900,amount:146}"
+			}
+		},
+		{
+			"tick": 400,
+			"action": {
+				"type": "rotateTo",
+				"ticksFor": 20,
+				"yaw": 0,
+				"pitch": -90
+			}
+		},
+		{
+			"tick": 430,
+			"action": {
+				"type": "display",
+				"ticksFor": 60,
+				"position": {
+					"x": 0,
+					"y": -25
+				},
+				"lines": [
+					[
+						{
+							"type": "string",
+							"localized": true,
+							"value": "cannery.foundryChannel.4"
+						}
+					]
+				],
+				"autowrap": 200,
+				"orientation": "BOTTOM",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 490,
+			"action": {
+				"type": "display",
+				"ticksFor": 40,
+				"position": {
+					"x": 0,
+					"y": -25
+				},
+				"lines": [
+					[
+						{
+							"type": "itemStack",
+							"id": "minecraft:iron_shovel"
+						},
+						{
+							"type": "string",
+							"value": "->"
+						},
+						{
+							"type": "itemStack",
+							"id": "hbm:item.scraps",
+							"meta": 7900
+						}
+					]
+				],
+				"autowrap": 200,
+				"colors": "COPPER",
+				"orientation": "BOTTOM"
+			}
+		},
+		{
+			"tick": 530,
+			"action": {
+				"type": "modifyTileEntityNBT",
+				"position": {
+					"x": 2,
+					"y": 2,
+					"z": 2
+				},
+				"nbt": "{amount:0}"
+			}
+		},
+		{
+			"tickStart": 538,
+			"tickEnd": 550,
+			"action": {
+				"type": "modifyTileEntityNBT",
+				"position": {
+					"x": 2,
+					"y": 2,
+					"z": 2
+				},
+				"nbt": "{amount:0}"
+			}
+		},
+		{
+			"tick": 540,
+			"action": {
+				"type": "rotateTo",
+				"ticksFor": 20,
+				"yaw": -45,
+				"pitch": -30
+			}
+		},
+		{
+			"tick": 600,
+			"action": {
+				"type": "display",
+				"ticksFor": 40,
+				"position": {
+					"x": -32,
+					"y": -20
+				},
+				"lines": [
+					[
+						{
+							"type": "itemStack",
+							"id": "minecraft:gold_block"
+						}
+					]
+				],
+				"orientation": "BOTTOM",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 600,
+			"action": {
+				"type": "display",
+				"ticksFor": 40,
+				"position": {
+					"x": -10,
+					"y": 10
+				},
+				"lines": [
+					[
+						{
+							"type": "itemStack",
+							"id": "minecraft:gold_ingot"
+						}
+					]
+				],
+				"orientation": "BOTTOM",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 600,
+			"action": {
+				"type": "display",
+				"ticksFor": 40,
+				"position": {
+					"x": 32,
+					"y": -20
+				},
+				"lines": [
+					[
+						{
+							"type": "itemStack",
+							"id": "minecraft:gold_ingot"
+						}
+					]
+				],
+				"orientation": "BOTTOM",
+				"colors": "COPPER"
+			}
+		},
+		{
+			"tick": 640,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 3,
+					"y": 1,
+					"z": 1
+				},
+				"callList": "decrStackSize()",
+				"decrStackSize": [
+					{
+						"type": "int",
+						"value": 1
+					},
+					{
+						"type": "int",
+						"value": 2
+					}
+				]
+			}
+		},
+		{
+			"tick": 640,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 2,
+					"y": 1,
+					"z": 1
+				},
+				"callList": "decrStackSize()",
+				"decrStackSize": [
+					{
+						"type": "int",
+						"value": 1
+					},
+					{
+						"type": "int",
+						"value": 2
+					}
+				]
+			}
+		},
+		{
+			"tick": 640,
+			"action": {
+				"type": "modifyTileEntity",
+				"position": {
+					"x": 1,
+					"y": 2,
+					"z": 2
+				},
+				"callList": "decrStackSize()",
+				"decrStackSize": [
+					{
+						"type": "int",
+						"value": 1
+					},
+					{
+						"type": "int",
+						"value": 2
+					}
+				]
+			}
+		}
+	]
+}

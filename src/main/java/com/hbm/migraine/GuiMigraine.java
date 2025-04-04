@@ -1,23 +1,27 @@
 package com.hbm.migraine;
 
 import com.google.gson.JsonObject;
-import com.hbm.migraine.client.ClientFakePlayer;
-import com.hbm.migraine.client.ImmediateWorldSceneRenderer;
+import com.hbm.migraine.player.ClientFakePlayer;
+import com.hbm.migraine.client.WorldSceneRenderer;
 import com.hbm.migraine.world.TrackedDummyWorld;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
-import org.lwjgl.util.vector.Vector3f;
+import net.minecraft.util.Vec3;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
+/** @author kellen */
 public class GuiMigraine extends GuiScreen {
 
-	public ImmediateWorldSceneRenderer worldRenderer;
+	public WorldSceneRenderer worldRenderer;
 
 	public boolean updating = false;
 
@@ -31,18 +35,15 @@ public class GuiMigraine extends GuiScreen {
 
 
 	public float zoom = 1f;
-	public float yaw = 50f;
-	public float pitch = 20f;
+	public float yaw = -45f;
+	public float pitch = -30f;
+	public boolean isometric = true;
 
-	public Vector3f center;
+	public static int debugMode = 0;
 
+	public Vec3 camera = Vec3.createVectorHelper(0, 0, 0);
 	public HashSet<JsonObject> active = new HashSet<>();
-
 	public HashSet<MigraineDisplay> displays = new HashSet<>();
-
-	public List<MigraineDisplay> seealso = new ArrayList<>();
-
-	public MigraineDisplay title;
 
 
 	public GuiMigraine(MigraineInstructions instruct){
@@ -66,15 +67,16 @@ public class GuiMigraine extends GuiScreen {
 			first = false;
 			TrackedDummyWorld world = new TrackedDummyWorld(this.mc.getSoundHandler(), this.mc.thePlayer);
 			FAKE_PLAYER = new ClientFakePlayer(world, new GameProfile(UUID.randomUUID(), "Migraine"));
-			worldRenderer = new ImmediateWorldSceneRenderer(world, FAKE_PLAYER);
+			worldRenderer = new WorldSceneRenderer(world, FAKE_PLAYER);
 
 			FAKE_PLAYER.setWorld(worldRenderer.world);
+
+			worldRenderer.world.fakePlayer = FAKE_PLAYER;
 
 			chapterNumber = 0;
 
 			active.clear();
 			displays.clear();
-			seealso.clear();
 
 			instructions.init(this);
 		}
@@ -91,10 +93,28 @@ public class GuiMigraine extends GuiScreen {
 
 		updateCamera();
 
-		worldRenderer.render(0, 0, width, height, mouseX, mouseY, isPaused ? 0 : f);
+		String[] lines = worldRenderer.render(width, height, mouseX, mouseY, isPaused ? 0 : f);
 
 		// Render on top
 		instructions.render(mouseX, mouseY, isPaused ? 0 : f, this.width, this.height, this);
+
+		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+		RenderHelper.disableStandardItemLighting();
+		GL11.glDisable(GL11.GL_LIGHTING);
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		if (debugMode == 2){
+			int x = mouseX - width / 2;
+			int y = mouseY - height / 2;
+
+			fontRendererObj.drawString(x + ", " + y, width - fontRendererObj.getStringWidth(x + ", " + y) - 5, height - 15, 0xffffff);
+		}
+
+		if (debugMode > 0) {
+			for (int i = 0; i < lines.length; i++) {
+				if (i != 2 || debugMode == 2)
+					fontRendererObj.drawString(lines[i], width / 2 - fontRendererObj.getStringWidth(lines[i]) / 2, 5 + (fontRendererObj.FONT_HEIGHT + 3) * i, 0xffffff);
+			}
+		}
 	}
 
 	// Gets called at a normal 20fps
@@ -112,19 +132,9 @@ public class GuiMigraine extends GuiScreen {
 	}
 
 	public void updateCamera(){
-		Vector3f size = worldRenderer.world.getSize();
-		Vector3f minPos = worldRenderer.world.getMinPos();
-		Vector3f center = this.center == null ? new Vector3f(minPos.x + size.x / 2, minPos.y + size.y / 2, minPos.z + size.z / 2) : this.center;
+		worldRenderer.resetRenders();
 
-		worldRenderer.resetRenders().addRenderedBlocks(new HashSet<>(worldRenderer.world.blockMap.keySet())).addRenderEntities(worldRenderer.world.entities);
-
-		float max = Math.max(Math.max(size.x, size.y), size.z);
-		float baseZoom = (float) (3.5f * Math.sqrt(max)) / this.zoom;
-		float sizeFactor = (float) (1.0f + Math.log(max) / Math.log(10));
-
-		float zoom = baseZoom * sizeFactor / 1.5f;
-		// ignore how yaw and pitch are reversed
-		worldRenderer.setCameraLookAt(center, zoom, this.yaw, this.pitch);
+		worldRenderer.setCamera(camera, zoom, yaw, pitch, isometric);
 	}
 
 	@Override
@@ -146,6 +156,9 @@ public class GuiMigraine extends GuiScreen {
 		}
 		if (keyCode == 32 || keyCode == this.mc.gameSettings.keyBindJump.getKeyCode()){
 			this.isPaused = !this.isPaused;
+		}
+		if (key == 'p'){
+			debugMode = ++debugMode > 2 ? 0 : debugMode;
 		}
 	}
 

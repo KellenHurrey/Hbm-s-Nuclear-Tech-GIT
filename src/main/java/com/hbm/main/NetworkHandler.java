@@ -2,6 +2,7 @@ package com.hbm.main;
 
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.packet.threading.ThreadedPacket;
+import com.hbm.util.Tuple;
 import cpw.mods.fml.common.network.FMLEmbeddedChannel;
 import cpw.mods.fml.common.network.FMLOutboundHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -24,6 +25,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.lang.ref.WeakReference;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 
 import static cpw.mods.fml.common.network.FMLIndexedMessageToMessageCodec.INBOUNDPACKETTRACKER;
@@ -99,6 +101,8 @@ public class NetworkHandler {
 
 	private static PrecompilingNetworkCodec packetCodec;
 
+	public static HashMap<Class< ? extends IMessage>, Tuple.Pair<Side, Class< ? extends IMessageHandler< ? extends IMessage, ? extends IMessage>>>> messageHandlers = new HashMap<>();
+
 	public NetworkHandler(String name) {
 		packetCodec = new PrecompilingNetworkCodec();
 		EnumMap<Side, FMLEmbeddedChannel> channels = NetworkRegistry.INSTANCE.newChannel(name, packetCodec);
@@ -119,6 +123,7 @@ public class NetworkHandler {
 		SimpleChannelHandlerWrapper<REQ, REPLY> handler;
 		handler = new SimpleChannelHandlerWrapper<>(messageHandler, side, requestMessageType);
 		channel.pipeline().addAfter(type, messageHandler.getName(), handler);
+		messageHandlers.put(requestMessageType, new Tuple.Pair<>(side, messageHandler));
 	}
 
 	public static void flush() {

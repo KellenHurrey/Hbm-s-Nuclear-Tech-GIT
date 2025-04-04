@@ -8,7 +8,6 @@ import com.hbm.inventory.recipes.AssemblerRecipes;
 import com.hbm.items.ModItems;
 import com.hbm.items.machine.ItemAssemblyTemplate;
 import com.hbm.lib.Library;
-import com.hbm.main.MainRegistry;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.TileEntityMachineBase;
 import com.hbm.tileentity.machine.storage.TileEntityCrateTemplate;
@@ -320,8 +319,6 @@ public abstract class TileEntityMachineAssemblerBase extends TileEntityMachineBa
 		nbt.setLong("power", power);
 		nbt.setIntArray("progress", progress);
 		nbt.setIntArray("maxProgress", maxProgress);
-
-		MainRegistry.logger.debug(nbt.toString());
 	}
 
 	@Override

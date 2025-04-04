@@ -10,6 +10,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+/** @author kellen, hbm */
 public class MigraineBar {
 	private static final ResourceLocation guiUtil =  new ResourceLocation(RefStrings.MODID + ":textures/gui/gui_utility.png");
 
@@ -25,6 +26,14 @@ public class MigraineBar {
 	private long colorDarker = 0xFF7D7D7D;
 	private long colorFrame = 0xFFA0A0A0;
 	private long colorBg = 0xFF302E36;
+
+	private long selectedBrighter = 0xFFF2BA7C;
+	private long selectedDarker = 0xFFA03217;
+	private long selectedFrame = 0xFFCA6C43;
+
+	private long disabledBrighter = 0xFFD1D1D1;
+	private long disabledDarker = 0xFF5D5D5D;
+	private long disabledFrame = 0xFF919191;
 
 	public MigraineBar(int x, int y, int width, float[] chapters){
 		this.x = x;
@@ -71,8 +80,8 @@ public class MigraineBar {
 
 		Minecraft.getMinecraft().getTextureManager().bindTexture(guiUtil);
 
-		drawArrow(posX, posY, 50, 0, 10, 14, mouseX >= posX && mouseX <= posX + 9 && mouseY >= posY && mouseY <= posY + 14);
-		drawArrow(posX + width - 10, posY, 40, 0, 10, 14, mouseX >= posX + width - 9 && mouseX <= posX + width && mouseY >= posY && mouseY <= posY + 14);
+		drawArrow(posX, posY, 50, 0, 10, 14, mouseX >= posX && mouseX <= posX + 9 && mouseY >= posY && mouseY <= posY + 14, progress <= 0.01f);
+		drawArrow(posX + width - 10, posY, 40, 0, 10, 14, mouseX >= posX + width - 9 && mouseX <= posX + width && mouseY >= posY && mouseY <= posY + 14, progress >= 1.0f);
 		drawBar(posX + 9, posY + 5, width - 18);
 
 		for (float chapterPercent : chapters){
@@ -84,13 +93,13 @@ public class MigraineBar {
 	}
 
 	private void drawVertBar(int posX, int posY, int height, boolean selected){
-		this.drawRect(posX, posY, posX + 2, posY + 1, selected ? 0xFFF2BA7C : this.colorBrighter);
-		this.drawRect(posX + 2, posY, posX + 3, posY + 1, selected ? 0xFFCA6C43 : this.colorFrame);
-		this.drawRect(posX, posY + 1, posX + 1, posY + height - 1, selected ? 0xFFF2BA7C : this.colorBrighter);
-		this.drawRect(posX + 1, posY + 1, posX + 2, posY + height - 1, selected ? 0xFFCA6C43 : this.colorFrame);
-		this.drawRect(posX + 2, posY + 1, posX + 3, posY + height - 1, selected ? 0xFFA03217 : this.colorDarker);
-		this.drawRect(posX, posY + height - 1, posX + 1, posY + height, selected ? 0xFFCA6C43 : this.colorFrame);
-		this.drawRect(posX + 1, posY + height - 1, posX + 3, posY + height, selected ? 0xFFA03217 : this.colorDarker);
+		this.drawRect(posX, posY, posX + 2, posY + 1, selected ? this.selectedBrighter : this.colorBrighter);
+		this.drawRect(posX + 2, posY, posX + 3, posY + 1, selected ? this.selectedFrame : this.colorFrame);
+		this.drawRect(posX, posY + 1, posX + 1, posY + height - 1, selected ? this.selectedBrighter : this.colorBrighter);
+		this.drawRect(posX + 1, posY + 1, posX + 2, posY + height - 1, selected ? this.selectedFrame : this.colorFrame);
+		this.drawRect(posX + 2, posY + 1, posX + 3, posY + height - 1, selected ? this.selectedDarker : this.colorDarker);
+		this.drawRect(posX, posY + height - 1, posX + 1, posY + height, selected ? this.selectedFrame : this.colorFrame);
+		this.drawRect(posX + 1, posY + height - 1, posX + 3, posY + height, selected ? this.selectedDarker : this.colorDarker);
 	}
 
 	private void drawBar(int posX, int posY, int width){
@@ -99,11 +108,11 @@ public class MigraineBar {
 		this.drawRect(posX, posY + 3, posX + width, posY + 4, this.colorDarker);
 	}
 
-	private void drawArrow(int posX, int posY, int sourceX, int sourceY, int sizeX, int sizeY, boolean selected) {
-		this.drawTexturedModalRect(posX, posY, sourceX + 28 * 0, sourceY, sizeX, sizeY, this.colorBrighter);
-		this.drawTexturedModalRect(posX, posY, sourceX + 28 * 1, sourceY, sizeX, sizeY, selected ? 0xFFCA6C43 : this.colorFrame);
-		this.drawTexturedModalRect(posX, posY, sourceX + 28 * 2, sourceY, sizeX, sizeY, this.colorDarker);
-		this.drawTexturedModalRect(posX, posY, sourceX + 28 * 3, sourceY, sizeX, sizeY, selected ? 0xFFCA6C43 : this.colorFrame);
+	private void drawArrow(int posX, int posY, int sourceX, int sourceY, int sizeX, int sizeY, boolean selected, boolean disabled) {
+		this.drawTexturedModalRect(posX, posY, sourceX + 28 * 0, sourceY, sizeX, sizeY, disabled ? this.disabledBrighter : this.colorBrighter);
+		this.drawTexturedModalRect(posX, posY, sourceX + 28 * 1, sourceY, sizeX, sizeY, disabled ? this.disabledFrame : selected ? this.selectedFrame : this.colorFrame);
+		this.drawTexturedModalRect(posX, posY, sourceX + 28 * 2, sourceY, sizeX, sizeY, disabled ? this.disabledDarker : this.colorDarker);
+		this.drawTexturedModalRect(posX, posY, sourceX + 28 * 3, sourceY, sizeX, sizeY, disabled ? this.disabledFrame : selected ? this.selectedFrame : this.colorFrame);
 	}
 
 	private void drawRect(int minX, int minY, int maxX, int maxY, long color) {

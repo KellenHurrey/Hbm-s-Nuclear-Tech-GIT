@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+/** @author kellen, hbm */
 public class MigraineLoader implements IResourceManagerReloadListener {
 
 	public static final HashSet<File> registeredModFiles = new HashSet<>();
@@ -84,7 +85,7 @@ public class MigraineLoader implements IResourceManagerReloadListener {
 	private static void dissectZip(File pack){
 
 		if (pack == null){
-			MainRegistry.logger.info("[Migraine] Pack file does not exist!");
+			MainRegistry.logger.warn("[Migraine] Pack file does not exist!");
 			return;
 		}
 
@@ -106,13 +107,13 @@ public class MigraineLoader implements IResourceManagerReloadListener {
 						reader.close();
 						logFoundMigraine(manName);
 					} catch (Exception ex) {
-						MainRegistry.logger.info("[Migraine] Error reading migraine " + name + ": " + ex);
+						MainRegistry.logger.warn("[Migraine] Error reading migraine " + name + ", probably due to malformed json!");
 					}
 				}
 			}
 
 		} catch (Exception e) {
-			MainRegistry.logger.info("[Migraine] Error dissecting zip " + pack.getName() + ": " + e);
+			MainRegistry.logger.warn("[Migraine] Error dissecting zip " + pack.getName());
 		}
 	}
 
@@ -131,8 +132,7 @@ public class MigraineLoader implements IResourceManagerReloadListener {
 					registerJson(name, obj);
 					logFoundMigraine(name);
 				} catch(Exception ex) {
-					MainRegistry.logger.info("[Migraine] Error reading migraine " + name + ": " + ex);
-					ex.printStackTrace();
+					MainRegistry.logger.warn("[Migraine] Error reading migraine " + name + ", probably due to malformed json!");
 				}
 			}
 		}

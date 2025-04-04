@@ -12,6 +12,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -54,7 +55,7 @@ public class ExplosionCreator implements IParticleCreator {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void makeParticle(World world, EntityPlayer player, TextureManager man, Random rand, double x, double y, double z, NBTTagCompound data) {
+	public void makeParticle(World world, EntityPlayer player, TextureManager man, Random rand, double x, double y, double z, NBTTagCompound data, EffectRenderer effectRenderer) {
 		
 		int cloudCount = data.getByte("cloudCount");
 		float cloudScale = data.getFloat("cloudScale");
@@ -79,7 +80,7 @@ public class ExplosionCreator implements IParticleCreator {
 		// WAVE
 		ParticleMukeWave wave = new ParticleMukeWave(man, world, x, y + 2, z);
 		wave.setup(waveScale, (int) (25F * waveScale / 45));
-		Minecraft.getMinecraft().effectRenderer.addEffect(wave);
+		effectRenderer.addEffect(wave);
 		
 		// SMOKE PLUME
 		for(int i = 0; i < cloudCount; i++) {
@@ -92,7 +93,7 @@ public class ExplosionCreator implements IParticleCreator {
 			fx.motionZ = rand.nextGaussian() * 0.5 * cloudSpeedMult;
 			fx.setMaxAge(70 + rand.nextInt(20));
 			fx.noClip = true;
-			Minecraft.getMinecraft().effectRenderer.addEffect(fx);
+			effectRenderer.addEffect(fx);
 		}
 		
 		// DEBRIS
@@ -137,7 +138,7 @@ public class ExplosionCreator implements IParticleCreator {
 				}
 			}
 			
-			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+			effectRenderer.addEffect(particle);
 		}
 	}
 }

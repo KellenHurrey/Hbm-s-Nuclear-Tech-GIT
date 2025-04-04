@@ -58,9 +58,9 @@ public class AudioDynamic extends MovingSound {
 				if (screen instanceof GuiMigraine) {
 					GuiMigraine migraine = (GuiMigraine) screen;
 					if (migraine.worldRenderer != null)
-						f = (float) Math.sqrt(Math.pow(xPosF - migraine.worldRenderer.getEyePos().x, 2) + Math.pow(yPosF - migraine.worldRenderer.getEyePos().y, 2) + Math.pow(zPosF - migraine.worldRenderer.getEyePos().z, 2));
+						f = (float) Math.sqrt(Math.pow(xPosF - migraine.FAKE_PLAYER.posX, 2) + Math.pow(yPosF - migraine.FAKE_PLAYER.posY + migraine.FAKE_PLAYER.getEyeHeight(), 2) + Math.pow(zPosF - migraine.FAKE_PLAYER.posZ, 2));
 				}
-			}else {
+			} else {
 				f = (float) Math.sqrt(Math.pow(xPosF - player.posX, 2) + Math.pow(yPosF - player.posY, 2) + Math.pow(zPosF - player.posZ, 2));
 			}
 			volume = func(f);

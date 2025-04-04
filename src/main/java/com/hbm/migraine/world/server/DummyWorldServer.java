@@ -1,6 +1,7 @@
-package com.hbm.migraine.world;
+package com.hbm.migraine.world.server;
 
 import com.hbm.main.MainRegistry;
+import com.hbm.migraine.world.DummyWorld;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.Profiler;
@@ -18,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import javax.annotation.Nonnull;
 import java.io.File;
 
+/** @author kellen */
 public class DummyWorldServer extends WorldServer {
 
 	private final DummyWorld duplicateTo;
@@ -25,7 +27,7 @@ public class DummyWorldServer extends WorldServer {
 	public DummyWorldServer(DummyWorld world, ISaveHandler saveHandler, String name, int demId, WorldSettings settings, Profiler profiler) {
 		super(new DummyMinecraftServer(MinecraftServer.getServer()), saveHandler, name, demId, settings, profiler);
 		this.duplicateTo = world;
-		this.rand = world.rand;
+		this.rand.setSeed(0);
 		this.provider.setDimension(demId);
 		int providerDim = this.provider.dimensionId;
 		this.provider.worldObj = this;
@@ -39,9 +41,9 @@ public class DummyWorldServer extends WorldServer {
 		}
 	}
 
-	public void addPacket(long coord){
-		this.duplicateTo.addPacket(coord);
-	}
+//	public void addPacket(long coord){
+//		this.duplicateTo.addPacket(coord);
+//	}
 
 	@Override
 	public boolean setBlock(int x, int y, int z, Block block, int meta, int flags){
@@ -71,6 +73,11 @@ public class DummyWorldServer extends WorldServer {
 	@Override
 	public void scheduleBlockUpdateWithPriority(int x, int y, int z, Block block, int delay, int priority){
 		this.duplicateTo.scheduleBlockUpdateWithPriority(x, y, z, block, delay, priority);
+	}
+
+	@Override
+	public int getBlockLightOpacity(int x, int y, int z) {
+		return this.duplicateTo.getBlockLightOpacity(x, y, z);
 	}
 
 	@Override
