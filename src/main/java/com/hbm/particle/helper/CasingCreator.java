@@ -7,6 +7,7 @@ import com.hbm.particle.SpentCasing;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.EntityLivingBase;
@@ -74,7 +75,7 @@ public class CasingCreator implements IParticleCreator {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data, EffectRenderer effectRenderer) {
+	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data) {
 
 		String name = data.getString("name");
 		SpentCasing casingConfig = SpentCasing.casingMap.get(name);
@@ -92,6 +93,6 @@ public class CasingCreator implements IParticleCreator {
 		ParticleSpentCasing casing = new ParticleSpentCasing(texman, world, x, y, z, mX, mY, mZ, mPitch, mYaw, casingConfig, smoking, smokeLife, smokeLift, nodeLife);
 		casing.prevRotationYaw = casing.rotationYaw = yaw;
 		casing.prevRotationPitch = casing.rotationPitch = pitch;
-		effectRenderer.addEffect(casing);
+		Minecraft.getMinecraft().effectRenderer.addEffect(casing);
 	}
 }

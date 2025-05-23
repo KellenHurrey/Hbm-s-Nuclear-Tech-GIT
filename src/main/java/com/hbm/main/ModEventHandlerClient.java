@@ -819,26 +819,11 @@ public class ModEventHandlerClient {
 		}
 
 		try {
-			if (MigraineLoader.instructions.get(comp) != null){
-				list.add(EnumChatFormatting.GREEN + I18nUtil.resolveKey("cannery.f1"));
-				lastMigraine = comp;
-//				canneryTimestamp = System.currentTimeMillis();
-			}else
-				lastMigraine = null;
+			if (MigraineLoader.instructions.get(comp) != null)
+				list.add(EnumChatFormatting.GREEN + I18nUtil.resolveKey("migraine.f1"));
 		} catch (Exception ex){
 			list.add(EnumChatFormatting.RED + "Error loading migraine: " + ex.getLocalizedMessage());
 		}
-
-//		try {
-//			CanneryBase cannery = Jars.canneries.get(comp);
-//			if(cannery != null) {
-//				list.add(EnumChatFormatting.GREEN + I18nUtil.resolveKey("cannery.f1"));
-//				lastCannery = comp;
-//				canneryTimestamp = System.currentTimeMillis();
-//			}
-//		} catch(Exception ex) {
-//			list.add(EnumChatFormatting.RED + "Error loading cannery: " + ex.getLocalizedMessage());
-//		}
 
 		/*ItemStack copy = stack.copy();
 		List<MaterialStack> materials = Mats.getMaterialsFromItem(copy);
@@ -850,9 +835,7 @@ public class ModEventHandlerClient {
 		}*/
 	}
 
-//	private static long canneryTimestamp;
 	private static boolean firstHolding = true;
-	private static ComparableStack lastMigraine = null;
 
 	private ResourceLocation ashes = new ResourceLocation(RefStrings.MODID + ":textures/misc/overlay_ash.png");
 
@@ -967,11 +950,18 @@ public class ModEventHandlerClient {
 			}
 		}
 
-		if(Keyboard.isKeyDown(Keyboard.KEY_F1) && Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiMigraine) && firstHolding && lastMigraine != null) {
+		// May as well not call it twice, it looks expensive
+		ItemStack mouseOver = null;
+		boolean set = false;
+
+		if(Keyboard.isKeyDown(Keyboard.KEY_F1) && Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiMigraine) && firstHolding) {
 
 			firstHolding = false;
 
-			MigraineInstructions instructions = MigraineLoader.instructions.get(lastMigraine);
+			mouseOver = getMouseOverStack();
+			set = true;
+
+			MigraineInstructions instructions = MigraineLoader.instructions.get(new ComparableStack(mouseOver));
 			if(instructions != null)
 				FMLCommonHandler.instance().showGuiScreen(new GuiMigraine(instructions));
 		} else
@@ -979,11 +969,13 @@ public class ModEventHandlerClient {
 
 		if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_LMENU)) {
 
-			ItemStack stack = getMouseOverStack();
-			if(stack != null) {
-				stack = stack.copy();
-				stack.stackSize = 1;
-				FMLCommonHandler.instance().showGuiScreen(new GUIScreenPreview(stack));
+			if (!set)
+				mouseOver = getMouseOverStack();
+
+			if(mouseOver != null) {
+				mouseOver = mouseOver.copy();
+				mouseOver.stackSize = 1;
+				FMLCommonHandler.instance().showGuiScreen(new GUIScreenPreview(mouseOver));
 			}
 		}
 

@@ -1,0 +1,803 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/KellenHurrey/Migraine/refs/heads/main/Schema/migraine.schema.json", //TODO: change this over to the hbm git once it's merged
+    "title": "Migraine",
+    "description": "A migraine world descriptor",
+    "type": "object",
+    "definitions": {
+        "position3D": {
+            "type": "object",
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "z": {
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"]
+        },
+        "position2D": {
+            "type": "object",
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y"]
+        },
+        "item": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "The id of the item/block, as you would use in the /give or /setblock command",
+                    "type": "string"
+                },
+                "meta": {
+                    "description": "The damage/meta of the item/block",
+                    "type": "integer"
+                },
+                "count": {
+                    "description": "The number of items/blocks in the stack",
+                    "type": "integer"
+                },
+                "nbt": {
+                    "description": "A string containing a nbt value, the same as you would use with the /give or /setblock command",
+                    "type": "string"
+                }
+            },
+            "required": ["id"]
+        },
+        "localizedString": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "description": "The actual string value if \"localized\" is false or omitted, or localization key if \"localized\" is true",
+                    "type": "string"
+                },
+                "localized":{
+                    "description": "If the string is an actual string or a localization key",
+                    "type": "boolean"
+                }
+            },
+            "required": ["value"]
+        },
+        "callFunction": {
+            "type": "object",
+            "properties": {
+                "client": {
+                    "description": "Should it be called on the client side or server side. (Set isRemote of the world to this while calling)",
+                    "type": "boolean"
+                },
+                "callList": {
+                    "description": "The list of calls to make. Variables have no parenthesis and functions have empty parenthesis (). For example: \"openInventory()\", \"wasteStack.clear()\". If these calls return a value, that value can be used to set a field, as defined in \"setTo\". Each function here must have a key value pair defined below. The key must be equal to the callStack behind the function, without any parenthesis. The value must be an array of parameters. Each element must be an object, with a \"type\" field set to one of: world (gives the migraine world, passes null if \"value\": null is set), itemStack (requires id. optional: meta, count, nbt), string (requires value. optional: localized (boolean). If localized true, treats the value as a localization key), all primitives (requires value, can be set to null for default value). For example: \"openInventory\": [] or \"setInventorySlotContents\": [{ \"type\": \"int\", \"value\": 0 }, { \"type\": \"itemStack\", \"id\": \"hbm:item.mold\", \"meta\": 12 }]",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Sets the value of the object that will be passed to \"setTo\".",
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "enum": ["float", "int", "double", "long", "short", "byte"]
+                                },
+                                "value": {
+                                    "description": "A number value",
+                                    "type": ["number", "null"]
+                                }
+                            },
+                            "required": ["type", "value"]
+                        },
+                        {
+                            "type": "object",
+                            "allOf": [
+                                { "$ref": "#/definitions/item" },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "const": "itemStack"
+                                        }
+                                    },
+                                    "required": ["type"]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "world"
+                                },
+                                "value": {
+                                    "description": "null if you want the world to be null, otherwise omit this field",
+                                    "type": "null"
+                                }
+                            },
+                            "required": ["type"]
+                        },
+                        {
+                            "type": "object",
+                            "allOf": [
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": { "const": "string" }
+                                    },
+                                    "required": ["type"]
+                                },
+                                {
+                                    "$ref": "#/definitions/localizedString"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "char"
+                                },
+                                "value": {
+                                    "type": ["string", "null"]
+                                }
+                            }
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "boolean"
+                                },
+                                "value": {
+                                    "type": ["boolean", "null"]
+                                }
+                            }
+                        }
+                    ]
+                },
+                "setTo": {
+                    "description": "A list of calls to make with a value. Variables have no parenthesis and functions have empty parenthesis (). For example: \"openInventory()\", \"wasteStack.clear()\". If the last item is a field, it will be set to the callList result, unless value was set, which overrides callList. Each function here must have a key value pair defined below. The key must be equal to the setTo behind the function, without any parenthesis. The value must be an array of parameters. Each element must be an object, with a \"type\" field set to one of: world (gives the migraine world, passes null if \"value\": null is set), itemStack (requires id. optional: meta, count, nbt), string (requires value. optional: localized (boolean). If localized true, treats the value as a localization key), all primitives (requires value, can be set to null for default value). For example: \"openInventory\": [] or \"setInventorySlotContents\": [{ \"type\": \"int\", \"value\": 0 }, { \"type\": \"itemStack\", \"id\": \"hbm:item.mold\", \"meta\": 12 }]",
+                    "type": "string"
+                }
+            }
+        },
+        "setBlock": {
+            "description": "Places a single block at a specified position in the world",
+            "type": "object",
+            "allOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "setBlock"
+                        },
+                        "position": {
+                            "description": "The position to place the block",
+                            "$ref": "#/definitions/position3D"
+                        }
+                    },
+                    "required": ["type", "position"]
+                },
+                {
+                    "$ref": "#/definitions/item"
+                }
+            ]
+        },
+        "placeBlock": {
+            "description": "Places a block by a player with a specified rotation. Use for multiblocks and machines",
+            "type": "object",
+            "allOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "placeBlock"
+                        },
+                        "position": {
+                            "description": "The position that the player will place the block at",
+                            "$ref": "#/definitions/position3D"
+                        },
+                        "yaw": {
+                            "description": "The yaw that the player will be facing when placing the block. Defaults to 0 if omitted",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["type", "position"]
+                },
+                {
+                    "$ref": "#/definitions/item"
+                }
+            ]
+        },
+        "fillBlocks": {
+            "description": "Fills an area of blocks, like using the /fill command in later versions",
+            "type": "object",
+            "allOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "fillBlocks"
+                        },
+                        "positionMin": {
+                            "description": "The smallest position of the area. MUST be the smallest or equal or you will get an error",
+                            "$ref": "#/definitions/position3D"
+                        },
+                        "positionMax": {
+                            "description": "The largest position of the area. MUST be the largest or equal or you will get an error",
+                            "$ref": "#/definitions/position3D"
+                        }
+                    },
+                    "required": ["type", "positionMin", "positionMax"]
+                },
+                {
+                    "$ref": "#/definitions/item"
+                }
+            ]
+        },
+        "modifyTileEntity": {
+            "description": "Calls a function and/or sets a field on a tile entity",
+            "type": "object",
+            "allOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "modifyTileEntity"
+                        },
+                        "position": {
+                            "description": "The position of the tile entity to modify",
+                            "$ref": "#/definitions/position3D"
+                        }
+                    },
+                    "required": ["type", "position"]
+                },
+                {
+                    "$ref": "#/definitions/callFunction"
+                }
+            ]
+        },
+        "setCamera": {
+            "description": "Sets any or all of pitch, yaw, and zoom",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "setCamera"
+                },
+                "pitch": {
+                    "description": "The pitch value to set to",
+                    "type": "number"
+                },
+                "yaw": {
+                    "description": "The yaw value to set to",
+                    "type": "number"
+                },
+                "zoom": {
+                    "description": "The zoom value to set to",
+                    "type": "number"
+                }
+            },
+            "required": ["type"]
+        },
+        "addCamera": {
+            "description": "Adds any or all to the current value of pitch, yaw, and zoom",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "addCamera"
+                },
+                "pitch": {
+                    "description": "The pitch value to add",
+                    "type": "number"
+                },
+                "yaw": {
+                    "description": "The yaw value to add",
+                    "type": "number"
+                },
+                "zoom": {
+                    "description": "The zoom value to add",
+                    "type": "number"
+                }
+            },
+            "required": ["type"]
+        },
+        "setCenter": {
+            "description": "Sets the camera's center view point. If set to null, lets the world calculate it to be the center of the current blocks",
+            "type": "object",
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "setCenter"
+                        },
+                        "position": {
+                            "$ref": "#/definitions/position3D"
+                        }
+                    },
+                    "required": ["type", "position"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "setCenter"
+                        },
+                        "position": {
+                            "type": "null"
+                        }
+                    },
+                    "required": ["type", "position"]
+                }
+            ]
+        },
+        "addCenter": {
+            "description": "Adds to the camera's center view point. If the camera's center view point is null, ie is being calculated at render, this will do nothing",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "addCenter"
+                },
+                "position": {
+                    "$ref": "#/definitions/position3D"
+                }
+            },
+            "required": ["type"]
+        },
+        "rotateTo": {
+            "description": "Rotates the camera to a specified pitch and yaw, over a certain number of ticks. The default pitch and yaw of the world is -30 pitch and -45 yaw",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "rotateTo"
+                },
+                "ticksFor": {
+                    "description": "The number of ticks that it will take to rotate to the set value. The larger the distance, and the lower the ticks, the faster it will spin",
+                    "type": "integer"
+                },
+                "yaw": {
+                    "description": "The target yaw",
+                    "type": "number"
+                },
+                "pitch": {
+                    "description": "The target pitch",
+                    "type": "number"
+                }
+            },
+            "required": ["type", "ticksFor", "yaw", "pitch"]
+        },
+        "zoomTo": {
+            "description": "Zooms the camera to a specified value, over a certain number of ticks. The default zoom is 1",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "zoomTo"
+                },
+                "ticksFor": {
+                    "description": "The number of ticks that it will take to rotate to the set value. The larger the distance, and the lower the ticks, the faster it will zoom",
+                    "type": "integer"
+                },
+                "zoom": {
+                    "description": "The target zoom",
+                    "type": "number"
+                }
+            },
+            "required": ["type", "ticksFor", "zoom"]
+        },
+        "moveCenterTo": {
+            "description": "Moves the camera's center to a specified value, over a certain number of ticks. If the camera's center view point is null, ie is being calculated at render, this will do nothing",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "zoomTo"
+                },
+                "ticksFor": {
+                    "description": "The number of ticks that it will take to rotate to the set value. The larger the distance, and the lower the ticks, the faster it will move",
+                    "type": "integer"
+                },
+                "position": {
+                    "description": "The target position",
+                    "$ref": "#/definitions/position3D"
+                }
+            },
+            "required": ["type", "ticksFor", "position"]
+        },
+        "display": {
+            "description": "Display text and itemStacks, at specified screen positions (from the center), for specified times",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "display"
+                },
+                "position": {
+                    "description": "The position to show the display. If orientation is not CENTER, this will be at the point of the arrow. This is calculated from the center of the screen",
+                    "$ref": "#/definitions/position2D"
+                },
+                "ticksFor": {
+                    "description": "The number of ticks to display this for",
+                    "type": "integer"
+                },
+                "lines": {
+                    "description": "The lines of the display. First array is each line, second arrays are the elements on the array (text or itemStack)",
+                    "type": "array",
+                    "items": {
+                        "description": "The elements of the line",
+                        "type": "array",
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "type": "object",
+                                    "allOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": {
+                                                    "const": "itemStack"
+                                                }
+                                            },
+                                            "required": ["type"]
+                                        },
+                                        {
+                                            "$ref": "#/definitions/item"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "object",
+                                    "allOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": {
+                                                    "const": "string"
+                                                }
+                                            },
+                                            "required": ["type"]
+                                        },
+                                        {
+                                            "$ref": "#/definitions/localizedString"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "autowrap": {
+                    "description": "A length to autowrap text to the next line. If there are itemStacks, it should be 0, otherwise, 200 is a good value. If omitted, defaults to 0",
+                    "type": "integer"
+                },
+                "orientation": {
+                    "description": "Which side of the display the arrow comes from. If CENTER, there will be no arrow",
+                    "enum": ["TOP", "BOTTOM", "LEFT", "RIGHT", "CENTER"]
+                },
+                "arrowInverted": {
+                    "description": "If false or omitted, the arrow will point away from the display. If true, the arrow will point towards the display",
+                    "type": "boolean"
+                }
+            },
+            "required": ["type", "position", "ticksFor", "lines", "orientation"],
+            "oneOf": [
+                {
+                    "type": "object",
+                    "required": ["colors"],
+                    "properties": {
+                        "colors": {
+                            "description": "A color from the default color sets. Defaults to GREY if this and the custom color options are omitted",
+                            "enum": ["COPPER", "GOLD", "BLUE", "GREY"]
+                        },
+                        "backgroundColor": false,
+                        "frameColor": false,
+                        "darkerColor": false,
+                        "lighterColor": false
+                    }
+                },
+                {
+                    "type": "object",
+                    "required": ["backgroundColor", "frameColor", "darkerColor", "lighterColor"],
+                    "properties": {
+                        "backgroundColor": {
+                            "description": "The color behind the text, in a hex string (0xAARRGGBB)",
+                            "type": "string"
+                        },
+                        "frameColor": {
+                            "description": "The middle color of the frame, in a hex string (0xAARRGGBB)",
+                            "type": "string"
+                        },
+                        "darkerColor": {
+                            "description": "The darker frame color, in a hex string (0xAARRGGBB)",
+                            "type": "string"
+                        },
+                        "lighterColor": {
+                            "description": "The lighter frame color, in a hex string (0xAARRGGBB)",
+                            "type": "string"
+                        },
+                        "colors": false
+                    }
+                },
+                {
+                    "type": "object",
+                    "not": {
+                        "anyOf": [
+                            { "required": ["colors"] },
+                            { "required": ["backgroundColor"] }
+                        ]
+                    }
+                }
+            ]
+        },
+        "setTileEntityNBT": {
+            "description": "Sets the nbt data of a tile entity",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "setTileEntityNBT"
+                },
+                "position": {
+                    "description": "The position of the tile entity",
+                    "$ref": "#/definitions/position3D"
+                },
+                "nbt": {
+                    "description": "The nbt to set the tile entity to. Same as in /setblock, but with no extra commas (I think). Use NBTEdit for help",
+                    "type": "string"
+                }
+            },
+            "required": ["type", "position", "nbt"]
+        },
+        "modifyTileEntityNBT": {
+            "description": "Replaces all tags of a tile entity's nbt with those provided here, essentially merges them",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "mergeTileEntityNBT"
+                },
+                "position": {
+                    "description": "The position of the tile entity",
+                    "$ref": "#/definitions/position3D"
+                },
+                "nbt": {
+                    "description": "The nbt to merge with the tile entity. Same as in /setblock, but with no extra commas (I think). Use NBTEdit for help",
+                    "type": "string"
+                }
+            },
+            "required": ["type", "position", "nbt"]
+        },
+        "spawnEntity": {
+            "description": "Spawns an entity at a specified position, with an optional entityId to modify it later",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "spawnEntity"
+                },
+                "position": {
+                    "description": "The position to spawn the entity at",
+                    "$ref": "#/definitions/position3D"
+                },
+                "nbt": {
+                    "description": "The optional nbt of the entity to spawn with. Same as /summon",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "The named id of the entity. Same as /summon (Bat, Cow, etc.)",
+                    "type": "string"
+                },
+                "entityId": {
+                    "description": "An optional numeric id to modify this entity in the future",
+                    "type": "integer"
+                }
+            },
+            "required": ["type", "position", "id"]
+        },
+        "setEntityNBT": {
+            "description": "Sets the nbt of an already-spawned entity with the specified entityId",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "setEntityNBT"
+                },
+                "entityId": {
+                    "description": "The numeric entityId of this entity, set at spawn",
+                    "type": "integer"
+                },
+                "nbt": {
+                    "description": "The nbt to set",
+                    "type": "string"
+                }
+            },
+            "required": ["type", "entityId", "nbt"]
+        },
+        "setEntityTarget": {
+            "description": "Sets the entity to pathfind to a specific location. Recommended to use removeEntityTasks before using this, and before every time you change its target with this action",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "setEntityTarget"
+                },
+                "entityId": {
+                    "description": "The numeric entityId of this entity, set at spawn",
+                    "type": "integer"
+                },
+                "position": {
+                    "description": "The position for this entity to pathfind to",
+                    "$ref": "#/definitions/position3D"
+                }
+            },
+            "required": ["type", "entityId", "position"]
+        },
+        "modifyEntity": {
+            "description": "Calls a function and/or sets a field on an entity",
+            "type": "object",
+            "allOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "modifyEntity"
+                        },
+                        "entityId": {
+                            "description": "The numeric entityId of this entity, set at spawn",
+                            "type": "integer"
+                        }
+                    },
+                    "required": ["type", "entityId"]
+                },
+                {
+                    "$ref": "#/definitions/callFunction"
+                }
+            ]
+        },
+        "removeEntityTasks": {
+            "description": "Removes all AI tasks from an entity",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "const": "removeEntityTasks"
+                },
+                "entityId": {
+                    "description": "The numeric entityId of this entity, set at spawn",
+                    "type": "integer"
+                }
+            },
+            "required": ["type", "entityId"]
+        }
+    },
+    "properties": {
+        "owner": {
+            "description": "The item/block that this migraine belongs to",
+            "type": "object",
+            "allOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "text": {
+                            "description": "An optional display name of the migraine. If omitted, it will just use the item's name",
+                            "type": "string"
+                        },
+                        "localized": {
+                            "description": "If the alt text is a localization key",
+                            "type": "boolean"
+                        }
+                    },
+                    "if": {
+                        "required": ["localized"]
+                    },
+                    "then": {
+                        "required": ["text"]
+                    }
+                },
+                {
+                    "$ref": "#/definitions/item"
+                }
+            ]
+        },
+        "seeAlso": {
+            "description": "The migraines that are recommended",
+            "type": "array",
+            "items": {
+                "type": "object",
+            "allOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "text": {
+                            "description": "An optional display name of the see also. If omitted, it will just use the item's name",
+                            "type": "string"
+                        },
+                        "localized": {
+                            "description": "If the alt text is a localization key",
+                            "type": "boolean"
+                        }
+                    },
+                    "if": {
+                        "required": ["localized"]
+                    },
+                    "then": {
+                        "required": ["text"]
+                    }
+                },
+                {
+                    "$ref": "#/definitions/item"
+                }
+            ]
+            },
+            "minItems": 0
+        },
+        "chapters": {
+            "description": "The tick numbers that the chapter bar will be shown at, with the last value signifying the last tick of the migraine",
+            "type": "array",
+            "items": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+            },
+            "minItems": 1
+        },
+        "size": {
+            "description": "The maximum size of the world, for the camera. If omitted, the current size of the world will be used when rendered",
+            "$ref": "#/definitions/position3D"
+        },
+        "update": {
+            "description": "The array containing all tick events",
+            "type": "array",
+            "items": {
+                "description": "An event that happens on a tick, or every tick in a range",
+                "type": "object",
+                "properties": {
+                    "tick": {
+                        "description": "Tick number to execute this action on",
+                        "type": "integer"
+                    },
+                    "tickStart": {
+                        "description": "The first tick to execute this action on. If -1, runs until tickEnd",
+                        "type": "integer"
+                    },
+                    "tickEnd": {
+                        "description": "The last tick to execute this action on. If -1, run after tickEnd without an end",
+                        "type": "integer"
+                    },
+                    "priority": {
+                        "description": "The order that actions with the same tick value execute. Higher values go first. If omitted, defaults to 0. If multiple actions with the same tick have the same priority, they will be executed in an arbitrary order"
+                    },
+                    "action": {
+                        "description": "The object containing the information to execute. No matter the action, \"type\" is required, and it defines what this action does",
+                        "type": "object",
+                        "oneOf": [
+                            { "$ref": "#/definitions/setBlock" },
+                            { "$ref": "#/definitions/placeBlock" },
+                            { "$ref": "#/definitions/fillBlocks" },
+                            { "$ref": "#/definitions/modifyTileEntity" },
+                            { "$ref": "#/definitions/setCamera" },
+                            { "$ref": "#/definitions/addCamera" },
+                            { "$ref": "#/definitions/setCenter" },
+                            { "$ref": "#/definitions/addCenter" },
+                            { "$ref": "#/definitions/rotateTo" },
+                            { "$ref": "#/definitions/zoomTo" },
+                            { "$ref": "#/definitions/moveCenterTo" },
+                            { "$ref": "#/definitions/display" },
+                            { "$ref": "#/definitions/setTileEntityNBT" },
+                            { "$ref": "#/definitions/modifyTileEntityNBT" },
+                            { "$ref": "#/definitions/spawnEntity" },
+                            { "$ref": "#/definitions/setEntityNBT" },
+                            { "$ref": "#/definitions/setEntityTarget" },
+                            { "$ref": "#/definitions/modifyEntity" },
+                            { "$ref": "#/definitions/removeEntityTasks" }
+                        ]
+                    }
+                },
+                "required": ["action"],
+                "oneOf": [
+                    { "required": ["tick"] },
+                    { "required": ["tickStart", "tickEnd"] }
+                ]
+            }
+        }
+    },
+    "required": ["owner", "seeAlso", "chapters", "update"]
+}

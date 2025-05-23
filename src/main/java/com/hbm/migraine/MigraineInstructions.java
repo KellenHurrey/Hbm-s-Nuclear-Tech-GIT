@@ -90,7 +90,7 @@ public class MigraineInstructions {
 						text = owner.get("text").getAsString();
 				}else
 					text = itemStack.getDisplayName();
-				title = new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, 40, 27, new Object[][]{{text}}, 0, -1, itemStack).setOrientation(MigraineDisplay.Orientation.LEFT).setColors(defaultColors.GOLD.colors);
+				title = new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, 40, 27, new Object[][]{{text}}, 0, -1, itemStack, false).setOrientation(MigraineDisplay.Orientation.LEFT).setColors(defaultColors.GOLD.colors);
 			}
 			if (object.has("seeAlso")){
 				JsonArray also = object.getAsJsonArray("seeAlso");
@@ -106,7 +106,7 @@ public class MigraineInstructions {
 					}else{
 						text = itemStack.getDisplayName();
 					}
-					seealso.add(new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, 40, 27 + 36 * (i + 1), new Object[][]{{text}}, 0, -1, itemStack).setOrientation(MigraineDisplay.Orientation.LEFT).setColors(defaultColors.GREY.colors));
+					seealso.add(new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, 40, 27 + 36 * (i + 1), new Object[][]{{text}}, 0, -1, itemStack, false).setOrientation(MigraineDisplay.Orientation.LEFT).setColors(defaultColors.GREY.colors));
 				}
 			}
 
@@ -225,6 +225,10 @@ public class MigraineInstructions {
 				case "char":
 					params[i] = arg.get("value").isJsonNull() ? '\u0000' : arg.get("value").getAsCharacter();
 					types[i] = char.class;
+					break;
+				case "byte":
+					params[i] = arg.get("value").isJsonNull() ? 0 : arg.get("value").getAsByte();
+					types[i] = byte.class;
 					break;
 			}
 		}
@@ -372,7 +376,7 @@ public class MigraineInstructions {
 			toDisplay[j] = currentLine;
 		}
 
-		MigraineDisplay display = new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, pos.get("x").getAsInt(), pos.get("y").getAsInt(), toDisplay, action.has("autowrap") ? action.get("autowrap").getAsInt() : 0, action.get("ticksFor").getAsInt());
+		MigraineDisplay display = new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, pos.get("x").getAsInt(), pos.get("y").getAsInt(), toDisplay, action.has("autowrap") ? action.get("autowrap").getAsInt() : 0, action.get("ticksFor").getAsInt(), action.has("arrowInverted") ? action.get("arrowInverted").getAsBoolean() : false);
 
 		if (action.has("colors")){
 			display.setColors(defaultColors.valueOf(action.get("colors").getAsString()).colors);
@@ -447,10 +451,11 @@ public class MigraineInstructions {
 	}
 
 	private void setCenter(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
-		JsonObject pos = action.getAsJsonObject("position");
-		if (pos.isJsonNull()){
+		JsonElement val = action.get("position");
+		if (val.isJsonNull()){
 			gui.camera = null;
 		}else{
+			JsonObject pos = val.getAsJsonObject();
 			gui.camera = Vec3.createVectorHelper(pos.get("x").getAsDouble(), pos.get("y").getAsDouble(), pos.get("z").getAsDouble());
 		}
 	}
@@ -458,7 +463,9 @@ public class MigraineInstructions {
 	private void addCenter(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
 		JsonObject pos = action.getAsJsonObject("position");
 
-		gui.camera = gui.camera.addVector(pos.get("x").getAsDouble(), pos.get("y").getAsDouble(), pos.get("z").getAsDouble());
+		if (gui.camera != null) {
+			gui.camera = gui.camera.addVector(pos.get("x").getAsDouble(), pos.get("y").getAsDouble(), pos.get("z").getAsDouble());
+		}
 	}
 
 	private void rotateTo(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
@@ -799,9 +806,11 @@ public class MigraineInstructions {
 						gui.zoom += overTime.get("addZoom").getAsFloat();
 						break;
 					case "moveCenterTo":
-						gui.camera.xCoord += overTime.get("addX").getAsFloat();
-						gui.camera.yCoord += overTime.get("addY").getAsFloat();
-						gui.camera.zCoord += overTime.get("addZ").getAsFloat();
+						if (gui.camera != null) {
+							gui.camera.xCoord += overTime.get("addX").getAsFloat();
+							gui.camera.yCoord += overTime.get("addY").getAsFloat();
+							gui.camera.zCoord += overTime.get("addZ").getAsFloat();
+						}
 						break;
 
 				}
@@ -832,13 +841,20 @@ public class MigraineInstructions {
 
 		progressBar.update(w, h, Math.min(((float) gui.ticks) / chapters.get(chapters.size() - 1), 1f), mouseX, mouseY);
 
-		// Title
-
 		// I couldent figure out why the items went being lit properly, but spaming this fixes it so fuck it
 		GL11.glEnable(GL11.GL_LIGHTING);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		RenderHelper.enableStandardItemLighting();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+
+		// Render this below title and see also but above buttons, cuz that just makes sense
+		gui.displays.forEach((MigraineDisplay display) -> {
+			GL11.glPushMatrix();
+			display.drawForegroundComponent(w, h);
+			GL11.glPopMatrix();
+		});
+
+		// Title
 
 		Minecraft.getMinecraft().getTextureManager().bindTexture(guiUtil);
 		RenderHelper.disableStandardItemLighting();
@@ -862,6 +878,7 @@ public class MigraineInstructions {
 
 		// See also
 		for (int i = 0; i < seealso.size(); i++){
+			GL11.glPushMatrix();
 			MigraineDisplay display = seealso.get(i);
 
 			Minecraft.getMinecraft().getTextureManager().bindTexture(guiUtil);
@@ -880,14 +897,8 @@ public class MigraineInstructions {
 			if(15 <= mouseX && 39 > mouseX && 15 + 36 * (i + 1) < mouseY && 39 + 36 * (i + 1) >= mouseY) {
 				display.drawForegroundComponent(0, 0);
 			}
-		}
-
-		// Render this on top ig
-		gui.displays.forEach((MigraineDisplay display) -> {
-			GL11.glPushMatrix();
-			display.drawForegroundComponent(w, h);
 			GL11.glPopMatrix();
-		});
+		}
 
 		GL11.glEnable(GL11.GL_LIGHTING);
 	}
@@ -950,9 +961,9 @@ public class MigraineInstructions {
 		}
 	}
 
-	private void skip(int toTick, int fromTick, GuiMigraine gui){
+	public void skip(int toTick, int fromTick, GuiMigraine gui){
 		// TODO: maybe make it so it saves from chapters or something so it doesnt need to redo the entire world in one frame?
-		if (Math.abs(toTick - fromTick) <= 1) return;
+		if (Math.abs(toTick - fromTick) < 1) return;
 		if (toTick < fromTick){
 			gui.worldRenderer.world.emptyWorld();
 			gui.ticks = 0;

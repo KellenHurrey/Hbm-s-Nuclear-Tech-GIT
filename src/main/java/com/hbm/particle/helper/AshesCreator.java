@@ -7,6 +7,7 @@ import com.hbm.particle.ParticleAshes;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.particle.EntityFlameFX;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -29,7 +30,7 @@ public class AshesCreator implements IParticleCreator {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data, EffectRenderer effectRenderer) {
+	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data) {
 		
 		int entityID = data.getInteger("entityID");
 		Entity entity = world.getEntityByID(entityID);
@@ -39,16 +40,16 @@ public class AshesCreator implements IParticleCreator {
 		
 		int amount = data.getInteger("ashesCount");
 		float scale = data.getFloat("ashesScale");
-		
+
 		for(int i = 0; i < amount; i++) {
 			ParticleAshes particle = new ParticleAshes(world,
 					entity.posX + (entity.width + scale * 2) * (rand.nextDouble() - 0.5),
 					entity.posY + entity.height * rand.nextDouble(),
 					entity.posZ + (entity.width + scale * 2) * (rand.nextDouble() - 0.5),
 					scale);
-			effectRenderer.addEffect(particle);
+			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
 			EntityFlameFX flame = new EntityFlameFX(world, particle.posX, particle.posY, particle.posZ, 0.0, 0.0, 0.0);
-			effectRenderer.addEffect(flame);
+			Minecraft.getMinecraft().effectRenderer.addEffect(flame);
 		}
 	}
 }

@@ -14,6 +14,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraftforge.common.DimensionManager;
 import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nonnull;
@@ -24,8 +25,10 @@ public class DummyWorldServer extends WorldServer {
 
 	private final DummyWorld duplicateTo;
 
-	public DummyWorldServer(DummyWorld world, ISaveHandler saveHandler, String name, int demId, WorldSettings settings, Profiler profiler) {
-		super(new DummyMinecraftServer(MinecraftServer.getServer()), saveHandler, name, demId, settings, profiler);
+	public DummyWorldServer(DummyWorld world, ISaveHandler saveHandler, String name, int demId, WorldSettings settings, Profiler profiler, MinecraftServer server) {
+		super(new DummyMinecraftServer(), saveHandler, name, demId, settings, profiler);
+		MinecraftServer.mcServer = server;
+//		DimensionManager.unloadWorld(demId);
 		this.duplicateTo = world;
 		this.rand.setSeed(0);
 		this.provider.setDimension(demId);

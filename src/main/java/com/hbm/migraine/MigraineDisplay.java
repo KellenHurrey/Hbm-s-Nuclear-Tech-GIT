@@ -31,6 +31,8 @@ public class MigraineDisplay {
 	private int x;
 	private int y;
 
+	private final boolean arrowInverted;
+
 	public int ticksRemaining;
 
 	boolean consistentHeight = false;
@@ -44,11 +46,12 @@ public class MigraineDisplay {
 	long colorFrame = 0xFFA0A0A0;
 	long colorBg = 0xFF302E36;
 
-	public MigraineDisplay(FontRenderer font, int x, int y, Object[][] raw, int autowrap, int ticksRemaining, ItemStack icon) {
+	public MigraineDisplay(FontRenderer font, int x, int y, Object[][] raw, int autowrap, int ticksRemaining, ItemStack icon, boolean arrowInverted) {
 
 		this.font = font;
 		this.x = x;
 		this.y = y;
+		this.arrowInverted = arrowInverted;
 
 		if(autowrap <= 0) { //if autowrap is off, just add the lines 1:1
 			for(Object[] o : raw) {
@@ -74,8 +77,8 @@ public class MigraineDisplay {
 		this.icon = icon;
 	}
 
-	public MigraineDisplay(FontRenderer font, int x, int y, Object[][] raw, int autowrap, int ticksRemaining){
-		this(font, x, y, raw, autowrap, ticksRemaining, new ItemStack(Blocks.air));
+	public MigraineDisplay(FontRenderer font, int x, int y, Object[][] raw, int autowrap, int ticksRemaining, boolean arrowInverted){
+		this(font, x, y, raw, autowrap, ticksRemaining, new ItemStack(Blocks.air), arrowInverted);
 	}
 
 	public ItemStack getIcon(){
@@ -282,16 +285,28 @@ public class MigraineDisplay {
 
 		switch(o) {
 			case TOP:
-				this.drawArrow(posX + width / 2 - 7, posY - 15, 40, 14, 14, 10);
+				if (arrowInverted)
+					this.drawArrow(posX + width / 2 - 7, posY - 15, 54, 14, 14, 10);
+				else
+					this.drawArrow(posX + width / 2 - 7, posY - 15, 40, 14, 14, 10);
 				break;
 			case BOTTOM:
-				this.drawArrow(posX + width / 2 - 7, posY + height + 5, 54, 14, 14, 10);
+				if (arrowInverted)
+					this.drawArrow(posX + width / 2 - 7, posY + height + 5, 40, 14, 14, 10);
+				else
+					this.drawArrow(posX + width / 2 - 7, posY + height + 5, 54, 14, 14, 10);
 				break;
 			case LEFT:
-				this.drawArrow(posX - 15, posY + height / 2 - 7, 40, 0, 10, 14);
+				if (arrowInverted)
+					this.drawArrow(posX - 15, posY + height / 2 - 7, 50, 0, 10, 14);
+				else
+					this.drawArrow(posX - 15, posY + height / 2 - 7, 40, 0, 10, 14);
 				break;
 			case RIGHT:
-				this.drawArrow(posX + width + 5, posY + height / 2 - 7, 50, 0, 10, 14);
+				if (arrowInverted)
+					this.drawArrow(posX + width + 5, posY + height / 2 - 7, 40, 0, 10, 14);
+				else
+					this.drawArrow(posX + width + 5, posY + height / 2 - 7, 50, 0, 10, 14);
 				break;
 			case CENTER: break;
 		}

@@ -2,12 +2,13 @@
 	"owner": {
 		"id": "hbm:tile.foundry_channel"
 	},
+	"chapters": [
+		420,
+		560,
+		630
+	],
 	"seeAlso": [
 		{ "id": "hbm:tile.machine_crucible" }
-	],
-	"chapters": [
-		285,
-		640
 	],
 	"size": {
 		"x": 5,
@@ -288,7 +289,7 @@
 						{
 							"type": "string",
 							"localized": true,
-							"value": "cannery.foundryChannel.0"
+							"value": "migraine.foundryChannel.0"
 						}
 					]
 				],
@@ -311,7 +312,7 @@
 						{
 							"type": "string",
 							"localized": true,
-							"value": "cannery.foundryChannel.1"
+							"value": "migraine.foundryChannel.1"
 						}
 					]
 				],
@@ -334,7 +335,7 @@
 						{
 							"type": "string",
 							"localized": true,
-							"value": "cannery.foundryChannel.2"
+							"value": "migraine.foundryChannel.2"
 						}
 					]
 				],
@@ -374,7 +375,7 @@
 						{
 							"type": "string",
 							"localized": true,
-							"value": "cannery.foundryChannel.3"
+							"value": "migraine.foundryChannel.3"
 						}
 					]
 				],
@@ -418,7 +419,7 @@
 						{
 							"type": "string",
 							"localized": true,
-							"value": "cannery.foundryChannel.4"
+							"value": "migraine.foundryChannel.4"
 						}
 					]
 				],
@@ -431,7 +432,7 @@
 			"tick": 490,
 			"action": {
 				"type": "display",
-				"ticksFor": 40,
+				"ticksFor": 30,
 				"position": {
 					"x": 0,
 					"y": -25
@@ -441,38 +442,42 @@
 						{
 							"type": "itemStack",
 							"id": "minecraft:iron_shovel"
-						},
-						{
-							"type": "string",
-							"value": "->"
-						},
-						{
-							"type": "itemStack",
-							"id": "hbm:item.scraps",
-							"meta": 7900
 						}
 					]
 				],
-				"autowrap": 200,
+				"autowrap": 0,
 				"colors": "COPPER",
 				"orientation": "BOTTOM"
 			}
 		},
 		{
-			"tick": 530,
+			"tick": 510,
 			"action": {
-				"type": "modifyTileEntityNBT",
+				"type": "display",
+				"ticksFor": 30,
 				"position": {
-					"x": 2,
-					"y": 2,
-					"z": 2
+					"x": 0,
+					"y": -25
 				},
-				"nbt": "{amount:0}"
+				"lines": [
+					[
+						{
+							"type": "itemStack",
+							"id": "hbm:item.scraps",
+							"meta": 7900,
+							"count": 2
+						}
+					]
+				],
+				"autowrap": 0,
+				"colors": "COPPER",
+				"orientation": "BOTTOM",
+				"arrowInverted": true
 			}
 		},
 		{
-			"tickStart": 538,
-			"tickEnd": 550,
+			"tickStart": 510,
+			"tickEnd": 530,
 			"action": {
 				"type": "modifyTileEntityNBT",
 				"position": {
@@ -493,10 +498,10 @@
 			}
 		},
 		{
-			"tick": 600,
+			"tick": 590,
 			"action": {
 				"type": "display",
-				"ticksFor": 40,
+				"ticksFor": 30,
 				"position": {
 					"x": -32,
 					"y": -20
@@ -510,14 +515,15 @@
 					]
 				],
 				"orientation": "BOTTOM",
-				"colors": "COPPER"
+				"colors": "COPPER",
+				"arrowInverted": true
 			}
 		},
 		{
-			"tick": 600,
+			"tick": 590,
 			"action": {
 				"type": "display",
-				"ticksFor": 40,
+				"ticksFor": 30,
 				"position": {
 					"x": -10,
 					"y": 10
@@ -531,14 +537,15 @@
 					]
 				],
 				"orientation": "BOTTOM",
-				"colors": "COPPER"
+				"colors": "COPPER",
+				"arrowInverted": true
 			}
 		},
 		{
-			"tick": 600,
+			"tick": 590,
 			"action": {
 				"type": "display",
-				"ticksFor": 40,
+				"ticksFor": 30,
 				"position": {
 					"x": 32,
 					"y": -20
@@ -552,11 +559,12 @@
 					]
 				],
 				"orientation": "BOTTOM",
-				"colors": "COPPER"
+				"colors": "COPPER",
+				"arrowInverted": true
 			}
 		},
 		{
-			"tick": 640,
+			"tick": 630,
 			"action": {
 				"type": "modifyTileEntity",
 				"position": {
@@ -578,7 +586,7 @@
 			}
 		},
 		{
-			"tick": 640,
+			"tick": 630,
 			"action": {
 				"type": "modifyTileEntity",
 				"position": {
@@ -600,7 +608,7 @@
 			}
 		},
 		{
-			"tick": 640,
+			"tick": 630,
 			"action": {
 				"type": "modifyTileEntity",
 				"position": {
@@ -619,6 +627,15 @@
 						"value": 2
 					}
 				]
+			}
+		},
+		{
+			"tick": 100,
+			"action": {
+				"type": "rotateTo",
+				"ticksFor": 10,
+				"pitch": 5,
+				"yaw": 2
 			}
 		}
 	]

@@ -97,6 +97,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.AnvilUpdateEvent;
@@ -1028,20 +1029,24 @@ public class ModEventHandler {
 		}
 	}
 
-	private MinecraftServer prevServer;
-	@SubscribeEvent(priority = EventPriority.HIGHEST)
-	public void onPlayerTickFirst(TickEvent.PlayerTickEvent event){
-		// Getting an nei crash where the super constructor of DummyMinecraftServer sets itself to the static variable mcServer, and before i can init the configuration manager nei calls it and throws NPE, so lets just set it back to the original ms. Oh what i would do for mixins
-
-		MinecraftServer server = MinecraftServer.getServer();
-		if (server instanceof DummyMinecraftServer){
-			if (prevServer != null){
-				MinecraftServer.mcServer = prevServer;
-			} // else shit
-		}else{
-			prevServer = server;
-		}
-	}
+//	private MinecraftServer prevServer;
+//	@SubscribeEvent(priority = EventPriority.HIGHEST)
+//	public void onPlayerTickFirst(TickEvent.PlayerTickEvent event){
+//		// Getting an nei crash where the super constructor of DummyMinecraftServer sets itself to the static variable mcServer, and before i can init the configuration manager nei calls it and throws NPE, so lets just set it back to the original ms. Oh what i would do for mixins
+//
+//		if (event.phase == Phase.START) {
+//			MinecraftServer server = MinecraftServer.getServer();
+//			MainRegistry.logger.debug("fuck");
+//			if (server instanceof DummyMinecraftServer) {
+//				MainRegistry.logger.debug("shit");
+//				if (prevServer != null) {
+//					MinecraftServer.mcServer = prevServer;
+//				} // else shit
+//			} else {
+//				prevServer = server;
+//			}
+//		}
+//	}
 
 	@SubscribeEvent
 	public void onPlayerTick(TickEvent.PlayerTickEvent event) {
@@ -1195,6 +1200,10 @@ public class ModEventHandler {
 	public void onServerTick(TickEvent.ServerTickEvent event) {
 
 		if(event.phase == Phase.START) {
+
+			// Dont exist
+//			if (DimensionManager.getWorld(MainRegistry.MigraineWorldId) != null)
+//				DimensionManager.setWorld(MainRegistry.MigraineWorldId, null);
 
 			// do other shit I guess?
 			RTTYSystem.updateBroadcastQueue();

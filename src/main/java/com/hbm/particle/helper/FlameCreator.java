@@ -7,6 +7,7 @@ import com.hbm.particle.ParticleFlamethrower;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,8 +39,8 @@ public class FlameCreator implements IParticleCreator {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data, EffectRenderer effectRenderer) {
+	public void makeParticle(World world, EntityPlayer player, TextureManager texman, Random rand, double x, double y, double z, NBTTagCompound data) {
 		ParticleFlamethrower particle = new ParticleFlamethrower(world, x, y, z, data.getInteger("meta"));
-		effectRenderer.addEffect(particle);
+		Minecraft.getMinecraft().effectRenderer.addEffect(particle);
 	}
 }

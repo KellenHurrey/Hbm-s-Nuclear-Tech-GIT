@@ -4,13 +4,17 @@ import com.hbm.main.MainRegistry;
 import com.hbm.migraine.player.ClientFakePlayer;
 import com.hbm.migraine.world.client.DummyWorldClient;
 import com.hbm.migraine.world.server.DummyWorldServer;
+import cpw.mods.fml.relauncher.FMLRelaunchLog;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.Profiler;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.IChunkProvider;
+import org.apache.logging.log4j.core.Logger;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Field;
 
 /** @author kellen, @https://github.com/GTNewHorizons/BlockRenderer6343 */
 public class DummyWorld extends World {
@@ -36,7 +40,20 @@ public class DummyWorld extends World {
 		this.chunkProvider = this.createChunkProvider();
 		this.calculateInitialSkylight();
 		this.calculateInitialWeatherBody();
-		this.serverWorld = new DummyWorldServer(this, this.getSaveHandler(), "MigraineServer", MainRegistry.MigraineWorldId, DEFAULT_SETTINGS, new Profiler());
+
+		// We don't need to tell the player the world was loaded each time they open the screen
+		DummyWorldServer dummyServer = null;
+		try {
+			Field f = Class.forName("cpw.mods.fml.relauncher.FMLRelaunchLog").getDeclaredField("myLog");
+			f.setAccessible(true);
+			Logger log = (Logger) f.get(FMLRelaunchLog.log);
+			f.set(FMLRelaunchLog.log, DummyLogger.LOG);
+			dummyServer = new DummyWorldServer(this, this.getSaveHandler(), "MigraineServer", MainRegistry.MigraineWorldId, DEFAULT_SETTINGS, new Profiler(), MinecraftServer.getServer());
+			f.set(FMLRelaunchLog.log, log);
+		} catch (Exception ex) {
+			MainRegistry.logger.warn(ex);
+		}
+		this.serverWorld = dummyServer;
 		this.clientWorld = DummyWorldClient.createDummyClientWorld(this, DEFAULT_SETTINGS, MainRegistry.MigraineWorldId, EnumDifficulty.HARD, new Profiler());
 	}
 

@@ -10,6 +10,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.util.Vec3;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -106,7 +107,10 @@ public class GuiMigraine extends GuiScreen {
 			int x = mouseX - width / 2;
 			int y = mouseY - height / 2;
 
-			fontRendererObj.drawString(x + ", " + y, width - fontRendererObj.getStringWidth(x + ", " + y) - 5, height - 15, 0xffffff);
+			// mouse pos
+			// fontRendererObj.drawString(x + ", " + y, width - fontRendererObj.getStringWidth(x + ", " + y) - 5, height - 15, 0xffffff);
+			// tick num
+			fontRendererObj.drawString(ticks + "", 5, height - 15, 0xffffff);
 		}
 
 		if (debugMode > 0) {
@@ -156,6 +160,12 @@ public class GuiMigraine extends GuiScreen {
 		}
 		if (keyCode == 32 || keyCode == this.mc.gameSettings.keyBindJump.getKeyCode()){
 			this.isPaused = !this.isPaused;
+		}
+		if (debugMode == 2){
+			if (keyCode == Keyboard.KEY_RIGHT)
+				this.instructions.skip(ticks + 1, ticks, this);
+			else if (keyCode == Keyboard.KEY_LEFT)
+				this.instructions.skip(ticks - 1, ticks, this);
 		}
 		if (key == 'p'){
 			debugMode = ++debugMode > 2 ? 0 : debugMode;

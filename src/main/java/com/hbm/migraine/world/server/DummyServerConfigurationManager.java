@@ -1,5 +1,6 @@
 package com.hbm.migraine.world.server;
 
+import com.hbm.main.MainRegistry;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -16,5 +17,8 @@ public class DummyServerConfigurationManager extends ServerConfigurationManager 
 	}
 
 	@Override
-	public EntityPlayerMP func_152612_a(String p_152612_1_){ return null; }
+	public EntityPlayerMP func_152612_a(String p_152612_1_){
+		MainRegistry.logger.debug("HERE: " + p_152612_1_);
+		return null;
+	}
 }

@@ -55,7 +55,7 @@ public class ExplosionCreator implements IParticleCreator {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void makeParticle(World world, EntityPlayer player, TextureManager man, Random rand, double x, double y, double z, NBTTagCompound data, EffectRenderer effectRenderer) {
+	public void makeParticle(World world, EntityPlayer player, TextureManager man, Random rand, double x, double y, double z, NBTTagCompound data) {
 		
 		int cloudCount = data.getByte("cloudCount");
 		float cloudScale = data.getFloat("cloudScale");
@@ -80,7 +80,7 @@ public class ExplosionCreator implements IParticleCreator {
 		// WAVE
 		ParticleMukeWave wave = new ParticleMukeWave(man, world, x, y + 2, z);
 		wave.setup(waveScale, (int) (25F * waveScale / 45));
-		effectRenderer.addEffect(wave);
+		Minecraft.getMinecraft().effectRenderer.addEffect(wave);
 		
 		// SMOKE PLUME
 		for(int i = 0; i < cloudCount; i++) {
@@ -93,7 +93,7 @@ public class ExplosionCreator implements IParticleCreator {
 			fx.motionZ = rand.nextGaussian() * 0.5 * cloudSpeedMult;
 			fx.setMaxAge(70 + rand.nextInt(20));
 			fx.noClip = true;
-			effectRenderer.addEffect(fx);
+			Minecraft.getMinecraft().effectRenderer.addEffect(fx);
 		}
 		
 		// DEBRIS
@@ -137,8 +137,8 @@ public class ExplosionCreator implements IParticleCreator {
 					}
 				}
 			}
-			
-			effectRenderer.addEffect(particle);
+
+			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
 		}
 	}
 }

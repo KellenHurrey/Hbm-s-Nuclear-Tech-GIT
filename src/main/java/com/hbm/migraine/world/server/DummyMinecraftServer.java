@@ -2,6 +2,7 @@ package com.hbm.migraine.world.server;
 
 import com.hbm.main.MainRegistry;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldSettings;
 
@@ -12,9 +13,10 @@ import java.net.Proxy;
 /** @author kellen */
 public class DummyMinecraftServer extends MinecraftServer {
 
-	public DummyMinecraftServer(MinecraftServer reset) {
+	public DummyMinecraftServer() { // MinecraftServer reset
 		super(new File(MainRegistry.configHbmDir, "data"), Proxy.NO_PROXY);
-		mcServer = reset;
+//		mcServer = reset;
+//		worldTickTimes.forEach(reset.worldTickTimes::putIfAbsent);
 		this.func_152361_a(new DummyServerConfigurationManager(this));
 	}
 
@@ -73,4 +75,16 @@ public class DummyMinecraftServer extends MinecraftServer {
 
 	@Override
 	public void updateTimeLightAndEntities(){}
+
+	@Override
+	public ServerConfigurationManager getConfigurationManager(){
+		ServerConfigurationManager scm = super.getConfigurationManager();
+		if (scm == null){
+			return new DummyServerConfigurationManager(this);
+		}
+		return scm;
+	}
+
+	@Override
+	public void run() {}
 }

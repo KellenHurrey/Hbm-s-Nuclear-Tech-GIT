@@ -747,7 +747,7 @@ public class TrackedDummyWorld extends DummyWorld {
 		entities.clear();
 		if (Minecraft.getMinecraft().currentScreen instanceof GuiMigraine)
 			((GuiMigraine) Minecraft.getMinecraft().currentScreen).worldRenderer.rendererEffect.clearEffects(this);
-		DimensionManager.unloadWorld(MainRegistry.MigraineWorldId);
+//		DimensionManager.unloadWorld(MainRegistry.MigraineWorldId);
 	}
 
 	public void emptyWorld(){
