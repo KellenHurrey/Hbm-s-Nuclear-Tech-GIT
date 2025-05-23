@@ -38,8 +38,15 @@ public class NTMWorldGenerator implements IWorldGenerator {
 		final List<BiomeGenBase> invalidBiomes = Arrays.asList(new BiomeGenBase[] {BiomeGenBase.ocean, BiomeGenBase.river, BiomeGenBase.frozenOcean, BiomeGenBase.frozenRiver, BiomeGenBase.deepOcean});
 		final List<BiomeGenBase> oceanBiomes = Arrays.asList(new BiomeGenBase[] { BiomeGenBase.ocean, BiomeGenBase.deepOcean });
 		final List<BiomeGenBase> beachBiomes = Arrays.asList(new BiomeGenBase[] { BiomeGenBase.beach, BiomeGenBase.stoneBeach, BiomeGenBase.coldBeach });
+		final List<BiomeGenBase> lighthouseBiomes = Arrays.asList(new BiomeGenBase[] { BiomeGenBase.ocean, BiomeGenBase.deepOcean, BiomeGenBase.beach, BiomeGenBase.stoneBeach, BiomeGenBase.coldBeach });
 
-
+		/// SPIRE ///
+		NBTStructure.registerStructure(0, new SpawnCondition() {{
+			canSpawn = biome -> biome.heightVariation <= 0.05F && !invalidBiomes.contains(biome);
+			structure = new JigsawPiece("spire", StructureManager.spire, -1);
+			spawnWeight = 2;
+		}});
+		
 		NBTStructure.registerStructure(0, new SpawnCondition() {{
 			canSpawn = biome -> !invalidBiomes.contains(biome);
 			start = d -> new MapGenNTMFeatures.Start(d.getW(), d.getX(), d.getY(), d.getZ());
@@ -80,6 +87,14 @@ public class NTMWorldGenerator implements IWorldGenerator {
 		}});
 
 		NBTStructure.registerStructure(0, new SpawnCondition() {{
+			canSpawn = lighthouseBiomes::contains;
+			structure = new JigsawPiece("lighthouse", StructureManager.lighthouse, -40);
+			maxHeight = 29;
+			minHeight = 28;
+			spawnWeight = 2;
+		}});
+
+		NBTStructure.registerStructure(0, new SpawnCondition() {{
 			canSpawn = beachBiomes::contains;
 			structure = new JigsawPiece("beached_patrol", StructureManager.beached_patrol, -5);
 			minHeight = 58;
@@ -87,7 +102,18 @@ public class NTMWorldGenerator implements IWorldGenerator {
 			spawnWeight = 8;
 		}});
 
-		NBTStructure.registerNullWeight(0, 2);
+		NBTStructure.registerNullWeight(0, 2, oceanBiomes::contains); //why the fuck did this change
+    
+		NBTStructure.registerStructure(0, new SpawnCondition() {{
+			canSpawn = biome -> biome == BiomeGenBase.plains;
+			structure = new JigsawPiece("dish", StructureManager.dish, -10);
+			minHeight = 53;
+			maxHeight = 65;
+			spawnWeight = 1;
+		}});
+
+		NBTStructure.registerNullWeight(0, 2, biome -> biome == BiomeGenBase.plains);
+		NBTStructure.registerNullWeight(0, 2, oceanBiomes::contains);
 
 		Map<Block, BlockSelector> bricks = new HashMap<Block, BlockSelector>() {{
 			put(ModBlocks.meteor_brick, new MeteorBricks());
@@ -158,7 +184,7 @@ public class NTMWorldGenerator implements IWorldGenerator {
 					add(new JigsawPiece("meteor_dragon_tesla", StructureManager.meteor_dragon_tesla) {{ blockTable = crates; }}, 1);
 					add(new JigsawPiece("meteor_dragon_trap", StructureManager.meteor_dragon_trap) {{ blockTable = crates; }}, 1);
 					add(new JigsawPiece("meteor_dragon_crate_crab", StructureManager.meteor_dragon_crate_crab) {{ blockTable = crates; }}, 1);
-                    fallback = "headback";
+					fallback = "headback";
 				}});
 				put("fallback", new JigsawPool() {{
 					add(new JigsawPiece("meteor_fallback", StructureManager.meteor_fallback) {{ blockTable = bricks; }}, 1);
