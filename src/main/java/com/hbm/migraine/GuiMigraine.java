@@ -89,10 +89,11 @@ public class GuiMigraine extends GuiScreen {
 
 		this.drawDefaultBackground();
 
+		// Update before rendering so that we don't get sudden rotation at the start
+		updateCamera();
+
 		// Don't render if we haven't set up yet
 		if (ticks <= 0) return;
-
-		updateCamera();
 
 		String[] lines = worldRenderer.render(width, height, mouseX, mouseY, isPaused ? 0 : f);
 
@@ -108,7 +109,7 @@ public class GuiMigraine extends GuiScreen {
 			int y = mouseY - height / 2;
 
 			// mouse pos
-			// fontRendererObj.drawString(x + ", " + y, width - fontRendererObj.getStringWidth(x + ", " + y) - 5, height - 15, 0xffffff);
+			 fontRendererObj.drawString(x + ", " + y, width - fontRendererObj.getStringWidth(x + ", " + y) - 5, height - 15, 0xffffff);
 			// tick num
 			fontRendererObj.drawString(ticks + "", 5, height - 15, 0xffffff);
 		}

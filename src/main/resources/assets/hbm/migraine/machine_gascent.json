@@ -1,0 +1,488 @@
+{
+    "owner": {
+        "id": "hbm:tile.machine_gascent"
+    },
+    "seeAlso": [],
+    "chapters": [
+        78,
+        529
+    ],
+    "size": {
+        "x": 9,
+        "y": 5,
+        "z": 5
+    },
+    "update": [
+        {
+            "tick": 0,
+            "action": {
+                "type": "setCamera",
+                "zoom": 0.75
+            }
+        },
+        {
+            "tick": 0,
+            "action": {
+                "type": "fillBlocks",
+                "id": "minecraft:brick_block",
+                "positionMin": {
+                    "x": 8,
+                    "y": 0,
+                    "z": 0
+                },
+                "positionMax": {
+                    "x": 8,
+                    "y": 0,
+                    "z": 4
+                }
+            }
+        },
+        {
+            "tick": 2,
+            "action": {
+                "type": "fillBlocks",
+                "id": "minecraft:brick_block",
+                "positionMin": {
+                    "x": 7,
+                    "y": 0,
+                    "z": 0
+                },
+                "positionMax": {
+                    "x": 7,
+                    "y": 0,
+                    "z": 4
+                }
+            }
+        },
+        {
+            "tick": 2,
+            "action": {
+                "type": "setBlock",
+                "id": "hbm:tile.barrel_tcalloy",
+                "position": {
+                    "x": 7,
+                    "y": 1,
+                    "z": 2
+                }
+            }
+        },
+        {
+            "tick": 2,
+            "priority": -1,
+            "action": {
+                "type": "modifyTileEntityNBT",
+                "position": {
+                    "x": 7,
+                    "y": 1,
+                    "z": 2
+                },
+                "nbt": "{tank_type:29}"
+            }
+        },
+        {
+            "tick": 4,
+            "action": {
+                "type": "fillBlocks",
+                "id": "minecraft:brick_block",
+                "positionMin": {
+                    "x": 6,
+                    "y": 0,
+                    "z": 0
+                },
+                "positionMax": {
+                    "x": 6,
+                    "y": 0,
+                    "z": 4
+                }
+            }
+        },
+        {
+            "tick": 4,
+            "action": {
+                "type": "setBlock",
+                "id": "hbm:tile.fluid_duct_neo",
+                "position": {
+                    "x": 6,
+                    "y": 1,
+                    "z": 2
+                }
+            }
+        },
+        {
+            "tick": 4,
+            "priority": -1,
+            "action": {
+                "type": "modifyTileEntityNBT",
+                "position": {
+                    "x": 6,
+                    "y": 1,
+                    "z": 2
+                },
+                "nbt": "{type:29}"
+            }
+        },
+        {
+            "tick": 6,
+            "action": {
+                "type": "fillBlocks",
+                "id": "minecraft:brick_block",
+                "positionMin": {
+                    "x": 5,
+                    "y": 0,
+                    "z": 0
+                },
+                "positionMax": {
+                    "x": 5,
+                    "y": 0,
+                    "z": 4
+                }
+            }
+        },
+        {
+            "tick": 6,
+            "action": {
+                "type": "placeBlock",
+                "id": "hbm:tile.machine_gascent",
+                "position": {
+                    "x": 5,
+                    "y": 1,
+                    "z": 2
+                },
+                "yaw": 90
+            }
+        },
+        {
+            "tick": 8,
+            "action": {
+                "type": "fillBlocks",
+                "id": "minecraft:brick_block",
+                "positionMin": {
+                    "x": 4,
+                    "y": 0,
+                    "z": 0
+                },
+                "positionMax": {
+                    "x": 4,
+                    "y": 0,
+                    "z": 4
+                }
+            }
+        },
+        {
+            "tick": 10,
+            "action": {
+                "type": "fillBlocks",
+                "id": "minecraft:brick_block",
+                "positionMin": {
+                    "x": 3,
+                    "y": 0,
+                    "z": 0
+                },
+                "positionMax": {
+                    "x": 3,
+                    "y": 0,
+                    "z": 4
+                }
+            }
+        },
+        {
+            "tick": 12,
+            "action": {
+                "type": "fillBlocks",
+                "id": "minecraft:brick_block",
+                "positionMin": {
+                    "x": 2,
+                    "y": 0,
+                    "z": 0
+                },
+                "positionMax": {
+                    "x": 2,
+                    "y": 0,
+                    "z": 4
+                }
+            }
+        },
+        {
+            "tick": 14,
+            "action": {
+                "type": "fillBlocks",
+                "id": "minecraft:brick_block",
+                "positionMin": {
+                    "x": 1,
+                    "y": 0,
+                    "z": 0
+                },
+                "positionMax": {
+                    "x": 1,
+                    "y": 0,
+                    "z": 4
+                }
+            }
+        },
+        {
+            "tick": 16,
+            "action": {
+                "type": "fillBlocks",
+                "id": "minecraft:brick_block",
+                "positionMin": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "positionMax": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 4
+                }
+            }
+        },
+        {
+            "tick": 18,
+            "action": {
+                "type": "display",
+                "ticksFor": 60,
+                "position": {
+                    "x": -15,
+                    "y": -50
+                },
+                "lines": [
+                    [
+                        {
+                            "type": "string",
+                            "localized": true,
+                            "value": "migraine.centrifuge.0"
+                        }
+                    ]
+                ],
+                "autowrap": 200,
+                "colors": "COPPER",
+                "orientation": "BOTTOM"
+            }
+        },
+        {
+            "tick": 78,
+            "action": {
+                "type": "display",
+                "ticksFor": 60,
+                "position": {
+                    "x": -15,
+                    "y": 10
+                },
+                "lines": [
+                    [
+                        {
+                            "type": "string",
+                            "localized": true,
+                            "value": "migraine.centrifuge.1"
+                        }
+                    ]
+                ],
+                "autowrap": 200,
+                "colors": "COPPER",
+                "orientation": "CENTER"
+            }
+        },
+        {
+            "tick": 138,
+            "action": {
+                "type": "zoomTo",
+                "ticksFor": 20,
+                "zoom": 2
+            }
+        },
+        {
+            "tick": 158,
+            "action": {
+                "type": "display",
+                "ticksFor": 60,
+                "position": {
+                    "x": 0,
+                    "y": 40
+                },
+                "lines": [
+                    [
+                        {
+                            "type": "string",
+                            "localized": true,
+                            "value": "migraine.centrifuge.2"
+                        }
+                    ]
+                ],
+                "autowrap": 150,
+                "colors": "COPPER",
+                "orientation": "LEFT"
+            }
+        },
+        {
+            "tick": 218,
+            "action": {
+                "type": "zoomTo",
+                "ticksFor": 20,
+                "zoom": 1.25
+            }
+        },
+        {
+            "tick": 258,
+            "action": {
+                "type": "placeBlock",
+                "id": "hbm:tile.machine_gascent",
+                "position": {
+                    "x": 4,
+                    "y": 1,
+                    "z": 2
+                },
+                "yaw": 90
+            }
+        },
+        {
+            "tick": 268,
+            "action": {
+                "type": "display",
+                "ticksFor": 100,
+                "position": {
+                    "x": 0,
+                    "y": 0
+                },
+                "lines": [
+                    [
+                        {
+                            "type": "string",
+                            "localized": true,
+                            "value": "migraine.centrifuge.3"
+                        }
+                    ]
+                ],
+                "autowrap": 200,
+                "colors": "COPPER",
+                "orientation": "CENTER"
+            }
+        },
+        {
+            "tick": 368,
+            "action": {
+                "type": "zoomTo",
+                "ticksFor": 20,
+                "zoom": 0.75
+            }
+        },
+        {
+            "tick": 388,
+            "action": {
+                "type": "display",
+                "ticksFor": 60,
+                "position": {
+                    "x": 0,
+                    "y": 0
+                },
+                "lines": [
+                    [
+                        {
+                            "type": "string",
+                            "localized": true,
+                            "value": "migraine.centrifuge.4"
+                        }
+                    ]
+                ],
+                "autowrap": 200,
+                "orientation": "CENTER"
+            }
+        },
+        {
+            "tick": 448,
+            "action": {
+                "type": "placeBlock",
+                "id": "hbm:tile.machine_gascent",
+                "position": {
+                    "x": 3,
+                    "y": 1,
+                    "z": 2
+                },
+                "yaw": 90
+            }
+        },
+        {
+            "tick": 458,
+            "action": {
+                "type": "placeBlock",
+                "id": "hbm:tile.machine_gascent",
+                "position": {
+                    "x": 2,
+                    "y": 1,
+                    "z": 2
+                },
+                "yaw": 90
+            }
+        },
+        {
+            "tick": 468,
+            "action": {
+                "type": "display",
+                "ticksFor": 60,
+                "position": {
+                    "x": 0,
+                    "y": 0
+                },
+                "lines": [
+                    [
+                        {
+                            "type": "string",
+                            "localized": true,
+                            "value": "migraine.centrifuge.5"
+                        }
+                    ]
+                ],
+                "autowrap": 200,
+                "colors": "COPPER",
+                "orientation": "CENTER"
+            }
+        },
+        {
+            "tick": 528,
+            "action": {
+                "type": "display",
+                "ticksFor": -1,
+                "position": {
+                    "x": 32,
+                    "y": -34
+                },
+                "lines": [
+                    [
+                        {
+                            "type": "itemStack",
+                            "id": "hbm:item.upgrade_gc_speed"
+                        }
+                    ]
+                ],
+                "colors": "COPPER",
+                "orientation": "BOTTOM"
+            }
+        },
+        {
+            "tick": 528,
+            "action": {
+                "type": "display",
+                "ticksFor": -1,
+                "position": {
+                    "x": 50,
+                    "y": 38
+                },
+                "lines": [
+                    [
+                        {
+                            "type": "itemStack",
+                            "id": "hbm:item.nugget_u238",
+                            "count": 11
+                        },
+                        {
+                            "type": "itemStack",
+                            "id": "hbm:item.nugget_u235"
+                        }
+                    ]
+                ],
+                "colors": "COPPER",
+                "orientation": "LEFT",
+                "arrowInverted": true
+            }
+        }
+    ]
+}

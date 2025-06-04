@@ -126,7 +126,7 @@ public class MigraineInstructions {
 			}
 
 		} catch (Exception ex){
-			MainRegistry.logger.warn("[Migraine] You need to include a owner tag! Skipping " + name);
+			MainRegistry.logger.warn("[Migraine] Error initalizing! Skipping " + name);
 		}
 
 		this.comparableStack = stack;
@@ -415,6 +415,7 @@ public class MigraineInstructions {
 		gui.FAKE_PLAYER.rotationYaw = action.has("yaw") ? action.get("yaw").getAsFloat() : 0f;
 		gui.FAKE_PLAYER.capabilities.isCreativeMode = true;
 
+		block.onBlockPlacedBy(worldRenderer.world, pos.get("x").getAsInt(), pos.get("y").getAsInt(), pos.get("z").getAsInt(), gui.FAKE_PLAYER.client, itemStackFromJson(action));
 		worldRenderer.world.isRemote = false;
 		block.onBlockPlacedBy(worldRenderer.world, pos.get("x").getAsInt(), pos.get("y").getAsInt(), pos.get("z").getAsInt(), gui.FAKE_PLAYER, itemStackFromJson(action));
 		worldRenderer.world.isRemote = true;
@@ -481,9 +482,9 @@ public class MigraineInstructions {
 	private void zoomTo(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
 		JsonObject toAdd = new JsonObject();
 		int forTicks = action.get("ticksFor").getAsInt();
-		toAdd.addProperty("type", "zoom");
+		toAdd.addProperty("type", "zoomTo");
 		toAdd.addProperty("tickLeft", forTicks);
-		toAdd.addProperty("addZoom", (action.get("targetZoom").getAsFloat() - gui.zoom) / forTicks);
+		toAdd.addProperty("addZoom", (action.get("zoom").getAsFloat() - gui.zoom) / forTicks);
 		gui.active.add(toAdd);
 	}
 
@@ -687,9 +688,11 @@ public class MigraineInstructions {
 
 			HashSet<MigraineDisplay> toRemove = new HashSet<>();
 			gui.displays.forEach((MigraineDisplay display) -> {
-				display.ticksRemaining--;
-				if (display.ticksRemaining <= 0)
-					toRemove.add(display);
+				if (display.ticksRemaining != -1) {
+					display.ticksRemaining--;
+					if (display.ticksRemaining <= 0)
+						toRemove.add(display);
+				}
 			});
 
 			gui.displays.removeAll(toRemove);
@@ -712,7 +715,7 @@ public class MigraineInstructions {
 				}
 			}
 
-			List<Integer> priorityNums = new ArrayList<>(priorities.keys());
+			List<Integer> priorityNums = new ArrayList<>(priorities.keySet());
 
 			priorityNums.sort(Integer::compareTo);
 

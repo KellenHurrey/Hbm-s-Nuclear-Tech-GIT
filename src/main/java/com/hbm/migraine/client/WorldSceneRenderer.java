@@ -54,7 +54,6 @@ public class WorldSceneRenderer {
 	private double prevZoom = 1, zoom = 1;
 	private boolean isometric = true;
 	private Vec3 size, prevSize;
-	private Vec3 min, prevMin;
 
 	public WorldSceneRenderer(TrackedDummyWorld world, ClientFakePlayer player) {
 		this.world = world;
@@ -121,6 +120,7 @@ public class WorldSceneRenderer {
 		this.centerOffset = Vec3.createVectorHelper(centerOffset.xCoord, centerOffset.yCoord, centerOffset.zCoord);
 		camera.rotationYaw = (float) rotationYaw % 360.0F;
 		camera.rotationPitch = (float) rotationPitch % 360.0F;
+		this.prevZoom = this.zoom;
 		this.zoom = zoom;
 		this.isometric = isometric;
 		camera.onUpdate();
@@ -154,14 +154,6 @@ public class WorldSceneRenderer {
 
 		// Get interped size
 		Vec3 size = this.size != null ? this.size : world.getSize();
-		this.prevSize = this.prevSize != null ? this.prevSize : size;
-		Vec3 sizeInterp = BobMathUtil.interpVec(size, this.prevSize, partialTicks);
-		this.prevSize = size;
-
-		Vec3 min = world.getMinPos();
-		this.prevMin = this.prevMin != null ? this.prevMin : min;
-		Vec3 minInterp = BobMathUtil.interpVec(min, this.prevMin, partialTicks);
-		this.prevMin = min;
 
 		glColor4f(1, 1, 1, 1);
 		// rotate around 0,0,0
@@ -173,11 +165,13 @@ public class WorldSceneRenderer {
 			glScaled(scale, scale, scale);
 			glScaled(1, 1, 0.5);
 		} else {
-			double max = Math.max(sizeInterp.xCoord, Math.max(sizeInterp.yCoord, sizeInterp.zCoord));
+			double max = Math.max(size.xCoord, Math.max(size.yCoord, size.zCoord));
 
 			glTranslated(0, 0, -(max + 13 / scaledresolution.getScaleFactor()));
 		}
 
+		double zoomInterp = BobMathUtil.interp(zoom, prevZoom, partialTicks);
+		GL11.glScaled(zoomInterp, zoomInterp, zoomInterp);
 
 		double yawInterp = BobMathUtil.interp(camera.rotationYaw, camera.prevRotationYaw, partialTicks);
 		double pitchInterp = BobMathUtil.interp(camera.rotationPitch, camera.prevRotationPitch, partialTicks);
@@ -188,7 +182,7 @@ public class WorldSceneRenderer {
 
 		Vec3 centerOffsetInterp = BobMathUtil.interpVec(centerOffset, prevCenterOffset, partialTicks);
 		this.prevCenterOffset = this.centerOffset;
-		glTranslated((sizeInterp.xCoord - minInterp.xCoord) / -2, (sizeInterp.yCoord - minInterp.yCoord) / -2, (sizeInterp.zCoord - minInterp.zCoord) / -2);
+		glTranslated((size.xCoord) / -2, (size.yCoord) / -2, (size.zCoord) / -2);
 		glTranslated(-centerOffsetInterp.xCoord, -centerOffsetInterp.yCoord, -centerOffsetInterp.zCoord);
 
 		// Update camera position

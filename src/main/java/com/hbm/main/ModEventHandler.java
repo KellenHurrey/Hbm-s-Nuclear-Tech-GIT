@@ -446,7 +446,7 @@ public class ModEventHandler {
 			int slot = entry.getKey();
 			List<WeightedRandomObject> pool = entry.getValue();
 
-			WeightedRandomObject choice = (WeightedRandomObject) WeightedRandom.getRandomItem(rand, pool); //NullPointerException sludge fix
+			WeightedRandomObject choice = (WeightedRandomObject) WeightedRandom.getRandomItem(entity.worldObj.rand, pool); //NullPointerException sludge fix
 			if (choice == null) {
 				continue;
 			}
