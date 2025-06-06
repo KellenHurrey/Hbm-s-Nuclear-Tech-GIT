@@ -31,7 +31,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
@@ -47,7 +46,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.EnumChatFormatting;
@@ -352,16 +350,16 @@ public class ItemToolAbility extends ItemTool implements IDepthRockTool, IGUIPro
 		Block block = world.getBlock(x, y, z);
 		int l = world.getBlockMetadata(x, y, z);
 		world.playAuxSFXAtEntity(player, 2001, x, y, z, Block.getIdFromBlock(block) + (world.getBlockMetadata(x, y, z) << 12));
-		boolean flag = false;
+		boolean removedByPlayer = false;
 
 		if(player.capabilities.isCreativeMode) {
-			flag = removeBlock(world, x, y, z, false, player);
+			removedByPlayer = removeBlock(world, x, y, z, false, player);
 			player.playerNetServerHandler.sendPacket(new S23PacketBlockChange(x, y, z, world));
 		} else {
 			ItemStack itemstack = player.getCurrentEquippedItem();
-			boolean flag1 = block.canHarvestBlock(player, l);
+			boolean canHarvest = block.canHarvestBlock(player, l);
 
-			flag = removeBlock(world, x, y, z, flag1, player);
+			removedByPlayer = removeBlock(world, x, y, z, canHarvest, player);
 
 			if(itemstack != null) {
 				itemstack.func_150999_a(world, block, x, y, z, player);
@@ -371,13 +369,9 @@ public class ItemToolAbility extends ItemTool implements IDepthRockTool, IGUIPro
 				}
 			}
 			
-			// TODO: Missing from other method, may be unneeded
-			if(flag && flag1) {
+			if(removedByPlayer && canHarvest) {
 				block.harvestBlock(world, player, x, y, z, l);
 			}
-			
-			// TODO: Added from other method, may be unneeded
-			Minecraft.getMinecraft().getNetHandler().addToSendQueue(new C07PacketPlayerDigging(2, x, y, z, Minecraft.getMinecraft().objectMouseOver.sideHit));
 		}
 
 		// Why was this commented out?

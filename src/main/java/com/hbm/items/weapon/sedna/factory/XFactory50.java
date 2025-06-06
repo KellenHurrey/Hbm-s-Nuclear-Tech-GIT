@@ -18,6 +18,7 @@ import com.hbm.items.weapon.sedna.factory.GunFactory.EnumAmmo;
 import com.hbm.items.weapon.sedna.factory.GunFactory.EnumAmmoSecret;
 import com.hbm.items.weapon.sedna.mags.MagazineBelt;
 import com.hbm.items.weapon.sedna.mags.MagazineFullReload;
+import com.hbm.lib.RefStrings;
 import com.hbm.particle.SpentCasing;
 import com.hbm.particle.SpentCasing.CasingType;
 import com.hbm.render.anim.BusAnimation;
@@ -27,9 +28,13 @@ import com.hbm.render.anim.HbmAnimations.AnimType;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.ResourceLocation;
 
 public class XFactory50 {
 
+	public static final ResourceLocation scope = new ResourceLocation(RefStrings.MODID, "textures/misc/scope_amat.png");
+	public static final ResourceLocation scope_thermal = new ResourceLocation(RefStrings.MODID, "textures/misc/scope_penance.png");
+	
 	public static BulletConfig bmg50_sp;
 	public static BulletConfig bmg50_fmj;
 	public static BulletConfig bmg50_jhp;
@@ -68,7 +73,7 @@ public class XFactory50 {
 				.setCasing(casing50.clone().setColor(SpentCasing.COLOR_CASE_44).register("bmg50du"));
 		bmg50_he = new BulletConfig().setItem(EnumAmmo.BMG50_HE).setCasing(EnumCasingType.LARGE_STEEL, 12).setWear(3F).setDoesPenetrate(true).setDamageFalloffByPen(false).setDamage(1.75F).setOnImpact(LAMBDA_STANDARD_EXPLODE)
 				.setCasing(casing50.clone().setColor(SpentCasing.COLOR_CASE_44).register("bmg50he"));
-		bmg50_sm = new BulletConfig().setItem(EnumAmmo.BMG50_SM).setCasing(EnumCasingType.LARGE_STEEL, 12).setWear(10F).setDoesPenetrate(true).setDamageFalloffByPen(false).setDamage(2.5F).setThresholdNegation(30F).setArmorPiercing(0.35F)
+		bmg50_sm = new BulletConfig().setItem(EnumAmmo.BMG50_SM).setCasing(EnumCasingType.LARGE_STEEL, 6).setWear(10F).setDoesPenetrate(true).setDamageFalloffByPen(false).setDamage(2.5F).setThresholdNegation(30F).setArmorPiercing(0.35F)
 				.setCasing(casing50.clone().setColor(SpentCasing.COLOR_CASE_44).register("bmg50sm"));
 		bmg50_black = new BulletConfig().setItem(EnumAmmoSecret.BMG50_BLACK).setWear(5F).setDoesPenetrate(true).setDamageFalloffByPen(false).setSpectral(true).setDamage(1.5F).setHeadshot(3F).setThresholdNegation(30F).setArmorPiercing(0.35F)
 				.setCasing(casing50.clone().setColor(SpentCasing.COLOR_CASE_EQUESTRIAN).register("bmg50black"));
@@ -76,7 +81,7 @@ public class XFactory50 {
 				.setCasing(casing50.clone().setColor(SpentCasing.COLOR_CASE_EQUESTRIAN).register("bmg50equestrian"));
 		
 		ModItems.gun_amat = new ItemGunBaseNT(WeaponQuality.A_SIDE, new GunConfig()
-				.dura(350).draw(20).inspect(50).crosshair(Crosshair.CIRCLE).scopeTexture(XFactory44.scope_lilmac).smoke(LAMBDA_SMOKE)
+				.dura(350).draw(20).inspect(50).crosshair(Crosshair.CIRCLE).scopeTexture(scope).smoke(LAMBDA_SMOKE)
 				.rec(new Receiver(0)
 						.dmg(30F).delay(25).dry(25).spreadHipfire(0.05F).reload(51).jam(43).sound("hbm:weapon.fire.amat", 1.0F, 1.0F)
 						.mag(new MagazineFullReload(0, 7).addConfigs(bmg50_sp, bmg50_fmj, bmg50_jhp, bmg50_ap, bmg50_du, bmg50_sm, bmg50_he))
@@ -86,7 +91,7 @@ public class XFactory50 {
 				.anim(LAMBDA_AMAT_ANIMS).orchestra(Orchestras.ORCHESTRA_AMAT)
 				).setUnlocalizedName("gun_amat");
 		ModItems.gun_amat_subtlety = new ItemGunBaseNT(WeaponQuality.LEGENDARY, new GunConfig()
-				.dura(1_000).draw(20).inspect(50).crosshair(Crosshair.CIRCLE).scopeTexture(XFactory44.scope_lilmac).smoke(LAMBDA_SMOKE)
+				.dura(1_000).draw(20).inspect(50).crosshair(Crosshair.CIRCLE).scopeTexture(scope).smoke(LAMBDA_SMOKE)
 				.rec(new Receiver(0)
 						.dmg(50F).delay(25).dry(25).spreadHipfire(0.05F).reload(51).jam(43).sound("hbm:weapon.fire.amat", 1.0F, 1.0F)
 						.mag(new MagazineFullReload(0, 7).addConfigs(bmg50_equestrian, bmg50_sp, bmg50_fmj, bmg50_jhp, bmg50_ap, bmg50_du, bmg50_sm, bmg50_he))
@@ -96,7 +101,7 @@ public class XFactory50 {
 				.anim(LAMBDA_AMAT_ANIMS).orchestra(Orchestras.ORCHESTRA_AMAT)
 				).setUnlocalizedName("gun_amat_subtlety");
 		ModItems.gun_amat_penance = new ItemGunBaseNT(WeaponQuality.LEGENDARY, new GunConfig()
-				.dura(5_000).draw(20).inspect(50).crosshair(Crosshair.CIRCLE).scopeTexture(XFactory44.scope_lilmac).thermalSights(true).smoke(LAMBDA_SMOKE)
+				.dura(5_000).draw(20).inspect(50).crosshair(Crosshair.CIRCLE).scopeTexture(scope_thermal).thermalSights(true).smoke(LAMBDA_SMOKE)
 				.rec(new Receiver(0)
 						.dmg(45F).delay(25).dry(25).spreadHipfire(0F).reload(51).jam(43).sound("hbm:weapon.silencerShoot", 1.0F, 1.0F)
 						.mag(new MagazineFullReload(0, 7).addConfigs(bmg50_sp, bmg50_fmj, bmg50_jhp, bmg50_ap, bmg50_du, bmg50_sm, bmg50_he, bmg50_black))
