@@ -24,17 +24,18 @@ import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.INetHandler;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
-import net.minecraftforge.common.DimensionManager;
-
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -973,4 +974,125 @@ public class TrackedDummyWorld extends DummyWorld {
 			this.SoundHandler.playSound(new RecordMovingSound(player, new ResourceLocation(soundName), volume, pitch, (float) x, (float) y, (float) z));
 	}
 
+	@Override
+	public void playSoundToNearExcept(EntityPlayer player, String soundName, float volume, float pitch) {
+		if (this.SoundHandler != null)
+			this.SoundHandler.playSound(new RecordMovingSound(player, new ResourceLocation(soundName), volume, pitch, (float) player.posX, (float) player.posY, (float) player.posZ));
+	}
+
+	public NBTTagCompound writeToNBT() {
+		NBTTagCompound nbt = new NBTTagCompound();
+		
+		// Blocks
+		NBTTagList blockList = new NBTTagList();
+		for (Map.Entry<Long, Block> entry : blockMap.entrySet()) {
+			NBTTagCompound blockTag = new NBTTagCompound();
+			blockTag.setLong("pos", entry.getKey());
+			blockTag.setInteger("block", Block.getIdFromBlock(entry.getValue()));
+			blockTag.setInteger("meta", getBlockMetadata(CoordinatePacker.unpackX(entry.getKey()), CoordinatePacker.unpackY(entry.getKey()), CoordinatePacker.unpackZ(entry.getKey())));
+			blockTag.setInteger("pendingTick", pendingBlockTicks.getOrDefault(entry.getKey(), -1));
+			blockTag.setInteger("tickPriority", pendingTickPriority.getOrDefault(entry.getKey(), -1));
+			blockList.appendTag(blockTag);
+		}
+		nbt.setTag("blocks", blockList);
+
+		// Tile Entities
+		NBTTagList tileList = new NBTTagList();
+		for (Map.Entry<Long, TileEntity> entry : tileMap.entrySet()) {
+			NBTTagCompound tileTag = new NBTTagCompound();
+			tileTag.setLong("pos", entry.getKey());
+			entry.getValue().writeToNBT(tileTag);
+			tileList.appendTag(tileTag);
+		}
+		nbt.setTag("tiles", tileList);
+		NBTTagList tileReserializeList = new NBTTagList();
+		for (Long pos : tilesToReserialize) {
+			NBTTagCompound tileTag = new NBTTagCompound();
+			tileTag.setLong("pos", pos);
+			tileReserializeList.appendTag(tileTag);
+		}
+		nbt.setTag("tilesToReserialize", tileReserializeList);
+
+		// Entities
+		NBTTagList entityList = new NBTTagList();
+		for (Entity entity : entities) {
+			if (entity instanceof EntityPlayerMP) continue; // Don't save players
+			NBTTagCompound entityTag = new NBTTagCompound();
+			entityTag.setInteger("id", entity.getEntityId());
+			entity.writeToNBT(entityTag);
+			entityList.appendTag(entityTag);
+		}
+		nbt.setTag("entities", entityList);
+
+		// Particles
+		// NBTTagList particleList = new NBTTagList();
+		// if (Minecraft.getMinecraft().currentScreen instanceof GuiMigraine) {
+		// 	GuiMigraine gui = (GuiMigraine) Minecraft.getMinecraft().currentScreen;
+		// 	List[] fxLayers = gui.worldRenderer.rendererEffect.fxLayers;
+		// 	for (int i = 0; i < fxLayers.length; i++) {
+		// 		List<EntityFX> fxLayer = fxLayers[i];
+		// 		for (EntityFX fx : fxLayer) {
+		// 			NBTTagCompound particleTag = new NBTTagCompound();
+		// 			particleTag.setString("type", fx.getClass().getSimpleName());
+		// 			particleTag.setInteger("layer", i);
+		// 			particleList.appendTag(particleTag);
+		// 		}
+		// 	}
+		// }
+		// nbt.setTag("particles", particleList);
+
+		return nbt;
+	}
+
+	public void readFromNBT(NBTTagCompound nbt) {
+		// Blocks
+		NBTTagList blockList = nbt.getTagList("blocks", 10);
+		for (int i = 0; i < blockList.tagCount(); i++) {
+			NBTTagCompound blockTag = blockList.getCompoundTagAt(i);
+			Long pos = blockTag.getLong("pos");
+			Block block = Block.getBlockById(blockTag.getInteger("block"));
+			int meta = blockTag.getInteger("meta");
+			int pendingTick = blockTag.getInteger("pendingTick");
+			int tickPriority = blockTag.getInteger("tickPriority");
+			setBlock(CoordinatePacker.unpackX(pos), CoordinatePacker.unpackY(pos), CoordinatePacker.unpackZ(pos), block, meta, 3);
+			if (pendingTick > -1)
+				pendingBlockTicks.put(pos, pendingTick);
+			if (tickPriority > -1)
+				pendingTickPriority.put(pos, tickPriority);
+		}
+
+		// Tile Entities
+		NBTTagList tileList = nbt.getTagList("tiles", 10);
+		for (int i = 0; i < tileList.tagCount(); i++) {
+			NBTTagCompound tileTag = tileList.getCompoundTagAt(i);
+			Long pos = tileTag.getLong("pos");
+			TileEntity tile = TileEntity.createAndLoadEntity(tileTag);
+			if (tile != null) {
+				tile.setWorldObj(this);
+				tile.xCoord = CoordinatePacker.unpackX(pos);
+				tile.yCoord = CoordinatePacker.unpackY(pos);
+				tile.zCoord = CoordinatePacker.unpackZ(pos);
+				setTileEntity(CoordinatePacker.unpackX(pos), CoordinatePacker.unpackY(pos), CoordinatePacker.unpackZ(pos), tile);
+			}
+		}
+		NBTTagList tileReserializeList = nbt.getTagList("tilesToReserialize", 10);
+		for (int i = 0; i < tileReserializeList.tagCount(); i++) {
+			NBTTagCompound tileTag = tileReserializeList.getCompoundTagAt(i);
+			Long pos = tileTag.getLong("pos");
+			tilesToReserialize.add(pos);
+		}
+
+		// Entities
+		NBTTagList entityList = nbt.getTagList("entities", 10);
+		for (int i = 0; i < entityList.tagCount(); i++) {
+			NBTTagCompound entityTag = entityList.getCompoundTagAt(i);
+			int id = entityTag.getInteger("id");
+			Entity entity = EntityList.createEntityFromNBT(entityTag, this);
+			if (entity != null) {
+				entity.setEntityId(id);
+				entity.setWorld(this);
+				this.onEntityAdded(entity);
+			}
+		}
+	}
 }

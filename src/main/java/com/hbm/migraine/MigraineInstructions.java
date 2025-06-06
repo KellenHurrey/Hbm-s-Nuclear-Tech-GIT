@@ -5,6 +5,8 @@ import com.google.common.collect.Multimap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.lib.RefStrings;
 import com.hbm.main.MainRegistry;
@@ -28,12 +30,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+
+import static com.hbm.inventory.OreDictManager.NB;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -70,8 +75,8 @@ public class MigraineInstructions {
 		MigraineBar progressBar = null;
 		float[] chapterPercents = new float[0];
 		try {
-			JsonObject ownerInfo = object.getAsJsonObject("owner");
-			stack = new ComparableStack(itemStackFromJson(ownerInfo));
+			JsonObject owner = object.getAsJsonObject("owner");
+			stack = new ComparableStack(itemStackFromJson(owner));
 
 			JsonArray chapArray = object.getAsJsonArray("chapters");
 			this.chapters.add(0);
@@ -79,30 +84,21 @@ public class MigraineInstructions {
 				this.chapters.add(chapArray.get(i).getAsInt());
 			}
 
-			if (object.has("owner")){
-				JsonObject owner = object.getAsJsonObject("owner");
-				ItemStack itemStack = itemStackFromJson(owner);
-				String text;
-				if (owner.has("text")){
-					if (owner.has("localized") && owner.get("localized").getAsBoolean())
-						text = I18nUtil.resolveKey(owner.get("text").getAsString());
-					else
-						text = owner.get("text").getAsString();
-				}else
-					text = itemStack.getDisplayName();
-				title = new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, 40, 27, new Object[][]{{text}}, 0, -1, itemStack, false).setOrientation(MigraineDisplay.Orientation.LEFT).setColors(defaultColors.GOLD.colors);
-			}
-			if (object.has("seeAlso")){
-				JsonArray also = object.getAsJsonArray("seeAlso");
+			String displayName;
+			if (owner.has("text")){
+				displayName = getLocalizedString(owner);
+			}else
+				displayName = stack.toStack().getDisplayName();
+			title = new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, 40, 27, new Object[][]{{displayName}}, 0, -1, stack.toStack(), false).setOrientation(MigraineDisplay.Orientation.LEFT).setColors(defaultColors.GOLD.colors);
+			
+			JsonArray also = Parameter.getParam(object, "seeAlso").jsonArray();
+			if (also != null) {
 				for (int i = 0; i < also.size(); i++){
 					JsonObject display = also.get(i).getAsJsonObject();
 					ItemStack itemStack = itemStackFromJson(display);
 					String text;
 					if (display.has("text")){
-						if (display.has("localized") && display.get("localized").getAsBoolean())
-							text = I18nUtil.resolveKey(display.get("text").getAsString());
-						else
-							text = display.get("text").getAsString();
+						text = getLocalizedString(display);
 					}else{
 						text = itemStack.getDisplayName();
 					}
@@ -120,10 +116,7 @@ public class MigraineInstructions {
 			progressBar = new MigraineBar(progressBarXRange[0], progressBarY, progressBarXRange[1] - progressBarXRange[0], chapterPercents);
 			progressBar.setColors(defaultColors.COPPER.colors);
 
-			if (object.has("size")) {
-				JsonObject sise = object.getAsJsonObject("size");
-				size = Vec3.createVectorHelper(sise.get("x").getAsDouble(), sise.get("y").getAsDouble(), sise.get("z").getAsDouble());
-			}
+			size = Parameter.getParam(object, "size").vec3();
 
 		} catch (Exception ex){
 			MainRegistry.logger.warn("[Migraine] Error initalizing! Skipping " + name);
@@ -136,7 +129,16 @@ public class MigraineInstructions {
 		this.chapterPercents = chapterPercents;
 	}
 
+	private String getLocalizedString(JsonObject parent){
+		return getLocalizedString(parent, "text");
+	}
 
+	private String getLocalizedString(JsonObject parent, String textName){
+		String text = Parameter.getParam(parent, textName).string();
+		if (Parameter.getParam(parent, "localized").bool(false))
+			text = I18nUtil.resolveKey(text);
+		return text;
+	}
 
 	/**
 	 * Gets an ItemStack
@@ -151,10 +153,10 @@ public class MigraineInstructions {
 
 		String[] id = item.get("id").getAsString().split(":");
 
-		ItemStack stack = GameRegistry.findItemStack(id[0], id[1], item.has("count") ? item.get("count").getAsInt() : 1);
+		ItemStack stack = GameRegistry.findItemStack(id[0], id[1], Parameter.getParam(item, "count").integer(1));
 
 		ItemStack out = stack.copy();
-		out.setItemDamage(item.has("meta") ? item.get("meta").getAsInt() : 0);
+		out.setItemDamage(Parameter.getParam(item, "meta").integer(0));
 
 		if (item.has("nbt")){
 			try {
@@ -167,9 +169,9 @@ public class MigraineInstructions {
 		return out;
 	}
 
-	private Tuple.Pair<Object[], Class[]> getParamsAndTypes(WorldSceneRenderer worldRenderer, JsonArray args){
+	private Tuple.Pair<Object[], Class<?>[]> getParamsAndTypes(WorldSceneRenderer worldRenderer, JsonArray args){
 		Object[] params = new Object[args.size()];
-		Class[] types = new Class[args.size()];
+		Class<?>[] types = new Class[args.size()];
 
 		// Params currently implemented:
 		// World (only migraine world)
@@ -276,7 +278,7 @@ public class MigraineInstructions {
 	}
 
 	private void callFunctionOnFromJson(WorldSceneRenderer worldRenderer, Object toCallOn, JsonObject action){
-		worldRenderer.world.isRemote = action.has("client") ? action.get("client").getAsBoolean() : true;
+		worldRenderer.world.isRemote = !action.has("client") || action.get("client").getAsBoolean();
 		// I know this looks bad, but its a fake world, so whats the worst someone could do?
 		try {
 
@@ -288,10 +290,10 @@ public class MigraineInstructions {
 
 				for (int i = 0; i < lists.length; i++) {
 					String stack = lists[i];
-					Class objectClass = currentValue.getClass();
+					Class<?> objectClass = currentValue.getClass();
 					if (stack.endsWith("()")) {
 						stack = stack.replace("()", "");
-						Tuple.Pair<Object[], Class[]> paramsTypes = getParamsAndTypes(worldRenderer, action.getAsJsonArray(callList.substring(0, callList.indexOf(stack)).replace("()", "") + stack));
+						Tuple.Pair<Object[], Class<?>[]> paramsTypes = getParamsAndTypes(worldRenderer, action.getAsJsonArray(callList.substring(0, callList.indexOf(stack)).replace("()", "") + stack));
 						Method method = getMethodRecursive(objectClass, stack, paramsTypes.value);
 						method.setAccessible(true);
 						currentValue = method.invoke(currentValue, paramsTypes.key);
@@ -306,7 +308,7 @@ public class MigraineInstructions {
 			if (action.has("value")) {
 				JsonArray array = new JsonArray();
 				array.add(action.getAsJsonObject("value"));
-				Tuple.Pair<Object[], Class[]> paramType = getParamsAndTypes(worldRenderer, array);
+				Tuple.Pair<Object[], Class<?>[]> paramType = getParamsAndTypes(worldRenderer, array);
 				currentValue = paramType.key[0];
 			}
 
@@ -318,10 +320,10 @@ public class MigraineInstructions {
 				Object setValue = toCallOn;
 				for (int i = 0; i < setLists.length; i++){
 					String stack = setLists[i];
-					Class objectClass = setValue.getClass();
+					Class<?> objectClass = setValue.getClass();
 					if (stack.endsWith("()")){
 						stack = stack.replace("()", "");
-						Tuple.Pair<Object[], Class[]> paramsTypes = getParamsAndTypes(worldRenderer, action.getAsJsonArray(setList.substring(0, setList.indexOf(stack)).replace("()", "") + stack));
+						Tuple.Pair<Object[], Class<?>[]> paramsTypes = getParamsAndTypes(worldRenderer, action.getAsJsonArray(setList.substring(0, setList.indexOf(stack)).replace("()", "") + stack));
 						Method method = getMethodRecursive(objectClass, stack, paramsTypes.value);
 						method.setAccessible(true);
 						setValue = method.invoke(setValue, paramsTypes.key);
@@ -364,10 +366,7 @@ public class MigraineInstructions {
 						currentLine[i] = itemStackFromJson(data);
 						break;
 					case "string":
-						if (data.has("localized") && data.get("localized").getAsBoolean())
-							currentLine[i] = I18nUtil.resolveKey(data.get("value").getAsString());
-						else
-							currentLine[i] = data.get("value").getAsString();
+						currentLine[i] = getLocalizedString(data, "value");
 						break;
 					default:
 						currentLine[i] = "";
@@ -376,7 +375,7 @@ public class MigraineInstructions {
 			toDisplay[j] = currentLine;
 		}
 
-		MigraineDisplay display = new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, pos.get("x").getAsInt(), pos.get("y").getAsInt(), toDisplay, action.has("autowrap") ? action.get("autowrap").getAsInt() : 0, action.get("ticksFor").getAsInt(), action.has("arrowInverted") ? action.get("arrowInverted").getAsBoolean() : false);
+		MigraineDisplay display = new MigraineDisplay(Minecraft.getMinecraft().fontRenderer, pos.get("x").getAsInt(), pos.get("y").getAsInt(), toDisplay, Parameter.getParam(action, "autowrap").integer(0), action.get("ticksFor").getAsInt(), Parameter.getParam(action, "arrowInverted").bool(false));
 
 		if (action.has("colors")){
 			display.setColors(defaultColors.valueOf(action.get("colors").getAsString()).colors);
@@ -396,11 +395,12 @@ public class MigraineInstructions {
 	}
 
 	private void setBlock(WorldSceneRenderer worldRenderer, JsonObject action){
-		JsonObject pos = action.getAsJsonObject("position");
 
 		String[] id = action.get("id").getAsString().split(":");
 
-		worldRenderer.world.setBlock(pos.get("x").getAsInt(), pos.get("y").getAsInt(), pos.get("z").getAsInt(), GameRegistry.findBlock(id[0], id[1]), action.has("meta") ? action.get("meta").getAsInt() : 0, 3);
+		Vec3 pos = Parameter.getParam(action, "position").vec3();
+
+		worldRenderer.world.setBlock((int) pos.xCoord, (int) pos.yCoord, (int) pos.zCoord, GameRegistry.findBlock(id[0], id[1]), Parameter.getParam(action, "meta").integer(0), 3);
 	}
 
 	private void placeBlock(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
@@ -409,32 +409,34 @@ public class MigraineInstructions {
 
 		Block block = GameRegistry.findBlock(id[0], id[1]);
 
-		JsonObject pos = action.getAsJsonObject("position");
+		Vec3 pos = Parameter.getParam(action, "position").vec3();
 
 		float prevYaw = gui.FAKE_PLAYER.rotationYaw;
-		gui.FAKE_PLAYER.rotationYaw = action.has("yaw") ? action.get("yaw").getAsFloat() : 0f;
+		gui.FAKE_PLAYER.rotationYaw = Parameter.getParam(action, "yaw").floatValue(0f);
 		gui.FAKE_PLAYER.capabilities.isCreativeMode = true;
 
-		block.onBlockPlacedBy(worldRenderer.world, pos.get("x").getAsInt(), pos.get("y").getAsInt(), pos.get("z").getAsInt(), gui.FAKE_PLAYER.client, itemStackFromJson(action));
+		ItemStack itemStack = itemStackFromJson(action);
+
+		block.onBlockPlacedBy(worldRenderer.world, (int) pos.xCoord, (int) pos.yCoord, (int) pos.zCoord, gui.FAKE_PLAYER.client, itemStack);
 		worldRenderer.world.isRemote = false;
-		block.onBlockPlacedBy(worldRenderer.world, pos.get("x").getAsInt(), pos.get("y").getAsInt(), pos.get("z").getAsInt(), gui.FAKE_PLAYER, itemStackFromJson(action));
+		block.onBlockPlacedBy(worldRenderer.world, (int) pos.xCoord, (int) pos.yCoord, (int) pos.zCoord, gui.FAKE_PLAYER, itemStack);
 		worldRenderer.world.isRemote = true;
 
 		gui.FAKE_PLAYER.rotationYaw = prevYaw;
 	}
 
 	private void fillBlocks(WorldSceneRenderer worldRenderer, JsonObject action){
-		JsonObject posMin = action.getAsJsonObject("positionMin");
-		JsonObject posMax = action.getAsJsonObject("positionMax");
+		Vec3 posMin = Parameter.getParam(action, "positionMin").vec3();
+		Vec3 posMax = Parameter.getParam(action, "positionMax").vec3();
 
 		String[] id = action.get("id").getAsString().split(":");
 
 		Block block = GameRegistry.findBlock(id[0], id[1]);
 
-		for (int x = posMin.get("x").getAsInt(); x <= posMax.get("x").getAsInt(); x++){
-			for (int y = posMin.get("y").getAsInt(); y <= posMax.get("y").getAsInt(); y++){
-				for (int z = posMin.get("z").getAsInt(); z <= posMax.get("z").getAsInt(); z++){
-					worldRenderer.world.setBlock(x, y, z, block, action.has("meta") ? action.get("meta").getAsInt() : 0, 3);
+		for (int x = (int) posMin.xCoord; x <= (int) posMax.xCoord; x++){
+			for (int y = (int) posMin.yCoord; y <= (int) posMax.yCoord; y++){
+				for (int z = (int) posMin.zCoord; z <= (int) posMax.zCoord; z++){
+					worldRenderer.world.setBlock(x, y, z, block, Parameter.getParam(action, "meta").integer(0), 3);
 					worldRenderer.world.markBlockForUpdate(x, y, z);
 				}
 			}
@@ -442,67 +444,66 @@ public class MigraineInstructions {
 	}
 
 	private void modifyTileEntity(WorldSceneRenderer worldRenderer, JsonObject action){
-		JsonObject pos = action.getAsJsonObject("position");
-		TileEntity te = worldRenderer.world.getTileEntity(pos.get("x").getAsInt(), pos.get("y").getAsInt(), pos.get("z").getAsInt());
+		Vec3 pos = Parameter.getParam(action, "position").vec3();
+		TileEntity te = worldRenderer.world.getTileEntity((int) pos.xCoord, (int) pos.yCoord, (int) pos.zCoord);
 		if (te != null) {
 			callFunctionOnFromJson(worldRenderer, te, action);
 		} else {
-			MainRegistry.logger.warn("[Migraine] Tried to access TileEntity at " + pos.get("x").getAsInt() + ", " + pos.get("y").getAsInt() + ", " + pos.get("z").getAsInt() + ", but failed in " + name + "!");
+			MainRegistry.logger.warn("[Migraine] Tried to access TileEntity at " + pos.xCoord + ", " + pos.yCoord + ", " + pos.zCoord + ", but failed in " + name + "!");
 		}
 	}
 
-	private void setCenter(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
+	private void setCenter(GuiMigraine gui, JsonObject action){
 		JsonElement val = action.get("position");
 		if (val.isJsonNull()){
 			gui.camera = null;
 		}else{
-			JsonObject pos = val.getAsJsonObject();
-			gui.camera = Vec3.createVectorHelper(pos.get("x").getAsDouble(), pos.get("y").getAsDouble(), pos.get("z").getAsDouble());
+			gui.camera = Parameter.getParam(action, "position").vec3();
 		}
 	}
 
-	private void addCenter(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
-		JsonObject pos = action.getAsJsonObject("position");
+	private void addCenter(GuiMigraine gui, JsonObject action){
+		Vec3 pos = Parameter.getParam(action, "position").vec3();
 
 		if (gui.camera != null) {
-			gui.camera = gui.camera.addVector(pos.get("x").getAsDouble(), pos.get("y").getAsDouble(), pos.get("z").getAsDouble());
+			gui.camera = gui.camera.addVector(pos.xCoord, pos.yCoord, pos.zCoord);
 		}
 	}
 
-	private void rotateTo(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
+	private void rotateTo(GuiMigraine gui, JsonObject action){
 		JsonObject toAdd = new JsonObject();
 		int forTicks = action.get("ticksFor").getAsInt();
 		toAdd.addProperty("type", "rotateTo");
 		toAdd.addProperty("tickLeft", forTicks);
-		toAdd.addProperty("addYaw", (action.get("yaw").getAsFloat() - gui.yaw) / forTicks);
-		toAdd.addProperty("addPitch", (action.get("pitch").getAsFloat() - gui.pitch) / forTicks);
+		toAdd.addProperty("addYaw", (action.get("yaw").getAsDouble() - gui.yaw) / forTicks);
+		toAdd.addProperty("addPitch", (action.get("pitch").getAsDouble() - gui.pitch) / forTicks);
 		gui.active.add(toAdd);
 	}
 
-	private void zoomTo(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
+	private void zoomTo(GuiMigraine gui, JsonObject action){
 		JsonObject toAdd = new JsonObject();
 		int forTicks = action.get("ticksFor").getAsInt();
 		toAdd.addProperty("type", "zoomTo");
 		toAdd.addProperty("tickLeft", forTicks);
-		toAdd.addProperty("addZoom", (action.get("zoom").getAsFloat() - gui.zoom) / forTicks);
+		toAdd.addProperty("addZoom", (action.get("zoom").getAsDouble() - gui.zoom) / forTicks);
 		gui.active.add(toAdd);
 	}
 
-	private void moveCenterTo(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
+	private void moveCenterTo(GuiMigraine gui, JsonObject action){
 		JsonObject toAdd = new JsonObject();
 		int forTicks = action.get("ticksFor").getAsInt();
 		toAdd.addProperty("type", "moveCenterTo");
 		toAdd.addProperty("tickLeft", forTicks);
-		JsonObject targetPos = action.getAsJsonObject("position");
+		Vec3 targetPos = Parameter.getParam(action, "position").vec3();
 
-		toAdd.addProperty("addX", (targetPos.get("x").getAsFloat() - gui.camera.xCoord) / forTicks);
-		toAdd.addProperty("addY", (targetPos.get("y").getAsFloat() - gui.camera.yCoord) / forTicks);
-		toAdd.addProperty("addZ", (targetPos.get("z").getAsFloat() - gui.camera.zCoord) / forTicks);
+		toAdd.addProperty("addX", (targetPos.xCoord - gui.camera.xCoord) / forTicks);
+		toAdd.addProperty("addY", (targetPos.yCoord - gui.camera.yCoord) / forTicks);
+		toAdd.addProperty("addZ", (targetPos.zCoord - gui.camera.zCoord) / forTicks);
 
 		gui.active.add(toAdd);
 	}
 
-	private void display(GuiMigraine gui, WorldSceneRenderer worldRenderer, JsonObject action){
+	private void display(GuiMigraine gui, JsonObject action){
 		gui.displays.add(getDisplayFromJson(action));
 	}
 
@@ -512,20 +513,16 @@ public class MigraineInstructions {
 	 * @param action
 	 */
 	private void setTileEntityNBT(WorldSceneRenderer worldRenderer, JsonObject action){
-		JsonObject pos = action.getAsJsonObject("position");
+		Vec3 pos = Parameter.getParam(action, "position").vec3();
 
-		int x = pos.get("x").getAsInt();
-		int y = pos.get("y").getAsInt();
-		int z = pos.get("z").getAsInt();
-
-		TileEntity tile = worldRenderer.world.getTileEntity(x, y, z);
+		TileEntity tile = worldRenderer.world.getTileEntity((int) pos.xCoord, (int) pos.yCoord, (int) pos.zCoord);
 
 		if (tile != null){
 			try {
 				NBTTagCompound nbt = (NBTTagCompound) JsonToNBT.func_150315_a(action.get("nbt").getAsString());
-				nbt.setInteger("x", x);
-				nbt.setInteger("y", y);
-				nbt.setInteger("z", z);
+				nbt.setInteger("x", (int) pos.xCoord);
+				nbt.setInteger("y", (int) pos.yCoord);
+				nbt.setInteger("z", (int) pos.zCoord);
 				tile.readFromNBT(nbt);
 			} catch(NBTException ex){
 				MainRegistry.logger.warn("[Migraine] Failed to read NBT String while setting tile entity nbt in " + name + "!");
@@ -534,13 +531,9 @@ public class MigraineInstructions {
 	}
 
 	private void modifyTileEntityNBT(WorldSceneRenderer worldRenderer, JsonObject action){
-		JsonObject pos = action.getAsJsonObject("position");
+		Vec3 pos = Parameter.getParam(action, "position").vec3();
 
-		int x = pos.get("x").getAsInt();
-		int y = pos.get("y").getAsInt();
-		int z = pos.get("z").getAsInt();
-
-		TileEntity tile = worldRenderer.world.getTileEntity(x, y, z);
+		TileEntity tile = worldRenderer.world.getTileEntity((int) pos.xCoord, (int) pos.yCoord, (int) pos.zCoord);
 
 		if (tile != null){
 			try {
@@ -561,13 +554,9 @@ public class MigraineInstructions {
 	}
 
 	private void spawnEntity(WorldSceneRenderer worldRenderer, JsonObject action){
-		JsonObject pos = action.getAsJsonObject("position");
+		Vec3 pos = Parameter.getParam(action, "position").vec3();
 
 		try {
-
-			double x = pos.get("x").getAsDouble();
-			double y = pos.get("y").getAsDouble();
-			double z = pos.get("z").getAsDouble();
 
 			NBTTagCompound nbt = new NBTTagCompound();
 
@@ -583,7 +572,7 @@ public class MigraineInstructions {
 
 			Entity entity = EntityList.createEntityFromNBT(nbt, worldRenderer.world);
 
-			entity.setLocationAndAngles(x, y, z, action.has("yaw") ? action.get("yaw").getAsFloat() : entity.rotationYaw, action.has("pitch") ? action.get("pitch").getAsFloat() : entity.rotationPitch);
+			entity.setLocationAndAngles(pos.xCoord, pos.yCoord, pos.zCoord, action.has("yaw") ? action.get("yaw").getAsFloat() : entity.rotationYaw, action.has("pitch") ? action.get("pitch").getAsFloat() : entity.rotationPitch);
 
 			// for accessing in setEntityNBT (and possibly more)
 			if (action.has("entityId")) entity.setEntityId(action.get("entityId").getAsInt());
@@ -599,7 +588,7 @@ public class MigraineInstructions {
 
 				if (entity1 != null)
 				{
-					entity1.setLocationAndAngles(x, y, z, entity1.rotationYaw, entity1.rotationPitch);
+					entity1.setLocationAndAngles(pos.xCoord, pos.yCoord, pos.zCoord, entity1.rotationYaw, entity1.rotationPitch);
 					worldRenderer.world.spawnEntityInWorld(entity1);
 					entity2.mountEntity(entity1);
 				}
@@ -624,23 +613,24 @@ public class MigraineInstructions {
 		}
 	}
 
+	// I think this is bugged for setting it when it is already set, but im not to sure
 	private void setEntityTarget(WorldSceneRenderer worldRenderer, JsonObject action){
 		Entity entity = worldRenderer.world.getEntityByID(action.get("entityId").getAsInt());
 		if (entity != null){
-			JsonObject pos = action.getAsJsonObject("position");
+			Vec3 pos = Parameter.getParam(action, "position").vec3();
 			if (entity instanceof EntityCreature){
 				EntityCreature entityCreature = (EntityCreature) entity;
 				boolean flag = false;
 				for (Object task : entityCreature.tasks.taskEntries) {
 					EntityAITasks.EntityAITaskEntry entry = (EntityAITasks.EntityAITaskEntry) task;
 					if (entry.action instanceof EntityAIMoveToLocation) {
-						((EntityAIMoveToLocation) entry.action).updateTarget(pos.get("x").getAsDouble(), pos.get("y").getAsDouble(), pos.get("z").getAsDouble(), action.has("speed") ? action.get("speed").getAsDouble() : 1);
+						((EntityAIMoveToLocation) entry.action).updateTarget(pos.xCoord, pos.yCoord, pos.zCoord, Parameter.getParam(action, "speed").doubleValue(1));
 						flag = true;
 						break;
 					}
 				}
 				if (!flag){
-					entityCreature.tasks.addTask(0, new EntityAIMoveToLocation(entityCreature, pos.get("x").getAsDouble(), pos.get("y").getAsDouble(), pos.get("z").getAsDouble(), action.has("speed") ? action.get("speed").getAsDouble() : 1));
+					entityCreature.tasks.addTask(0, new EntityAIMoveToLocation(entityCreature, pos.xCoord, pos.yCoord, pos.zCoord, Parameter.getParam(action, "speed").doubleValue(1)));
 				}
 			} else {
 				MainRegistry.logger.warn("[Migraine] Entity is not of type EntityCreature in " + name + "!");
@@ -657,19 +647,18 @@ public class MigraineInstructions {
 
 	private void removeEntityTasks(WorldSceneRenderer worldRenderer, JsonObject action){
 		Entity entity = worldRenderer.world.getEntityByID(action.get("entityId").getAsInt());
-		if (entity != null){
-			if (entity instanceof EntityCreature){
+		if (entity instanceof EntityCreature){
 				EntityCreature entityCreature = (EntityCreature) entity;
 				entityCreature.tasks.taskEntries.clear();
 			}
-		}
+		
 	}
 
 
 	// Called when the gui is opened
 	public void init(GuiMigraine gui){
 		try {
-			gui.isometric = this.json.has("isometric") ? this.json.get("isometric").getAsBoolean() : true;
+			gui.isometric = Parameter.getParam(json, "isometric").bool(true);
 			gui.worldRenderer.setSize(size);
 		}catch (Exception ex){
 			MainRegistry.logger.warn("[Migraine] Error while initializing " + name + "!");
@@ -702,14 +691,20 @@ public class MigraineInstructions {
 			for (JsonElement actionElem : data) {
 				JsonObject actionGroup = actionElem.getAsJsonObject();
 
+				int tick = Parameter.getParam(actionGroup, "tick").integer(-2);
+				int tickStart = Parameter.getParam(actionGroup, "tickStart").integer(-2);
+				int tickEnd = Parameter.getParam(actionGroup, "tickEnd").integer(-2);
+
 				// If there is tick, then just do that exact tick
 				// If there is start and end tick, then do startTick <= tickNum <= endTick, removing the upper or lower bound if it is -1
-				if ((actionGroup.has("tick") && tickNum == actionGroup.get("tick").getAsInt()) ||
-					(actionGroup.has("tickStart") && actionGroup.has("tickEnd") && (
-						(actionGroup.get("tickStart").getAsInt() != -1 && actionGroup.get("tickEnd").getAsInt() != -1 && tickNum >= actionGroup.get("tickStart").getAsInt() && tickNum <= actionGroup.get("tickEnd").getAsInt()) ||
-						(actionGroup.get("tickStart").getAsInt() == -1 && actionGroup.get("tickEnd").getAsInt() != -1 && tickNum <= actionGroup.get("tickEnd").getAsInt()) ||
-						(actionGroup.get("tickStart").getAsInt() != -1 && actionGroup.get("tickEnd").getAsInt() == -1 && tickNum >= actionGroup.get("tickStart").getAsInt())))) {
-
+				if ((tickNum == tick) ||
+					(tickStart != -2 && tickEnd != -2 && (
+						(tickStart != -1 && tickEnd != -1 && tickNum >= tickStart && tickNum <= tickEnd) ||
+						(tickStart == -1 && tickEnd != -1 && tickNum <= tickEnd) ||
+						(tickStart != -1 && tickEnd == -1 && tickNum >= tickStart) ||
+						(tickStart == -1 && tickEnd == -1))
+					)
+				){
 					JsonObject action = actionGroup.getAsJsonObject("action");
 					priorities.put(actionGroup.has("priority") ? actionGroup.get("priority").getAsInt() : 0, action);
 				}
@@ -748,22 +743,22 @@ public class MigraineInstructions {
 							if (action.has("zoom")) gui.zoom += action.get("zoom").getAsFloat();
 							break;
 						case "setCenter":
-							setCenter(gui, worldRenderer, action);
+							setCenter(gui, action);
 							break;
 						case "addCenter":
-							addCenter(gui, worldRenderer, action);
+							addCenter(gui, action);
 							break;
 						case "rotateTo":
-							rotateTo(gui, worldRenderer, action);
+							rotateTo(gui, action);
 							break;
 						case "zoomTo":
-							zoomTo(gui, worldRenderer, action);
+							zoomTo(gui, action);
 							break;
 						case "moveCenterTo":
-							moveCenterTo(gui, worldRenderer, action);
+							moveCenterTo(gui, action);
 							break;
 						case "display":
-							display(gui, worldRenderer, action);
+							display(gui, action);
 							break;
 						case "setTileEntityNBT":
 							setTileEntityNBT(worldRenderer, action);
@@ -802,23 +797,55 @@ public class MigraineInstructions {
 				}
 				switch (type) {
 					case "rotateTo":
-						gui.yaw += overTime.get("addYaw").getAsFloat();
-						gui.pitch += overTime.get("addPitch").getAsFloat();
+						gui.yaw += overTime.get("addYaw").getAsDouble();
+						gui.pitch += overTime.get("addPitch").getAsDouble();
 						break;
 					case "zoomTo":
-						gui.zoom += overTime.get("addZoom").getAsFloat();
+						gui.zoom += overTime.get("addZoom").getAsDouble();
 						break;
 					case "moveCenterTo":
 						if (gui.camera != null) {
-							gui.camera.xCoord += overTime.get("addX").getAsFloat();
-							gui.camera.yCoord += overTime.get("addY").getAsFloat();
-							gui.camera.zCoord += overTime.get("addZ").getAsFloat();
+							gui.camera.xCoord += overTime.get("addX").getAsDouble();
+							gui.camera.yCoord += overTime.get("addY").getAsDouble();
+							gui.camera.zCoord += overTime.get("addZ").getAsDouble();
 						}
 						break;
 
 				}
 				overTime.remove("tickLeft");
 				overTime.addProperty("tickLeft", --forTicks);
+			}
+
+			// Checkpoints
+			if (chapters.contains(tickNum) && !gui.chapterSaves.containsKey(tickNum)) {
+				NBTTagCompound nbt = gui.worldRenderer.world.writeToNBT();
+				nbt.setInteger("tick", tickNum);
+				nbt.setInteger("chapter", gui.chapterNumber);
+				nbt.setFloat("pitch", gui.pitch);
+				nbt.setFloat("yaw", gui.yaw);
+				nbt.setFloat("zoom", gui.zoom);
+				nbt.setBoolean("isometric", gui.isometric);
+				nbt.setBoolean("isCameraSet", gui.camera != null);
+				if (gui.camera != null) {
+					nbt.setDouble("cameraX", gui.camera.xCoord);
+					nbt.setDouble("cameraY", gui.camera.yCoord);
+					nbt.setDouble("cameraZ", gui.camera.zCoord);
+				}
+				NBTTagList activeList = new NBTTagList();
+				for (JsonObject active : gui.active) {
+					NBTTagCompound activeNBT = new NBTTagCompound();
+					activeNBT.setString("data", active.toString());
+					activeList.appendTag(activeNBT);
+				}
+				nbt.setTag("active", activeList);
+				NBTTagList displayList = new NBTTagList();
+				for (MigraineDisplay display : gui.displays) {
+					NBTTagCompound displayNBT = new NBTTagCompound();
+					display.writeToNBT(displayNBT);
+					displayList.appendTag(displayNBT);
+				}
+				nbt.setTag("displays", displayList);
+				gui.chapterSaves.put(tickNum, nbt);
 			}
 		} catch (Exception ex){
 			// I dont feel like trying to track down every single exception that could occur, but i dont want to crash the game if someone makes a bad file. Lets do this instead
@@ -827,7 +854,7 @@ public class MigraineInstructions {
 	}
 
 	// Updated every render call, not game tick
-	public void render(int mouseX, int mouseY, float partialTicks, int w, int h, GuiMigraine gui){
+	public void render(int mouseX, int mouseY, int w, int h, GuiMigraine gui){
 		GL11.glDisable(GL11.GL_LIGHTING);
 
 		// Buttons
@@ -964,6 +991,43 @@ public class MigraineInstructions {
 		}
 	}
 
+	private void loadFromChapter(GuiMigraine gui, int chapterTick){
+		if (gui.chapterSaves.containsKey(chapterTick)) {
+			NBTTagCompound chapterData = gui.chapterSaves.get(chapterTick);
+
+			gui.worldRenderer.world.readFromNBT(chapterData);
+			gui.ticks = chapterData.getInteger("tick");
+			gui.chapterNumber = chapterData.getInteger("chapter");
+			gui.pitch = chapterData.getFloat("pitch");
+			gui.yaw = chapterData.getFloat("yaw");
+			gui.zoom = chapterData.getFloat("zoom");
+			if (chapterData.getBoolean("isCameraSet")) {
+				gui.camera = Vec3.createVectorHelper(chapterData.getDouble("cameraX"), chapterData.getDouble("cameraY"), chapterData.getDouble("cameraZ"));
+			} else {
+				gui.camera = null;
+			}
+
+			NBTTagList activeList = chapterData.getTagList("active", 10);
+			for (int i = 0; i < activeList.tagCount(); i++) {
+				NBTTagCompound activeNBT = activeList.getCompoundTagAt(i);
+				JsonParser reader = new JsonParser();
+				JsonObject active = reader.parse(activeNBT.getString("data")).getAsJsonObject();
+				gui.active.add(active);
+			}
+
+			NBTTagList displayList = chapterData.getTagList("displays", 10);
+			for (int i = 0; i < displayList.tagCount(); i++) {
+				NBTTagCompound displayNBT = displayList.getCompoundTagAt(i);
+				MigraineDisplay display = new MigraineDisplay(gui.getFontRenderer(), displayNBT);
+				gui.displays.add(display);
+			}
+
+			gui.isometric = chapterData.getBoolean("isometric");
+		} else {
+			MainRegistry.logger.warn("[Migraine] Failed to load Migraine from chapter " + chapterTick + " in " + name + "!");
+		}
+	}
+
 	public void skip(int toTick, int fromTick, GuiMigraine gui){
 		// TODO: maybe make it so it saves from chapters or something so it doesnt need to redo the entire world in one frame?
 		if (Math.abs(toTick - fromTick) < 1) return;
@@ -980,20 +1044,75 @@ public class MigraineInstructions {
 
 			boolean pausedTemp = gui.isPaused;
 			gui.isPaused = false;
-			for (int i = 0; i < toTick; i++){
-				gui.updateScreen();
+
+			// Find the last chapter that is before the toTick
+			int lastChapter = -1;
+			for (int i = 0; i < chapters.size(); i++){
+				if (chapters.get(i) <= toTick){
+					lastChapter = i;
+				} else {
+					break;
+				}
 			}
-			gui.updateCamera();
-			gui.isPaused = pausedTemp;
-		}
-		else {
+
+			int chapterTick = chapters.get(lastChapter);
+
+			if (gui.chapterSaves.containsKey(chapterTick) && lastChapter != -1) {
+				loadFromChapter(gui, chapterTick);
+
+				for (int i = chapterTick; i < toTick; i++){
+					gui.updateScreen();
+				}
+				gui.updateCamera();
+				gui.isPaused = pausedTemp;
+			} else {
+				for (int i = 0; i < toTick; i++){
+					gui.updateScreen();
+				}
+				gui.updateCamera();
+				gui.isPaused = pausedTemp;
+			}
+		} else {
 			boolean pausedTemp = gui.isPaused;
 			gui.isPaused = false;
-			for (int i = 0; i < Math.abs(toTick - fromTick); i++){
-				gui.updateScreen();
+
+			// find the last chapter that is between fromTick and toTick
+			int lastChapter = -1;
+			for (int i = 0; i < chapters.size(); i++){
+				if (chapters.get(i) > fromTick && chapters.get(i) <= toTick){
+					lastChapter = i;
+				} else {
+					break;
+				}
 			}
-			gui.updateCamera();
-			gui.isPaused = pausedTemp;
+
+			int chapterTick = chapters.get(lastChapter);
+
+			if (gui.chapterSaves.containsKey(chapterTick) && lastChapter != -1) {
+				gui.worldRenderer.world.emptyWorld();
+				gui.ticks = 0;
+				gui.camera = Vec3.createVectorHelper(0, 0,0);
+				gui.chapterNumber = 0;
+				gui.active.clear();
+				gui.displays.clear();
+				gui.pitch = -30f;
+				gui.yaw = -45f;
+				gui.zoom = 1f;
+				loadFromChapter(gui, chapterTick);
+
+				for (int i = chapterTick; i < toTick; i++){
+					gui.updateScreen();
+				}
+				gui.updateCamera();
+				gui.isPaused = pausedTemp;
+
+			} else {
+				for (int i = 0; i < Math.abs(toTick - fromTick); i++){
+					gui.updateScreen();
+				}
+				gui.updateCamera();
+				gui.isPaused = pausedTemp;
+			}
 		}
 
 	}
@@ -1004,10 +1123,172 @@ public class MigraineInstructions {
 		BLUE(0xFFA5D9FF, 0xFF39ACFF, 0xFF1A6CA7, 0xFF1A1F22),
 		GREY(0xFFD1D1D1, 0xFF919191, 0xFF5D5D5D, 0xFF302E36);
 
-		public final int[] colors;
+		private final int[] colors;
 
 		defaultColors(int brighter, int frame, int darker, int background){
 			this.colors = new int[]{brighter, frame, darker, background};
+		}
+	}
+
+	private static class Parameter {
+
+		private boolean exist;
+		private JsonElement value;
+
+		private Parameter(boolean exist, JsonElement element){
+			this.exist = exist;
+			this.value = element;
+		}
+
+		private static Parameter getParam(JsonObject parent, String fieldName){
+			return new Parameter(parent.has(fieldName), parent.get(fieldName));
+		}
+
+		private int integer(){
+			if (!this.exist || !this.value.isJsonPrimitive() || !this.value.getAsJsonPrimitive().isNumber()){
+				throw new IllegalArgumentException("Parameter is not an integer or does not exist");
+			}
+			return this.integer(0);
+		}
+
+		private int integer(int defaultValue){
+			return this.exist ? this.value.getAsInt() : defaultValue;
+		}
+
+		private String string(){
+			if (!this.exist || !this.value.isJsonPrimitive() || !this.value.getAsJsonPrimitive().isString()){
+				throw new IllegalArgumentException("Parameter is not a String or does not exist");
+			}
+			return this.string(null);
+		}
+
+		private String string(String defaultValue){
+			return this.exist ? this.value.getAsString() : defaultValue;
+		}
+
+		private boolean bool(){
+			if (!this.exist || !this.value.isJsonPrimitive() || !this.value.getAsJsonPrimitive().isBoolean()){
+				throw new IllegalArgumentException("Parameter is not a boolean or does not exist");
+			}
+			return this.bool(false);
+		}
+
+		private boolean bool(boolean defaultValue){
+			return this.exist ? this.value.getAsBoolean() : defaultValue;
+		}
+
+		private JsonObject jsonObject(){
+			if (!this.exist || !this.value.isJsonObject()){
+				throw new IllegalArgumentException("Parameter is not a JsonObject or does not exist");
+			}
+			return this.jsonObject(null);
+		}
+
+		private JsonObject jsonObject(JsonObject defaultValue){
+			return this.exist ? this.value.getAsJsonObject() : defaultValue;
+		}
+
+		private JsonArray jsonArray(){
+			if (!this.exist || !this.value.isJsonArray()){
+				throw new IllegalArgumentException("Parameter is not a JsonArray or does not exist");
+			}
+			return this.jsonArray(null);
+		}
+
+		private JsonArray jsonArray(JsonArray defaultValue){
+			return this.exist ? this.value.getAsJsonArray() : defaultValue;
+		}
+
+		private JsonElement jsonElement(){
+			if (!this.exist){
+				throw new IllegalArgumentException("Parameter does not exist");
+			}
+			return this.jsonElement(null);
+		}
+
+		private JsonElement jsonElement(JsonElement defaultValue){
+			return this.exist ? this.value : defaultValue;
+		}
+
+		private double doubleValue(){
+			if (!this.exist || !this.value.isJsonPrimitive() || !this.value.getAsJsonPrimitive().isNumber()){
+				throw new IllegalArgumentException("Parameter is not a double or does not exist");
+			}
+			return this.doubleValue(0);
+		}
+
+		private double doubleValue(double defaultValue){
+			return this.exist ? this.value.getAsDouble() : defaultValue;
+		}
+
+		private float floatValue(){
+			if (!this.exist || !this.value.isJsonPrimitive() || !this.value.getAsJsonPrimitive().isNumber()){
+				throw new IllegalArgumentException("Parameter is not a float or does not exist");
+			}
+			return this.floatValue(0);
+		}
+
+		private float floatValue(float defaultValue){
+			return this.exist ? this.value.getAsFloat() : defaultValue;
+		}
+
+		private Vec3 vec3(){
+			if (!this.exist || !this.value.isJsonObject()){
+				throw new IllegalArgumentException("Parameter is not a Vec3 or does not exist");
+			}
+			return this.vec3(null);
+		}
+
+		private Vec3 vec3(Vec3 defaultValue){
+			if (this.exist && this.value.isJsonObject()){
+				JsonObject vec = this.value.getAsJsonObject();
+				return Vec3.createVectorHelper(vec.get("x").getAsDouble(), vec.get("y").getAsDouble(), vec.get("z").getAsDouble());
+			}
+			return defaultValue;
+		}
+
+		private long longValue(){
+			if (!this.exist || !this.value.isJsonPrimitive() || !this.value.getAsJsonPrimitive().isNumber()){
+				throw new IllegalArgumentException("Parameter is not a long or does not exist");
+			}
+			return this.longValue(0);
+		}
+
+		private long longValue(long defaultValue){
+			return this.exist ? this.value.getAsLong() : defaultValue;
+		}
+
+		private byte byteValue(){
+			if (!this.exist || !this.value.isJsonPrimitive() || !this.value.getAsJsonPrimitive().isNumber()){
+				throw new IllegalArgumentException("Parameter is not a byte or does not exist");
+			}
+			return this.byteValue((byte) 0);
+		}
+
+		private byte byteValue(byte defaultValue){
+			return this.exist ? this.value.getAsByte() : defaultValue;
+		}
+
+		private char charValue(){
+			if (!this.exist || !this.value.isJsonPrimitive() || !this.value.getAsJsonPrimitive().isString() || this.value.getAsString().length() != 1){
+				throw new IllegalArgumentException("Parameter is not a char or does not exist");
+			}
+			return this.charValue((char) 0);
+		}
+
+		private char charValue(char defaultValue){
+			return this.exist ? this.value.getAsCharacter() : defaultValue;
+		}
+
+		private short shortValue(){
+			if (!this.exist || !this.value.isJsonPrimitive() || !this.value.getAsJsonPrimitive().isNumber()){
+				throw new IllegalArgumentException("Parameter is not a short or does not exist");
+			}
+			return this.shortValue((short) 0);
+		}
+		
+		private short shortValue(short defaultValue){
+			return this.exist ? this.value.getAsShort() : defaultValue;
 		}
 	}
 }

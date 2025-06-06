@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -79,6 +81,54 @@ public class MigraineDisplay {
 
 	public MigraineDisplay(FontRenderer font, int x, int y, Object[][] raw, int autowrap, int ticksRemaining, boolean arrowInverted){
 		this(font, x, y, raw, autowrap, ticksRemaining, new ItemStack(Blocks.air), arrowInverted);
+	}
+
+	public MigraineDisplay(FontRenderer font, NBTTagCompound nbt){
+		this.font = font;
+		this.x = nbt.getInteger("x");
+		this.y = nbt.getInteger("y");
+		this.ticksRemaining = nbt.getInteger("ticksRemaining");
+		this.arrowInverted = nbt.getBoolean("arrowInverted");
+		this.o = Orientation.valueOf(nbt.getString("orientation"));
+
+		if(nbt.hasKey("icon")) {
+			this.icon = ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("icon"));
+		}
+
+		if(nbt.hasKey("lines")) {
+			NBTTagList nbtLines = nbt.getTagList("lines", 10);
+			for(int i = 0; i < nbtLines.tagCount(); i++) {
+				NBTTagCompound nbtLine = nbtLines.getCompoundTagAt(i);
+				Object[] line = new Object[nbtLine.getTagList("elements", 10).tagCount()];
+				if(nbtLine.hasKey("elements")) {
+					NBTTagList nbtElements = nbtLine.getTagList("elements", 10);
+					for(int j = 0; j < nbtElements.tagCount(); j++) {
+						NBTTagCompound nbtElement = nbtElements.getCompoundTagAt(j);
+						if(nbtElement.hasKey("text")) {
+							line[j] = nbtElement.getString("text");
+						} else if(nbtElement.hasKey("item")) {
+							ItemStack stack = ItemStack.loadItemStackFromNBT(nbtElement.getCompoundTag("item"));
+							line[j] = stack;
+						} else if(nbtElement.hasKey("scaled")) {
+							NBTTagCompound nbtScaled = nbtElement.getCompoundTag("scaled");
+							ItemStack stack = ItemStack.loadItemStackFromNBT(nbtScaled.getCompoundTag("item"));
+							double scale = nbtScaled.getDouble("scale");
+							line[j] = new Object[] { stack, scale };
+						}
+					}
+				}
+				lines.add(line);
+			}
+		}
+
+		this.consistentHeight = nbt.getBoolean("consistentHeight");
+		this.lineDist = nbt.getInteger("lineDist");
+		this.tallestElement = nbt.getInteger("tallestElement");
+		this.blockHeight = nbt.getInteger("blockHeight");
+		this.colorBrighter = nbt.getLong("colorBrighter");
+		this.colorDarker = nbt.getLong("colorDarker");
+		this.colorFrame = nbt.getLong("colorFrame");
+		this.colorBg = nbt.getLong("colorBg");
 	}
 
 	public ItemStack getIcon(){
@@ -428,6 +478,58 @@ public class MigraineDisplay {
 		tessellator.addVertexWithUV(posX + sizeX, posY + 0, zLevel, (u + sizeX) * f, (v + 0) * f1);
 		tessellator.addVertexWithUV(posX + 0, posY + 0, zLevel, (u + 0) * f, (v + 0) * f);
 		tessellator.draw();
+	}
+
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+
+		nbt.setInteger("x", x);
+		nbt.setInteger("y", y);
+		nbt.setInteger("ticksRemaining", ticksRemaining);
+		nbt.setBoolean("arrowInverted", arrowInverted);
+		nbt.setString("orientation", o.name());
+
+		if(icon != null) {
+			NBTTagCompound iconTag = new NBTTagCompound();
+			icon.writeToNBT(iconTag);
+			nbt.setTag("icon", iconTag);
+		}
+
+		NBTTagList nbtLines = new NBTTagList();
+		for(Object[] line : lines) {
+			NBTTagCompound nbtLine = new NBTTagCompound();
+			NBTTagList nbtElements = new NBTTagList();
+
+			for(Object element : line) {
+				if(element instanceof String) {
+					NBTTagCompound string = new NBTTagCompound();
+					string.setString("text", (String) element);
+					nbtElements.appendTag(string);
+				} else if(element instanceof ItemStack) {
+					NBTTagCompound stackTag = new NBTTagCompound();
+					((ItemStack) element).writeToNBT(stackTag);
+					nbtElements.appendTag(stackTag);
+				} else if(element instanceof Object[]) {
+					Object[] scaledStack = (Object[]) element;
+					NBTTagCompound scaledStackTag = new NBTTagCompound();
+					((ItemStack) scaledStack[0]).writeToNBT(scaledStackTag);
+					scaledStackTag.setDouble("scale", (double) scaledStack[1]);
+					nbtElements.appendTag(scaledStackTag);
+				}
+			}
+
+			nbtLine.setTag("elements", nbtElements);
+			nbtLines.appendTag(nbtLine);
+		}
+		nbt.setTag("lines", nbtLines);
+		nbt.setBoolean("consistentHeight", consistentHeight);
+		nbt.setInteger("lineDist", lineDist);
+		nbt.setInteger("tallestElement", tallestElement);
+		nbt.setLong("colorBrighter", colorBrighter);
+		nbt.setLong("colorDarker", colorDarker);
+		nbt.setLong("colorFrame", colorFrame);
+		nbt.setLong("colorBg", colorBg);
+
+		return nbt;
 	}
 
 	/** where the arrow should be or if the box should be centered around the home position */

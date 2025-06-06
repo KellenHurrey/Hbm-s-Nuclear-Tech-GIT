@@ -9,12 +9,14 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.Vec3;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -34,7 +36,6 @@ public class GuiMigraine extends GuiScreen {
 
 	private final MigraineInstructions instructions;
 
-
 	public float zoom = 1f;
 	public float yaw = -45f;
 	public float pitch = -30f;
@@ -45,6 +46,7 @@ public class GuiMigraine extends GuiScreen {
 	public Vec3 camera = Vec3.createVectorHelper(0, 0, 0);
 	public HashSet<JsonObject> active = new HashSet<>();
 	public HashSet<MigraineDisplay> displays = new HashSet<>();
+	public HashMap<Integer, NBTTagCompound> chapterSaves = new HashMap<>();
 
 
 	public GuiMigraine(MigraineInstructions instruct){
@@ -83,7 +85,7 @@ public class GuiMigraine extends GuiScreen {
 		}
 	}
 
-	// Gets called whenever the fuck it feels like it (fps)
+	// Gets called whenever the fuck it feels like it (render calls so fps ig)
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float f){
 
@@ -98,8 +100,9 @@ public class GuiMigraine extends GuiScreen {
 		String[] lines = worldRenderer.render(width, height, mouseX, mouseY, isPaused ? 0 : f);
 
 		// Render on top
-		instructions.render(mouseX, mouseY, isPaused ? 0 : f, this.width, this.height, this);
+		instructions.render(mouseX, mouseY, this.width, this.height, this);
 
+		// Debug stuff
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 		RenderHelper.disableStandardItemLighting();
 		GL11.glDisable(GL11.GL_LIGHTING);
@@ -114,6 +117,7 @@ public class GuiMigraine extends GuiScreen {
 			fontRendererObj.drawString(ticks + "", 5, height - 15, 0xffffff);
 		}
 
+		// Block the mouse is over
 		if (debugMode > 0) {
 			for (int i = 0; i < lines.length; i++) {
 				if (i != 2 || debugMode == 2)
@@ -127,6 +131,7 @@ public class GuiMigraine extends GuiScreen {
 	public void updateScreen(){
 		if (isPaused && ticks != 0) return;
 
+		// So the sound handler knows if it comes from the dummy world
 		this.updating = true;
 		worldRenderer.world.update();
 		this.updating = false;
